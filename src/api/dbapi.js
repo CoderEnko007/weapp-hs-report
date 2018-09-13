@@ -16,7 +16,41 @@ export function getRankData(time, mode, limit=20, orderBy='name') {
       query.compare('mode', '=', mode)
     }
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).find().then(res => {
-      resolve(res.data)
+      if (!res.data.object) {
+        let query = new wx.BaaS.Query()
+        query.isNotNull('name')
+        tableObj.setQuery(query).orderBy(orderBy).limit(limit).find().then(res => {
+          let result = {
+            date: res.data.objects[0].report_time,
+            list: res.data.objects
+          }
+          resolve(result)
+        }, err => {
+          reject(err)
+        })
+      } else {
+        let result = {
+          date: res.data.objects[0].get('report_time'),
+          list: res.data.objects
+        }
+        resolve(result)
+      }
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getSeriesData(mode, limit=20, orderBy='id') {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.seriesTableID)
+    let query = new wx.BaaS.Query()
+    if (mode) {
+      query.compare('mode', '=', mode)
+    }
+    tableObj.setQuery(query).orderBy(orderBy).limit(limit).find().then(res => {
+      console.log(res.data.objects)
+      resolve(result)
     }, err => {
       reject(err)
     })

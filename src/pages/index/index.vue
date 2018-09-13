@@ -15,7 +15,7 @@
         <div class="chart">
           <img :src="bgImg" class="bg-img" mode="aspectFill">
           <div class="echarts">
-            <p class="selected-data" >{{getSelectData}}</p>
+            <p class="selected-data" >{{report_date}}&nbsp;&nbsp;&nbsp;&nbsp;{{getSelectData}}</p>
             <mpvue-echarts lazyLoad :echarts="echarts" :onInit="handleInit" ref="echarts" />
             <div class="hero-icons">
               <div class="icons" v-for="(item, index) in heroes" :key="index">
@@ -51,8 +51,9 @@ export default {
       },
       banner: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1fyFXDHuOFhyZYRs.jpg',
       selectedMode: 'standard',
-      modeChangeDisabled: true,
+      modeChangeDisabled: false,
       selectedData: null,
+      report_date: null,
       rankMode: [
         {mode: 'standard', icon: '/static/icons/Mode_Standard.png', active_icon: '/static/icons/Mode_Standard_active.png', text: '标准模式'},
         {mode: 'wild', icon: '/static/icons/Mode_Wild.png', active_icon: '/static/icons/Mode_Wild_active.png', text: '狂野模式'},
@@ -60,7 +61,6 @@ export default {
       ],
       bgImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1fyuymPfaqGcpxdT.jpg',
       heroes: [
-        // ['德', '猎', '法', '骑', '牧', '贼', '萨', '术', '战']
         {name: 'druid', icon: '/static/heroIcons/druid-1.png'},
         {name: 'hunter', icon: '/static/heroIcons/hunter-1.png'},
         {name: 'mage', icon: '/static/heroIcons/mage-1.png'},
@@ -75,17 +75,17 @@ export default {
   },
   computed: {
     getSelectData() {
+      let mode = ''
+      switch(this.selectedMode) {
+        case this.rankMode[0].mode: mode=this.rankMode[0].text; break;
+        case this.rankMode[1].mode: mode=this.rankMode[1].text; break;
+        case this.rankMode[2].mode: mode=this.rankMode[2].text; break;
+        default: mode='';break
+      }
       if (this.selectedData) {
-        let mode = ''
-        switch(this.selectedMode) {
-          case this.rankMode[0].mode: mode=this.rankMode[0].text; break;
-          case this.rankMode[1].mode: mode=this.rankMode[1].text; break;
-          case this.rankMode[2].mode: mode=this.rankMode[2].text; break;
-          default: mode='';break
-        }
         return this.selectedData.hero+' '+mode+' 胜率'+': '+this.selectedData.winrate
       } else {
-        return '职业胜率'
+        return mode+'职业胜率'
       }
     }
   },
@@ -179,7 +179,8 @@ export default {
       let date = formatNowTime(new Date())
       getRankData(date, null, 27).then(res => {
         this.initWinrateArray()
-        res.objects.forEach(item => {
+        this.report_date = res.date
+        res.list.forEach(item => {
           if (item['mode'].toLowerCase() === 'standard') {
             this.winrate['standard'].push(item['winrate'].replace('%', ''))
           } else if (item['mode'].toLowerCase() === 'wild') {
@@ -194,7 +195,7 @@ export default {
       })
     }
   },
-  created () {
+  mounted() {
     this.Login()
     this.getRankData()
   }
