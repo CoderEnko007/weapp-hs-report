@@ -40,6 +40,10 @@ export default {
         top: 50%;
         transform: translateY(-50%);
       }
+      input {
+        height: 50rpx;
+        line-height: 50rpx;
+      }
     }
   }
 }

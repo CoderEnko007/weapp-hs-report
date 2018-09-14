@@ -33,9 +33,11 @@
       </div>
     </div>
     <div class="cards_list" :style="{height:600+'px'}">
-      <div class="cards_list">
-        <div :class="{mask: true, gray_bgc: selectedFilterTabItem!==null}"></div>
-      </div>
+      <div :class="{mask: true, gray_bgc: selectedFilterTabItem!==null}" @click="handleMaskClick"></div>
+      <CardList :list="cardsList" @cardClick="handleCardClick"></CardList>
+      <ZanLoadmore v-if="!cardsList.length" v-bind="{ nodata: true }" />
+      <ZanLoadmore v-else-if="more" v-bind="{ loading: true }" />
+      <ZanLoadmore v-else v-bind="{ nomore: true }" />
     </div>
   </div>
 </template>
@@ -43,9 +45,12 @@
 import utils from '@/utils'
 import SearchBar from '@/components/SearchBar'
 import FilterMenu from '@/components/FilterMenu'
-import {getSeriesData} from "@/api/dbapi";
+import CardList from '@/components/CardList'
+import {getSeriesData, getCardsList, genCardsImageURL} from "@/api/dbapi";
+import ZanLoadmore from '@/components/loadmore'
 
 const defaultFilter = {
+  search: null,
   cost: null,
   faction: null,
   mode: null,
@@ -54,8 +59,10 @@ const defaultFilter = {
 }
 export default {
   components: {
+    ZanLoadmore,
     SearchBar,
-    FilterMenu
+    FilterMenu,
+    CardList
   },
   data() {
     return {
@@ -77,6 +84,9 @@ export default {
         {name: 'series', text: '扩展包', items: [], selected: '扩展包'}
       ],
       selectedFilterTabItem: null,
+      page: 0,
+      more: true,
+      cardsList: []
     }
   },
   computed: {
@@ -95,7 +105,6 @@ export default {
       array = utils.rarity
       array.unshift({id: 'all', name: '全部稀有度'})
       this.filterTabBar[2].items = array
-      this.filterTabBar[3].items = array
       for (let filter of this.filterTabBar) {
         if (filter.items.length % 2) {
           filter.items.push({})
@@ -107,9 +116,14 @@ export default {
     },
     handleCostClick(item) {
       this.filter.cost = this.filter.cost === item?null:item
+      this.genCardsList(true)
     },
     handleSearch(value) {
-      console.log(value)
+      this.filter.search = value.trim()
+      this.genCardsList(true)
+    },
+    handleMaskClick() {
+      this.selectedFilterTabItem = null
     },
     handleFilterMenuClick(filter) {
       this.selectedFilterTabItem = null
@@ -120,11 +134,73 @@ export default {
         case 'series': this.filter.series = filter.item; this.filterTabBar[3].selected=filter.item.name; break
         default: console.log(filter.name+' not found');
       }
-      console.log(this.filter)
+      this.genCardsList(true)
     },
+    obtainSeriesList() {
+      getSeriesData().then(res => {
+        let array = res.map(item => {
+          return {
+            id: item.setId,
+            name: item.cname,
+            mode: item.mode
+          }
+        })
+        array.unshift({id: 'all', name: '全部扩展包', mode: 'all'})
+        if (array.length%2) {
+          array.push({})
+        }
+        this.$store.commit('setSeries', array)
+        this.filterTabBar[3].items = array
+      })
+    },
+    handleCardClick(item) {
+      console.log(item)
+    },
+    genCardsList(init) {
+      if (init) {
+        this.page = 0
+        this.more = true
+      }
+      wx.showNavigationBarLoading();
+      getCardsList(this.filter, 20, this.page).then(res => {
+        let list = res.objects.map(item => {
+          let image = utils.genCardsImageURL(item.hsId)
+          return {dbfId: item.dbfId, name: item.name, image: image}
+        })
+        if (init) {
+          this.cardsList = list
+          wx.stopPullDownRefresh();
+        } else {
+          this.cardsList = this.cardsList.concat(list)
+        }
+        let emptyNum = this.cardsList.length % 4
+        if(emptyNum) {
+          for (let i=0; i<(4-emptyNum); i++) {
+            this.cardsList.push({})
+          }
+        }
+        if (this.cardsList.length >= res.meta.total_count) {
+          this.more = false
+        }
+        wx.hideNavigationBarLoading()
+        wx.stopPullDownRefresh();
+      }).catch(err => {
+        console.log(err)
+        wx.hideNavigationBarLoading()
+        wx.stopPullDownRefresh();
+      })
+
+    }
   },
   mounted() {
     this.genFilterMenuItems()
+    this.obtainSeriesList()
+    this.genCardsList(true)
+  },
+  onReachBottom() {
+    if (!this.more) return false
+    this.page += 1
+    this.genCardsList(false)
   }
 }
 </script>
@@ -193,7 +269,6 @@ export default {
   position: relative;
   width: 100%;
   height: 100%;
-  overflow: hidden;
 }
 .mask {
   position:absolute;
