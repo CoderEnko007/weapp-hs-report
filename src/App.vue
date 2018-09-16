@@ -14,6 +14,7 @@ export default {
 
 <style lang="scss">
 @import "style/zanui.wxss";
+
 .container {
   height: 100%;
   width: 100%;

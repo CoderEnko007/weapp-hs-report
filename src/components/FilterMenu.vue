@@ -29,8 +29,8 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+@import '../style/color';
 .container {
-  background-color: #eee;
   .menu-list {
     box-sizing: border-box;
     display: flex;
@@ -39,6 +39,7 @@ export default {
     width: 100%;
     padding: 2rpx;
     font-size: 12px;
+    background-color: $palette-bg-gray;
     .menu-item {
       width: 45%;
       height: 22px;
@@ -50,8 +51,8 @@ export default {
     }
     .menu-item-action {
       color: #fff;
-      background-color: #206994;
-      border: 1px solid #206994;
+      background-color: $palette-blue;
+      border: 1px solid $palette-blue;
     }
     .menu-item-empty {
       border: none

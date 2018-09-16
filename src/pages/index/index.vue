@@ -202,6 +202,7 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import '../../style/color';
 .container {
   .banner {
     position: relative;
@@ -241,8 +242,8 @@ export default {
           }
           p.active {
             color: #4f4f4f;
-            text-shadow: 0 0 0.2em #bed6ff,
-                        -0 -0 0.2em #bed6ff;
+            text-shadow: 0 0 0.2em $palette-light-blue,
+                        -0 -0 0.2em $palette-light-blue;
           }
         }
       }

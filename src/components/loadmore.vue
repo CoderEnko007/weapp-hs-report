@@ -30,4 +30,7 @@
 </script>
 
 <style scoped>
+.zan-loadmore {
+  z-index: -999;
+}
 </style>

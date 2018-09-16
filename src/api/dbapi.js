@@ -43,7 +43,7 @@ export function getRankData(time, mode, limit=20, orderBy='name') {
   })
 }
 
-export function getSeriesData(mode, limit=20, orderBy='id') {
+export function getSeriesData(mode, limit=20, orderBy='-setId') {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.seriesTableID)
     let query = new wx.BaaS.Query()
@@ -113,13 +113,49 @@ export function getCardsList(params, limit=20, page=0, orderBy='cost') {
     if (params.search) {
       let nameQuery = new wx.BaaS.Query()
       nameQuery.contains('name', params.search)
+      let raceQuery = new wx.BaaS.Query()
+      for (let item in utils.race) {
+        if(utils.race.hasOwnProperty(item)) {
+          if (utils.race[item].name === params.search) {
+            raceQuery.compare('race', '=', item)
+          }
+        }
+      }
       let otherQuery = new wx.BaaS.Query()
       otherQuery.contains('text', params.search)
-      searchQuery = wx.BaaS.Query.or(nameQuery, otherQuery)
+      searchQuery = wx.BaaS.Query.or(nameQuery, raceQuery, otherQuery)
     }
     let query = wx.BaaS.Query.and(removeHeroQuery, costQuery, factionQuery, modeQuery, rarityQuery, seriesQuery, searchQuery)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
       resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getCardDetail(id) {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.cardsTableID)
+    let query = new wx.BaaS.Query()
+    query.compare('dbfId', '=', id)
+    tableObj.setQuery(query).find().then(res => {
+      resolve(res.data.objects)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getWinRateData(params, orderBy='games') {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.winrateTableID)
+    let factionQuery = new wx.BaaS.Query()
+    if (params.faction) {
+      factionQuery.compare('faction', '=', params.faction)
+    }
+    tableObj.setQuery(factionQuery).orderBy(orderBy).find().then(res => {
+      resolve(res.data.objects)
     }, err => {
       reject(err)
     })

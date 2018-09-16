@@ -1,18 +1,19 @@
 <template>
   <div class="container">
-    <div class="search-bar">
-      <SearchBar @handleConfirm="handleSearch" placeholder="请输入卡牌名称、规则或者属性"></SearchBar>
-    </div>
-    <div class="cost_filter">
-      <ul class="cards_cost">
-        <li v-for="i in costList" :key="i.cost">
-          <a :class="{type_icon: true, type_icon_active: i.cost===filter.cost}" @click="handleCostClick(i.cost)">
-            <img class="cost_num" :src="i.icon" mode="aspectFit">
-          </a>
-        </li>
-      </ul>
-    </div>
-    <div class="filter_tabbar">
+    <div class="filter">
+      <div class="search-bar">
+        <SearchBar @handleConfirm="handleSearch" placeholder="请输入卡牌名称、规则或者属性"></SearchBar>
+      </div>
+      <div class="cost_filter">
+        <ul class="cards_cost">
+          <li v-for="i in costList" :key="i.cost">
+            <a :class="{type_icon: true, type_icon_active: i.cost===filter.cost}" @click="handleCostClick(i.cost)">
+              <img class="cost_num" :src="i.icon" mode="aspectFit">
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="filter_tabbar">
       <ul class="filter_tab_list">
         <li v-for="(item, index) in filterTabBar"
             :key="index"
@@ -32,8 +33,9 @@
         </div>
       </div>
     </div>
+    </div>
+    <div v-show="selectedFilterTabItem!==null" :class="{mask: true, gray_bgc: selectedFilterTabItem!==null}"></div>
     <div class="cards_list" :style="{height:600+'px'}">
-      <div :class="{mask: true, gray_bgc: selectedFilterTabItem!==null}" @click="handleMaskClick"></div>
       <CardList :list="cardsList" @cardClick="handleCardClick"></CardList>
       <ZanLoadmore v-if="!cardsList.length" v-bind="{ nodata: true }" />
       <ZanLoadmore v-else-if="more" v-bind="{ loading: true }" />
@@ -96,7 +98,12 @@ export default {
   },
   methods: {
     genFilterMenuItems() {
-      let array = utils.faction
+      let array = []
+      for (let key in utils.faction) {
+        if (utils.faction.hasOwnProperty(key)) {
+          array.push({id: key, name: utils.faction[key].name})
+        }
+      }
       array.unshift({id: 'all', name: '全部职业'})
       this.filterTabBar[0].items = array
       array = utils.mode
@@ -121,9 +128,6 @@ export default {
     handleSearch(value) {
       this.filter.search = value.trim()
       this.genCardsList(true)
-    },
-    handleMaskClick() {
-      this.selectedFilterTabItem = null
     },
     handleFilterMenuClick(filter) {
       this.selectedFilterTabItem = null
@@ -154,7 +158,16 @@ export default {
       })
     },
     handleCardClick(item) {
-      console.log(item)
+      if (this.selectedFilterTabItem!==null) {
+        this.selectedFilterTabItem = null
+        return
+      }
+      if (!item.dbfId) {
+        return
+      }
+      wx.navigateTo({
+        url: `/pages/cardDetail/main?id=${item.dbfId}`
+      })
     },
     genCardsList(init) {
       if (init) {
@@ -201,10 +214,20 @@ export default {
     if (!this.more) return false
     this.page += 1
     this.genCardsList(false)
+  },
+  onPullDownRefresh() {
+    this.obtainSeriesList()
+    this.genCardsList(true)
   }
 }
 </script>
 <style lang="scss" scoped>
+.filter {
+  position: fixed;
+  width: 100%;
+  background-color: #fff;
+  z-index: 2;
+}
 .cost_filter {
   position: relative;
   padding: 0 15rpx;
@@ -269,12 +292,12 @@ export default {
   position: relative;
   width: 100%;
   height: 100%;
+  padding-top: 200rpx;
 }
 .mask {
-  position:absolute;
+  position:fixed;
   left: 0;
   top:0;
-  display: block;
   width:100%;
   height: 100%;
   transition: all .2s;
@@ -290,29 +313,5 @@ export default {
     width: 100%;
     z-index: 1;
   }
-}
-@keyframes slidown{
-  from{
-    transform:  translateY(-100%);
-  }
-  to{
-    transform:  translateY(0%);
-  }
-}
-.slidown{
-  display: block;
-  animation: slidown .5s ease-out both;
-}
-@keyframes slidup{
-  from{
-    transform:  translateY(0%);
-  }
-  to{
-    transform:  translateY(-100%);
-  }
-}
-.slidup{
-  display: block;
-  animation: slidup .3s linear both;
 }
 </style>

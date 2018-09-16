@@ -4,7 +4,6 @@ const cards = {
   },
   mutations: {
     setSeries: (state, series) => {
-      console.log(series)
       state.series = series
     }
   },
