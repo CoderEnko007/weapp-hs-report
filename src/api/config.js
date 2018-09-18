@@ -4,6 +4,7 @@ const archetypeTableID = 49232
 const rankTableID = 49198
 const seriesTableID = 51271
 const cardsTableID = 51267
+const deckNameTableID = 52136
 
 const tableID = {
   winrateTableID,
@@ -11,6 +12,7 @@ const tableID = {
   archetypeTableID,
   rankTableID,
   seriesTableID,
-  cardsTableID
+  cardsTableID,
+  deckNameTableID
 }
 export default tableID

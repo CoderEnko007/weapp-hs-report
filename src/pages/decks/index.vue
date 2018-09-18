@@ -31,13 +31,13 @@
       </div>
       <div class="panel-block">
         <div class="table">
-          <div class="table-tr faction"><span>{{selectedFaction.name}}</span></div>
+          <div class="table-tr faction"><span>{{selectedFaction.name}}</span><span class="float-right">更新于：{{updateDate}}</span></div>
           <div class="table-tr header">
             <div class="table-td text-center col-1st"><span>套牌类型</span></div>
             <div class="table-td text-center col-other"
                  v-for="(item, index) in tableTitle"
                  :key="index"
-                 @click="handleTitleClick(item)">
+                 @click="handleOrderClick(item)">
               <span>{{item.name}}</span><span class="table-icon iconfont">&#xe6c0;</span>
             </div>
           </div>
@@ -54,9 +54,13 @@
 </template>
 <script>
 import utils from '@/utils'
+import PieChart from '@/components/PieChart'
 import {getWinRateData} from "@/api/dbapi";
 
 export default {
+  components: {
+    PieChart
+  },
   data() {
     return {
       factionFrames: null,
@@ -67,7 +71,9 @@ export default {
         {id: 'winrate', name: '胜率'},
         {id: 'popularity', name: '热度'},
         {id: 'games', name: '对局总数'}
-      ]
+      ],
+      orderBy: '',
+      updateDate: null,
     }
   },
   methods: {
@@ -83,14 +89,32 @@ export default {
     },
     genWinRateData(orderBy='games') {
       getWinRateData({faction: this.selectedFaction.id}, orderBy).then(res => {
-        this.factionDeckData = res.map(item => {
-          return {
-            deckName: item.archetype,
-            games: item.games,
-            winrate: item.winrate,
-            popularity: item.popularity
+        let otherDeckIndex = 0
+        let decksName = this.$store.state.cards.decksName
+        this.factionDeckData = []
+        this.updateDate = res[0].create_time
+        for (let index in res) {
+          if (res.hasOwnProperty(index)) {
+            if (res[index].archetype.toLowerCase() === 'other') {
+              otherDeckIndex = index //记录other信息的序号，后面将其放置到最后
+            }
+            let name = decksName.filter(item => {
+              return item.ename === res[index].archetype && item.faction === this.selectedFaction.id
+            })[0]
+            let formatData = {
+              deckName: name.cname?name.cname:res[index].archetype,
+              games: res[index].games,
+              winrate: res[index].winrate.toFixed(1),
+              popularity: res[index].popularity.toFixed(1)
+            }
+            this.factionDeckData.push(formatData)
           }
-        })
+        }
+        if (!this.orderBy) {
+          let temp = this.factionDeckData[otherDeckIndex]
+          this.factionDeckData.splice(otherDeckIndex, 1)
+          this.factionDeckData.push(temp)
+        }
         wx.stopPullDownRefresh();
       }).catch(err => {
         console.log(err)
@@ -99,15 +123,22 @@ export default {
     },
     handleFactionClick(item) {
       console.log(item)
+      wx.navigateTo({
+        url: `/pages/decksList/main?id=${item.id}`
+      })
     },
     handleIconsClick(item) {
       this.selectedFaction = {id: item.id, name: item.name}
-      console.log(item)
+      this.orderBy = ''
       this.genWinRateData()
     },
-    handleTitleClick(item) {
-      console.log(item.id)
-      this.genWinRateData(item.id)
+    handleOrderClick(item) {
+      if (this.orderBy.indexOf(item.id)>=0) {
+        this.orderBy = this.orderBy.split('')[0]==='-'?item.id:'-'+item.id
+      } else {
+        this.orderBy = '-'+item.id
+      }
+      this.genWinRateData(this.orderBy)
     }
   },
   mounted() {
@@ -247,6 +278,10 @@ export default {
   .table-icon {
     font-size: 12px;
     margin-left: 5px;
+  }
+  .float-right {
+    float: right;
+    margin-right: 20px;
   }
 }
 </style>

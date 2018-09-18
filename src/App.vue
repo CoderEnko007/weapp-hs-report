@@ -5,9 +5,15 @@ export default {
       clientId: 'ec59002ba0fc4c74bf50'
     }
   },
+  methods: {
+    initDecksName() {
+      this.$store.dispatch('getDecksName')
+    }
+  },
   created () {
     require('./utils/sdk-v1.7.0')
     wx.BaaS.init(this.clientId)
+    this.initDecksName()
   },
 }
 </script>

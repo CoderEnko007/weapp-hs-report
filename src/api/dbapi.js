@@ -161,3 +161,18 @@ export function getWinRateData(params, orderBy='games') {
     })
   })
 }
+
+export function getDeckName(params, limit=1000) {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.deckNameTableID)
+    let factionQuery = new wx.BaaS.Query()
+    if (params && params.faction) {
+      factionQuery.compare('faction', '=', params.faction)
+    }
+    tableObj.setQuery(factionQuery).limit(limit).find().then(res => {
+      resolve(res.data.objects)
+    }, err => {
+      reject(err)
+    })
+  })
+}

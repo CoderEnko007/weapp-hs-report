@@ -158,6 +158,7 @@ export default {
       })
     },
     handleCardClick(item) {
+      // 如果过滤器菜单打开则关闭
       if (this.selectedFilterTabItem!==null) {
         this.selectedFilterTabItem = null
         return
