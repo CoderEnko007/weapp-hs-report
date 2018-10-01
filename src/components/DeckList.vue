@@ -1,8 +1,12 @@
 <template>
-  <h1>rank</h1>
+<div class="container">
+
+</div>
 </template>
 <script>
 export default {
+  name: 'DeckList',
+  props: ['list'],
   data() {
     return {
 

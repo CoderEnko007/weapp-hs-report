@@ -13,7 +13,7 @@ export default {
   // 这个字段走 app.json
   config: {
     // 页面前带有 ^ 符号的，会被编译成首页，其他页面可以选填，我们会自动把 webpack entry 里面的入口页面加进去
-    pages: ['^pages/decks/main'],
+    pages: ['^pages/index/main'],
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
@@ -28,8 +28,8 @@ export default {
         iconPath: "static/icons/main.png",
         selectedIconPath: "static/icons/main_active.png"
       }, {
-        pagePath: "pages/rank/main",
-        text: '排行榜',
+        pagePath: "pages/trending/main",
+        text: '最热套牌',
         iconPath: "static/icons/rank.png",
         selectedIconPath: "static/icons/rank_active.png"
       }, {
@@ -51,7 +51,7 @@ export default {
     },
     "plugins": {
       "sdkPlugin": {
-        "version": "0.1.0",
+        "version": "1.8.0",
         "provider": "wxc6b86e382a1e3294"
       }
     }

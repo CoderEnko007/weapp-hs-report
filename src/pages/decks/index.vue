@@ -23,43 +23,27 @@
               :key="index"
               @click="handleIconsClick(item)">
             <div class="icon">
-              <img :src="item.image" alt="item.id" mode="aspectFit">
+              <img :src="item.image" mode="aspectFit">
               <p>{{item.name}}</p>
             </div>
           </li>
         </ul>
       </div>
       <div class="panel-block">
-        <div class="table">
-          <div class="table-tr faction"><span>{{selectedFaction.name}}</span><span class="float-right">更新于：{{updateDate}}</span></div>
-          <div class="table-tr header">
-            <div class="table-td text-center col-1st"><span>套牌类型</span></div>
-            <div class="table-td text-center col-other"
-                 v-for="(item, index) in tableTitle"
-                 :key="index"
-                 @click="handleOrderClick(item)">
-              <span>{{item.name}}</span><span class="table-icon iconfont">&#xe6c0;</span>
-            </div>
-          </div>
-          <div class="table-tr content" v-for="(item, index) in factionDeckData" :key="index">
-            <div class="table-td text-center col-1st"><p>{{item.deckName}}</p></div>
-            <div class="table-td text-center col-other color-green" :class="{'color-red': item.winrate<50}"><span>{{item.winrate}}%</span></div>
-            <div class="table-td text-center col-other"><span>{{item.popularity}}%</span></div>
-            <div class="table-td text-center col-other"><span>{{item.games}}</span></div>
-          </div>
-        </div>
+        <DeckTable :tableName="selectedFaction.name" :date="updateDate" :tableTitle="tableTitle" :tableData="factionDeckData"
+                   @cellClick="handleDeckNameClick" ref="deckTable"></DeckTable>
       </div>
     </div>
   </div>
 </template>
 <script>
 import utils from '@/utils'
-import PieChart from '@/components/PieChart'
 import {getWinRateData} from "@/api/dbapi";
+import DeckTable from '@/components/DeckTable'
 
 export default {
   components: {
-    PieChart
+    DeckTable
   },
   data() {
     return {
@@ -72,7 +56,6 @@ export default {
         {id: 'popularity', name: '热度'},
         {id: 'games', name: '对局总数'}
       ],
-      orderBy: '',
       updateDate: null,
     }
   },
@@ -95,14 +78,17 @@ export default {
         this.updateDate = res[0].create_time
         for (let index in res) {
           if (res.hasOwnProperty(index)) {
-            if (res[index].archetype.toLowerCase() === 'other') {
+            let ename = res[index].archetype
+            if (ename.toLowerCase() === 'other') {
               otherDeckIndex = index //记录other信息的序号，后面将其放置到最后
+              ename = this.selectedFaction.id
             }
             let name = decksName.filter(item => {
-              return item.ename === res[index].archetype && item.faction === this.selectedFaction.id
+              return item.ename === ename && item.faction === this.selectedFaction.id
             })[0]
             let formatData = {
-              deckName: name.cname?name.cname:res[index].archetype,
+              deckName: name?name.cname:res[index].archetype,
+              ename: res[index].archetype,
               games: res[index].games,
               winrate: res[index].winrate.toFixed(1),
               popularity: res[index].popularity.toFixed(1)
@@ -110,11 +96,11 @@ export default {
             this.factionDeckData.push(formatData)
           }
         }
-        if (!this.orderBy) {
-          let temp = this.factionDeckData[otherDeckIndex]
-          this.factionDeckData.splice(otherDeckIndex, 1)
-          this.factionDeckData.push(temp)
-        }
+        // 默认排序下将'其他'放到最后
+        let temp = this.factionDeckData[otherDeckIndex]
+        temp.deckName = '其他'
+        this.factionDeckData.splice(otherDeckIndex, 1)
+        this.factionDeckData.push(temp)
         wx.stopPullDownRefresh();
       }).catch(err => {
         console.log(err)
@@ -122,23 +108,23 @@ export default {
       })
     },
     handleFactionClick(item) {
-      console.log(item)
       wx.navigateTo({
-        url: `/pages/decksList/main?id=${item.id}`
+        url: `/pages/decks/decksList/main?id=${item.id}`
       })
     },
     handleIconsClick(item) {
       this.selectedFaction = {id: item.id, name: item.name}
-      this.orderBy = ''
       this.genWinRateData()
+      this.$refs.deckTable.sortTableData()
     },
-    handleOrderClick(item) {
-      if (this.orderBy.indexOf(item.id)>=0) {
-        this.orderBy = this.orderBy.split('')[0]==='-'?item.id:'-'+item.id
-      } else {
-        this.orderBy = '-'+item.id
+    handleDeckNameClick(item) {
+      let queryId = item.ename
+      if(item.ename.toLowerCase() === 'other') {
+        queryId = this.selectedFaction.id
       }
-      this.genWinRateData(this.orderBy)
+      wx.navigateTo({
+        url: `/pages/decks/decksList/main?id=${this.selectedFaction.id}&name=${queryId}`
+      })
     }
   },
   mounted() {
@@ -223,51 +209,6 @@ export default {
         }
       }
     }
-    .table {
-      display: table;
-      width: 100%;
-      font-size: 12px;
-      font-weight: 700;
-      border-collapse: collapse;
-      .table-tr {
-        display: table-row;
-        width: 100%;
-        .table-td {
-          display: table-cell;
-          border: 1px solid gray;
-          span {
-            height: 60rpx;
-            line-height: 60rpx;
-          }
-        }
-        .col-1st {
-          width: 220rpx;
-          p {
-            width: 200rpx;
-            overflow:hidden;
-            word-break:keep-all;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-          }
-        }
-        .col-other {
-          width: 176rpx;
-        }
-      }
-      .faction {
-        display: table-caption;
-        color: white;
-        background-color: $palette-blue;
-        span {
-          margin-left: 40rpx;
-          height: 55rpx;
-          line-height: 55rpx;
-        }
-      }
-      .text-center {
-        text-align: center;
-      }
-    }
   }
   .color-green {
     color: green;
@@ -278,10 +219,6 @@ export default {
   .table-icon {
     font-size: 12px;
     margin-left: 5px;
-  }
-  .float-right {
-    float: right;
-    margin-right: 20px;
   }
 }
 </style>

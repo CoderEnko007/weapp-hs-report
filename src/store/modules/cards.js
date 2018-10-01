@@ -1,9 +1,11 @@
 import {getDeckName} from "@/api/dbapi";
+import {getDeckList, getUserCollectionDecks, setUserCollection, cancelUserCollection} from "@/api/dbapi";
 
 const cards = {
   state: {
     series: [],
-    decksName: []
+    decksName: [],
+    collectedDecks: []
   },
   mutations: {
     setSeries: (state, series) => {
@@ -11,6 +13,21 @@ const cards = {
     },
     SET_DECKSNAME: (state, names) => {
       state.decksName = names
+    },
+    SET_COLLECTED_DECKS: (state, decks) => {
+      state.collectedDecks = decks
+    },
+    ADD_COLLECTED_DECKS: (state, deck) => {
+      state.collectedDecks.unshift(deck)
+    },
+    REMOVE_COLLECTED_DECKS: (state, deckID) => {
+      for (let index in state.collectedDecks) {
+        if (state.collectedDecks.hasOwnProperty(index)) {
+          if (state.collectedDecks[index].deck_id === deckID) {
+            state.collectedDecks.splice(index, 1)
+          }
+        }
+      }
     }
   },
 
@@ -27,6 +44,41 @@ const cards = {
             })
           }
           commit('SET_DECKSNAME', decksName)
+          resolve(res)
+        }, err => {
+          reject(err)
+        })
+      })
+    },
+    getCollectedDecks({commit, state}, userID) {
+      return new Promise((resolve, reject) => {
+        getUserCollectionDecks(userID).then(res => {
+          let collectList = res.objects.map(item => {
+            return item.deck_id
+          })
+          getDeckList({collectList: collectList}).then(deckRes => {
+            commit('SET_COLLECTED_DECKS', deckRes.objects)
+            resolve({total_count: res.meta.total_count, list: deckRes.objects})
+          }, err => {
+            reject(err)
+          })
+        })
+      })
+    },
+    addCollectedDeck({commit, state}, data) {
+      return new Promise((resolve, reject) => {
+        setUserCollection(data.query).then(res => {
+          commit('ADD_COLLECTED_DECKS', data.deckDetail)
+          resolve(res)
+        }, err => {
+          reject(err)
+        })
+      })
+    },
+    cancelCollectedDeck({commit, state}, data) {
+      return new Promise((resolve, reject) => {
+        cancelUserCollection(data).then(res => {
+          commit('REMOVE_COLLECTED_DECKS', data.deck_id)
           resolve(res)
         }, err => {
           reject(err)

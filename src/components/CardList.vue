@@ -28,8 +28,8 @@ export default {
   margin-top: 15rpx;
   overflow: hidden;
   .card {
-    width: 24%;
-    height: 200rpx;
+    width: 33%;
+    height: 260rpx;
     padding: 0 0 8rpx;
     margin-bottom: 65rpx;
     text-align: center;
@@ -42,7 +42,7 @@ export default {
       transform:scale(1.3);
     }
     p {
-      width: 80px;
+      width: 100%;
       text-align: center;
       overflow: hidden;
       text-overflow: ellipsis;

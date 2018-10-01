@@ -60,7 +60,7 @@ export default {
       getCardDetail(parseInt(this.cardId)).then(res => {
         this.cardDetail = res[0]
         this.cardDetail.bgImg = genOrigImageURL(this.cardDetail.hsId)
-        this.cardDetail.cardImg = genCardsImageURL(this.cardDetail.hsId)
+        this.cardDetail.cardImg = gen512CardsImageURL(this.cardDetail.hsId)
         this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
         for (let item of this.$store.state.cards.series) {
           if(this.cardDetail.set_id === item.id) {
@@ -98,6 +98,12 @@ export default {
   onUnload() {
     this.cardId = null
     this.cardDetail = Object.assign({}, defaultCardDetail)
+  },
+  onShareAppMessage(res) {
+    return {
+      title: this.cardDetail.name,
+      path: `/pages/cards/cardDetail/main?id=${this.cardId}`
+    }
   }
 }
 </script>

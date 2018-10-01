@@ -4,13 +4,13 @@
 		"urlCheck": true,
 		"es6": false,
 		"postcss": true,
-		"minified": true,
+		"minified": false,
 		"newFeature": true
 	},
 	"miniprogramRoot": "./dist/",
 	"compileType": "miniprogram",
 	"appid": "wx68185c439fa57f83",
-	"projectname": "weapp-hs-report",
+	"projectname": "weapp-hs-report-back",
 	"condition": {
 		"search": {
 			"current": -1,

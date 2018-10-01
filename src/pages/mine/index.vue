@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="userinfo">
-      <img :src="userInfo.avatarUrl" alt="">
+      <img :src="userInfo.avatarUrl">
       <button v-if="!userInfo.openid" open-type="getUserInfo" @getuserinfo="userInfoHandler">请登录</button>
       <p v-else>{{userInfo.nickName}}</p>
     </div>
@@ -15,33 +15,74 @@
       <div class="zan-cell">
         <div class="zan-cell__bd">我的收藏</div>
       </div>
+      <div class="panel panel-list">
+        <DecksBoard :list="getDeckList" @itemClick="handleDeckClick"></DecksBoard>
+      </div>
     </div>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import {getDeckList, getUserCollectionDecks} from "@/api/dbapi";
+import DecksBoard from '@/components/DecksBoard';
+
 export default {
+  components: {
+    DecksBoard,
+  },
   data() {
     return {
-
+      deckList: [],
     }
   },
   computed: {
     ...mapGetters([
       'userInfo'
-    ])
+    ]),
+    getDeckList() {
+      return this.deckList
+    }
   },
   methods: {
     userInfoHandler(data) {
       this.$store.dispatch('getUserInfo', data).then(res => {
-        console.log(res)
+        this.genUserCollection()
       }).catch(err => {
         console.log(err)
       })
+    },
+    genUserCollection() {
+      if (this.userInfo.id) {
+        wx.showNavigationBarLoading();
+        this.$store.dispatch('getCollectedDecks', this.userInfo.id).then(res => {
+          this.deckList = res.list
+          wx.hideNavigationBarLoading()
+          wx.stopPullDownRefresh();
+        }).catch(err => {
+          console.log(err)
+          wx.hideNavigationBarLoading()
+          wx.stopPullDownRefresh();
+        })
+      }
+    },
+    handleDeckClick(item) {
+      console.log('handleDeckClick', item.id)
+      let url = ''
+      if (item.trending) {
+        url = `/pages/decks/deckDetail/main?id=${item.id}&trending=1`
+      } else {
+        url = `/pages/decks/deckDetail/main?id=${item.id}`
+      }
+      wx.navigateTo({
+        url: url
+      })
     }
   },
-  mounted() {
-    console.log(this.userInfo)
+  onShow() {
+    // console.log('onShow', this.$store.state.cards.collectedDecks)
+    // this.deckList = this.$store.state.cards.collectedDecks
+    console.log(this.deckList)
+    this.genUserCollection()
   }
 }
 </script>

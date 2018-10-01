@@ -68,7 +68,7 @@ export default {
   },
   data() {
     return {
-      filter: defaultFilter,
+      filter: Object.assign({}, defaultFilter),
       costList: [
         {cost: 0, icon: '/static/mana/0.png'},
         {cost: 1, icon: '/static/mana/1.png'},
@@ -167,7 +167,7 @@ export default {
         return
       }
       wx.navigateTo({
-        url: `/pages/cardDetail/main?id=${item.dbfId}`
+        url: `/pages/cards/cardDetail/main?id=${item.dbfId}`
       })
     },
     genCardsList(init) {
@@ -176,7 +176,7 @@ export default {
         this.more = true
       }
       wx.showNavigationBarLoading();
-      getCardsList(this.filter, 20, this.page).then(res => {
+      getCardsList(this.filter, 21, this.page).then(res => {
         let list = res.objects.map(item => {
           let image = utils.genCardsImageURL(item.hsId)
           return {dbfId: item.dbfId, name: item.name, image: image}
@@ -187,9 +187,9 @@ export default {
         } else {
           this.cardsList = this.cardsList.concat(list)
         }
-        let emptyNum = this.cardsList.length % 4
+        let emptyNum = this.cardsList.length % 3
         if(emptyNum) {
-          for (let i=0; i<(4-emptyNum); i++) {
+          for (let i=0; i<(3-emptyNum); i++) {
             this.cardsList.push({})
           }
         }

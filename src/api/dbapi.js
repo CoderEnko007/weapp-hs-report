@@ -123,7 +123,7 @@ export function getCardsList(params, limit=20, page=0, orderBy='cost') {
       }
       let otherQuery = new wx.BaaS.Query()
       otherQuery.contains('text', params.search)
-      searchQuery = wx.BaaS.Query.or(nameQuery, raceQuery, otherQuery)
+      searchQuery = wx.BaaS.Query.or(nameQuery, otherQuery)
     }
     let query = wx.BaaS.Query.and(removeHeroQuery, costQuery, factionQuery, modeQuery, rarityQuery, seriesQuery, searchQuery)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
@@ -171,6 +171,137 @@ export function getDeckName(params, limit=1000) {
     }
     tableObj.setQuery(factionQuery).limit(limit).find().then(res => {
       resolve(res.data.objects)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getDeckList(params, limit=20, page=0, orderBy='-game_count') {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.decksTableID)
+    let factionQuery = new wx.BaaS.Query()
+    if (params && params.faction) {
+      factionQuery.compare('faction', '=', params.faction)
+    }
+    let archetypeQuery = new wx.BaaS.Query()
+    if (params && params.archetype && params.archetype.toLowerCase() !== 'all') {
+      archetypeQuery.compare('deck_name', '=', params.archetype)
+    }
+    let collectionQuery = new wx.BaaS.Query()
+    if (params && params.collectList) {
+      collectionQuery.in('deck_id', params.collectList)
+    }
+    let query = wx.BaaS.Query.and(factionQuery, archetypeQuery, collectionQuery)
+    tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getDeckDetail(recordID, trending_flag=false ) {
+  return new Promise((resolve, reject) => {
+    let tableObj = trending_flag?new wx.BaaS.TableObject(tableID.trendingTableID):new wx.BaaS.TableObject(tableID.decksTableID)
+    console.log(trending_flag, tableObj, recordID)
+    tableObj.get(recordID).then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getArchetypeList(params, limit=1000, page=0, orderBy='-win_rate') {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.archetypeTableID)
+    let factionQuery = new wx.BaaS.Query()
+    if (params && params.faction) {
+      factionQuery.compare('faction', '=', params.faction)
+    }
+    let tierQuery = new wx.BaaS.Query()
+    if (params && params.tier) {
+      tierQuery.compare('tier', '=', params.tier)
+    }
+    let query = wx.BaaS.Query.and(factionQuery, tierQuery)
+    tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getArchetypeDetail(params) {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.archetypeTableID)
+    if (params.recordID) {
+      tableObj.get(params.recordID).then(res => {
+        resolve(res.data)
+      }, err => {
+        reject(err)
+      })
+    } else if (params.name) {
+      let query = new wx.BaaS.Query()
+      query.compare('archetype_name', '=', params.name)
+      tableObj.setQuery(query).find().then(res => {
+        resolve(res.data.objects[0])
+      }, err => {
+        reject(err)
+      })
+    }
+  })
+}
+
+export function getTrendingList(parmas, limit=20, page=0, orderBy='-win_rate') {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.trendingTableID)
+    let query = new wx.BaaS.Query()
+    tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getUserCollectionDecks(userID, limit=9999, page=0, orderBy='created_at') {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.decksCollectionTableID)
+    let query = new wx.BaaS.Query()
+    query.compare('created_by', '=', userID)
+    tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function setUserCollection(data) {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.decksCollectionTableID)
+    let record = tableObj.create()
+    record.set('created_by', data.user_id)
+    record.set('deck_id', data.deck_id)
+    record.set('trending', data.trending)
+    record.save().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function cancelUserCollection(data) {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.decksCollectionTableID)
+    let query = new wx.BaaS.Query()
+    query.compare('created_by', '=', data.user_id)
+    query.compare('deck_id', '=', data.deck_id)
+    tableObj.delete(query).then(res => {
+      resolve(res.data)
     }, err => {
       reject(err)
     })
