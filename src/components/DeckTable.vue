@@ -70,7 +70,7 @@ export default {
 .table {
   display: table;
   width: 100%;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   border-collapse: collapse;
   .table-tr {

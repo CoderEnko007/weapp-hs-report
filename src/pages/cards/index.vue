@@ -219,6 +219,12 @@ export default {
   onPullDownRefresh() {
     this.obtainSeriesList()
     this.genCardsList(true)
+  },
+  onShareAppMessage(res) {
+    return {
+      title: '炉石传说情报站',
+      path: '/pages/index/main'
+    }
   }
 }
 </script>

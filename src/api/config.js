@@ -1,5 +1,5 @@
 const winrateTableID = 49243
-const decksTableID = 53174
+const decksTableID = 53666
 const archetypeTableID = 49232
 const rankTableID = 49198
 const seriesTableID = 51271

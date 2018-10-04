@@ -134,6 +134,12 @@ export default {
   onPullDownRefresh() {
     this.genWinRateData()
   },
+  onShareAppMessage(res) {
+    return {
+      title: '炉石传说情报站',
+      path: '/pages/index/main'
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>

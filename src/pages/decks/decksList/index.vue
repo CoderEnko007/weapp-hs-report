@@ -162,6 +162,12 @@ export default {
     if (!this.more) return false
     this.page += 1
     this.genDeckList(false)
+  },
+  onShareAppMessage(res) {
+    return {
+      title: '炉石传说情报站',
+      path: '/pages/index/main'
+    }
   }
 }
 </script>

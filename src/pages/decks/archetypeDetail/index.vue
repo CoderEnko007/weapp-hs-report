@@ -184,6 +184,12 @@ export default {
   },
   onUnload() {
     this.resetPageData()
+  },
+  onShareAppMessage(res) {
+    return {
+      title: this.archetypeName,
+      path: `/pages/decks/archetypeDetail/main?id=${this.archetypeId}`
+    }
   }
 }
 </script>

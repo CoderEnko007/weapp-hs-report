@@ -12,7 +12,9 @@
           <div class="zan-card__detail-row zan-c-gray-darker">
             <div class="desc">
               <div class="detail-item dust-cost"><img :src="dustImage" mode="aspectFit"><span>{{item.dust_cost}}</span></div>
-              <div class="detail-item win-rate">胜率：{{item.win_rate}}%</div>
+              <div class="detail-item win-rate">胜率：
+                <span class="color-green" :class="{'color-red': item.win_rate<50}">{{item.win_rate}}%</span>
+              </div>
               <div class="detail-item games">对局数：{{item.game_count}}</div>
             </div>
           </div>
@@ -71,6 +73,7 @@ export default {
   .desc {
     display: flex;
     justify-content: space-between;
+    flex-wrap: nowrap;
     .detail-item {
       display: inline-block;
       position: relative;
@@ -90,7 +93,7 @@ export default {
       }
     }
     .win-rate {
-      width: 150rpx;
+      width: 160rpx;
     }
     .games {
       width: 185rpx;

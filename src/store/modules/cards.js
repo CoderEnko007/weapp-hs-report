@@ -57,8 +57,14 @@ const cards = {
             return item.deck_id
           })
           getDeckList({collectList: collectList}).then(deckRes => {
-            commit('SET_COLLECTED_DECKS', deckRes.objects)
-            resolve({total_count: res.meta.total_count, list: deckRes.objects})
+            let decks = []
+            for(let collect of collectList) {
+              decks.push(deckRes.objects.filter(item => {
+                return item.deck_id === collect
+              })[0])
+            }
+            commit('SET_COLLECTED_DECKS', decks)
+            resolve({total_count: res.meta.total_count, list: decks})
           }, err => {
             reject(err)
           })

@@ -266,7 +266,7 @@ export function getTrendingList(parmas, limit=20, page=0, orderBy='-win_rate') {
   })
 }
 
-export function getUserCollectionDecks(userID, limit=9999, page=0, orderBy='created_at') {
+export function getUserCollectionDecks(userID, limit=9999, page=0, orderBy='-created_at') {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.decksCollectionTableID)
     let query = new wx.BaaS.Query()

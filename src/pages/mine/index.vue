@@ -6,7 +6,7 @@
       <p v-else>{{userInfo.nickName}}</p>
     </div>
     <div class="about zan-panel">
-      <div class="zan-cell zan-cell--access">
+      <div class="zan-cell zan-cell--access" @click="handleAboutClick">
         <div class="zan-cell__bd">关于小程序</div>
         <div class="zan-cell__ft"></div>
       </div>
@@ -76,6 +76,11 @@ export default {
       wx.navigateTo({
         url: url
       })
+    },
+    handleAboutClick() {
+      wx.navigateTo({
+        url: `/pages/mine/about/main`
+      })
     }
   },
   onShow() {
@@ -83,6 +88,12 @@ export default {
     // this.deckList = this.$store.state.cards.collectedDecks
     console.log(this.deckList)
     this.genUserCollection()
+  },
+  onShareAppMessage(res) {
+    return {
+      title: '炉石传说情报站',
+      path: '/pages/index/main'
+    }
   }
 }
 </script>
