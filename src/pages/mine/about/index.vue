@@ -15,6 +15,9 @@
         <p>邮箱：yf381966217@163.com</p>
       </div>
     </div>
+    <div class="panel code">
+      <img :src="codeImg" mode="aspectFill" @click="handleClickCodeImg">
+    </div>
   </div>
 </div>
 </template>
@@ -23,6 +26,14 @@ export default {
   data() {
     return {
       bannerImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g7yChfIyViFMUoB.jpg',
+      codeImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9oGSrxprEojAfB.jpg'
+    }
+  },
+  methods: {
+    handleClickCodeImg() {
+      wx.previewImage({
+        urls: [this.codeImg]
+      })
     }
   },
   onShareAppMessage(res) {
@@ -72,6 +83,12 @@ export default {
         .indent_2 {
           text-indent: 2em;
         }
+      }
+    }
+    .code {
+      text-align: center;
+      img {
+        width: 220px;
       }
     }
   }

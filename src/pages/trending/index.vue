@@ -27,12 +27,15 @@ export default {
   },
   methods: {
     genTrendingList() {
+      wx.showNavigationBarLoading();
       getTrendingList().then(res => {
         this.deckList = res.objects
         wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
       }).catch(err => {
         console.log(err)
         wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
       })
     },
     handleDeckClick(item) {
@@ -58,7 +61,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../style/color';
 .banner {
-  position: fixed;
+  position: relative;
   width: 100%;
   height: 220rpx;
   overflow: hidden;
@@ -96,7 +99,7 @@ export default {
 }
 .deck-list {
   width: 100%;
-  padding-top: 220rpx;
+  /*padding-top: 220rpx;*/
   overflow: hidden;
   z-index: -1;
 }

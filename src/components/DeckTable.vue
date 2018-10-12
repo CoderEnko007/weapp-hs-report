@@ -11,7 +11,7 @@
         <span>{{item.name}}</span><span class="table-icon iconfont">&#xe6c0;</span>
       </div>
     </div>
-    <div class="table-tr content" v-for="(item, index) in tableData" :key="index">
+    <div class="table-tr content" v-for="(item, index) in genTableData" :key="index">
       <div class="table-td text-center col-1st" @click="handleCellNameClick(item)"><p>{{item.deckName}}</p></div>
       <div class="table-td text-center col-other color-green" :class="{'color-red': item.winrate<50}"><span>{{item.winrate}}%</span></div>
       <div class="table-td text-center col-other"><span>{{item.popularity}}%</span></div>
@@ -27,6 +27,12 @@ export default {
   data() {
     return {
       orderBy: ''
+    }
+  },
+  computed: {
+    genTableData() {
+      this.sortTableData()
+      return this.tableData
     }
   },
   methods: {
@@ -52,17 +58,19 @@ export default {
       this.$emit('cellClick', item)
     },
     sortTableData() {
-      this.tableData.sort(this.compareFunction(this.orderBy))
+      if (this.orderBy) {
+        this.tableData.sort(this.compareFunction(this.orderBy))
+      }
     }
   },
-  watch: {
-    tableData: {
-      handler: function (val) {
-        this.sortTableData()
-      },
-      deep: true
-    }
-  }
+  // watch: {
+  //   tableData: {
+  //     handler: function (val) {
+  //       this.sortTableData()
+  //     },
+  //     deep: true
+  //   }
+  // }
 }
 </script>
 <style lang="scss" scoped>

@@ -31,7 +31,7 @@
       </div>
       <div class="panel-block">
         <DeckTable :tableName="selectedFaction.name" :date="updateDate" :tableTitle="tableTitle" :tableData="factionDeckData"
-                   @cellClick="handleDeckNameClick" ref="deckTable"></DeckTable>
+                   @cellClick="handleDeckNameClick"></DeckTable>
       </div>
     </div>
   </div>
@@ -71,6 +71,7 @@ export default {
       }
     },
     genWinRateData(orderBy='games') {
+      wx.showNavigationBarLoading();
       getWinRateData({faction: this.selectedFaction.id}, orderBy).then(res => {
         let otherDeckIndex = 0
         let decksName = this.$store.state.cards.decksName
@@ -102,9 +103,11 @@ export default {
         this.factionDeckData.splice(otherDeckIndex, 1)
         this.factionDeckData.push(temp)
         wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
       }).catch(err => {
         console.log(err)
         wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
       })
     },
     handleFactionClick(item) {
@@ -115,7 +118,6 @@ export default {
     handleIconsClick(item) {
       this.selectedFaction = {id: item.id, name: item.name}
       this.genWinRateData()
-      this.$refs.deckTable.sortTableData()
     },
     handleDeckNameClick(item) {
       let queryId = item.ename
@@ -133,6 +135,7 @@ export default {
   },
   onPullDownRefresh() {
     this.genWinRateData()
+    this.$store.dispatch('getDecksName')
   },
   onShareAppMessage(res) {
     return {

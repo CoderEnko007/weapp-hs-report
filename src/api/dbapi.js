@@ -236,13 +236,14 @@ export function getArchetypeList(params, limit=1000, page=0, orderBy='-win_rate'
 export function getArchetypeDetail(params) {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.archetypeTableID)
-    if (params.recordID) {
+    console.log('getArchetypeDetail', params)
+    if (params && params.recordID) {
       tableObj.get(params.recordID).then(res => {
         resolve(res.data)
       }, err => {
         reject(err)
       })
-    } else if (params.name) {
+    } else if (params && params.name) {
       let query = new wx.BaaS.Query()
       query.compare('archetype_name', '=', params.name)
       tableObj.setQuery(query).find().then(res => {
@@ -301,6 +302,19 @@ export function cancelUserCollection(data) {
     query.compare('created_by', '=', data.user_id)
     query.compare('deck_id', '=', data.deck_id)
     tableObj.delete(query).then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getBanners(limit=5, orderBy='index') {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.bannerTableID)
+    let query = new wx.BaaS.Query()
+    query.isNotNull('name')
+    tableObj.setQuery(query).orderBy(orderBy).limit(limit).find().then(res => {
       resolve(res.data)
     }, err => {
       reject(err)

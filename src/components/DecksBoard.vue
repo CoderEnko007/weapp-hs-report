@@ -53,7 +53,6 @@ export default {
   },
   watch: {
     'list': function(val) {
-      console.log(val)
       this.decksName = this.$store.state.cards.decksName
       this.translateDeckName()
     }
@@ -78,6 +77,7 @@ export default {
       display: inline-block;
       position: relative;
       font-size: 12px;
+      font-weight: 700;
       img{
         position: absolute;
         width: 24rpx;
@@ -96,7 +96,7 @@ export default {
       width: 160rpx;
     }
     .games {
-      width: 185rpx;
+      width: 195rpx;
     }
   }
 }

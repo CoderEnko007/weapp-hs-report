@@ -1,14 +1,15 @@
-import {getDeckName} from "@/api/dbapi";
+import {getDeckName, getSeriesData, getArchetypeList} from "@/api/dbapi";
 import {getDeckList, getUserCollectionDecks, setUserCollection, cancelUserCollection} from "@/api/dbapi";
 
 const cards = {
   state: {
     series: [],
     decksName: [],
-    collectedDecks: []
+    collectedDecks: [],
+    archetypeList: []
   },
   mutations: {
-    setSeries: (state, series) => {
+    SET_SERIES: (state, series) => {
       state.series = series
     },
     SET_DECKSNAME: (state, names) => {
@@ -28,10 +29,30 @@ const cards = {
           }
         }
       }
+    },
+    SET_ARCHETYPE_LIST: (state, list) => {
+      state.archetypeList = list
     }
   },
 
   actions: {
+    getSeriesData({commit, state}) {
+      return new Promise((resolve, reject) => {
+        getSeriesData().then(res => {
+          let array = res.map(item => {
+            return {
+              id: item.setId,
+              name: item.cname,
+              mode: item.mode
+            }
+          })
+          commit('SET_SERIES', array)
+          resolve(res)
+        }, err => {
+          reject(err)
+        })
+      })
+    },
     getDecksName({commit, state}) {
       return new Promise((resolve, reject) => {
         getDeckName().then(res => {
@@ -59,9 +80,12 @@ const cards = {
           getDeckList({collectList: collectList}).then(deckRes => {
             let decks = []
             for(let collect of collectList) {
-              decks.push(deckRes.objects.filter(item => {
+              let array = deckRes.objects.filter(item => {
                 return item.deck_id === collect
-              })[0])
+              })
+              if (array.length > 0) {
+                decks.push(array[0])
+              }
             }
             commit('SET_COLLECTED_DECKS', decks)
             resolve({total_count: res.meta.total_count, list: decks})
@@ -86,6 +110,16 @@ const cards = {
         cancelUserCollection(data).then(res => {
           commit('REMOVE_COLLECTED_DECKS', data.deck_id)
           resolve(res)
+        }, err => {
+          reject(err)
+        })
+      })
+    },
+    getArchetypeList({commit, state}) {
+      return new Promise((resolve, reject) => {
+        getArchetypeList().then(res => {
+          commit('SET_ARCHETYPE_LIST', res.objects)
+          resolve(res.objects)
         }, err => {
           reject(err)
         })

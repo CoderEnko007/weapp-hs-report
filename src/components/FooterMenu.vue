@@ -1,19 +1,25 @@
 <template>
   <div class="footer-menu">
-    <button open-type="share" class="share"><span class="icon iconfont">&#xe63b;</span>点击分享</button>
+    <button open-type="share" class="share">
+      <span class="icon iconfont">&#xe63b;</span>
+      <span>点击分享</span>
+    </button>
     <div class="like-block" v-if="showCollectBtn">
-      <div class="separator" :style="{left: 138+'px'}"></div>
+      <div class="separator" :style="{left: 125+'px'}"></div>
       <button class="like" @click="handleCollect">
         <span class="active icon iconfont" v-if="collected">&#xe601;</span>
         <span class="icon iconfont" v-else>&#xe603;</span>
         <span>收藏</span>
       </button>
-      <div class="separator" :style="{right: 138+'px'}"></div>
+      <div class="separator" :style="{right: 125+'px'}"></div>
     </div>
     <div v-else>
       <div class="separator"></div>
     </div>
-    <button @click="backToHome"><span class="icon iconfont">&#xe615;</span>返回首页</button>
+    <button @click="backToHome">
+      <span class="icon iconfont">&#xe615;</span>
+      <span>返回首页</span>
+    </button>
   </div>
 </template>
 <script>

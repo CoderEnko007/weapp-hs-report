@@ -4,11 +4,11 @@
       <div class="overview">
         <div class="deck-name"><p>{{genDeckName}}</p></div>
         <div class="desc">
-          <div class="desc-item"><p>合成花费：</p><img :src="dustImage" mode="aspectFit"><p style="margin-left: 14px">{{deckDetail.dust_cost}}</p></div>
+          <div class="desc-item"><p>合成花费：</p><img :src="dustImage" mode="aspectFit"><p style="margin-left: 11px">{{deckDetail.dust_cost}}</p></div>
           <div class="desc-item"><p>对局时长：</p><p>{{deckDetail.duration}}分钟</p></div>
-          <div class="desc-item"><p>胜率：</p><p class="color-green" :class="{'color-red': deckDetail.win_rate<50}">{{deckDetail.win_rate}}%</p></div>
+          <div class="desc-item"><p>胜率：</p><p class="font-bold color-light-green" :class="{'color-red': deckDetail.win_rate<50}">{{deckDetail.win_rate}}%</p></div>
           <div class="desc-item"><p>回合数：</p><p>{{deckDetail.turns}}</p></div>
-          <div class="desc-item"><p>对局数：</p><p>{{deckDetail.game_count}}</p></div>
+          <div class="desc-item"><p>对局数：</p><p>{{gameCount}}</p></div>
           <div class="desc-item"></div>
         </div>
       </div>
@@ -35,6 +35,9 @@
           </span>
         </div>
         <div class="chart-text" v-else>点一下柱状图看看</div>
+      </div>
+      <div class="ads" v-if="adsOpenFlag">
+        <ad unit-id="adunit-5507cac6947d0ea4"></ad>
       </div>
       <div class="data-chart">
         <div class="title"><img src="/static/mana/mana.png" mode="aspectFit"><span>费用分布</span></div>
@@ -69,6 +72,7 @@ const defaultDetail = {
   dust_cost: null,
   win_rate: null,
   game_count: null,
+  real_game_count: null,
   duration: null,
   turns: null,
   card_list: '',
@@ -120,6 +124,12 @@ export default {
     ...mapGetters([
       'userInfo'
     ]),
+    gameCount() {
+      return this.deckDetail.real_game_count?this.deckDetail.real_game_count:this.deckDetail.game_count
+    },
+    adsOpenFlag() {
+      return utils.adsOpenFlag
+    },
     genDeckName() {
       for (let item of this.decksName) {
         if (item.ename === this.deckDetail.deck_name) {
@@ -155,6 +165,7 @@ export default {
       this.selectWinRate = {name: '', value: ''}
     },
     genDeckData() {
+      wx.showNavigationBarLoading();
       getDeckDetail(this.recordID, this.trending).then(res => {
         this.checkDeckCollected()
         this.deckDetail = res
@@ -203,8 +214,12 @@ export default {
         this.winrateChartData.max = Math.ceil(max/10)*10+10
         this.winrateChartData.unit = '%'
         this.winrateChartData = JSON.stringify(this.winrateChartData)
+        wx.hideNavigationBarLoading()
+        wx.stopPullDownRefresh();
       }).catch(err => {
         console.log(err)
+        wx.hideNavigationBarLoading()
+        wx.stopPullDownRefresh();
       })
     },
     handleCardClick(item) {
@@ -241,6 +256,7 @@ export default {
         }
         this.$store.dispatch('cancelCollectedDeck', data).then(res => {
           this.$refs.btnGroup.deactiveCollectIcon()
+          this.deckCollected = false
         }).catch(err => {
           console.log(err)
         })
@@ -256,6 +272,7 @@ export default {
               image: 'https://b.yzcdn.cn/v2/image/dashboard/secured_transaction/suc_green@2x.png'
             })
             this.$refs.btnGroup.activeCollectIcon()
+            this.deckCollected = true
           }).catch(err => {
             console.log(err)
           })
@@ -283,12 +300,15 @@ export default {
     this.recordID = this.$root.$mp.query.id
     this.decksName = this.$store.state.cards.decksName
     this.trending = !!this.$root.$mp.query.trending
-    console.log(this.$root.$mp.query, this.trending)
     this.genDeckData()
   },
   onUnload() {
     this.resetPageData()
     this.deckCollected = false
+    this.toast.clearZanToast()
+  },
+  onPullDownRefresh() {
+    this.genDeckData()
   },
   onShareAppMessage(res) {
     return {
@@ -302,6 +322,8 @@ export default {
 @import '../../../style/color';
 
 .container {
+  width: 100%;
+  overflow: hidden;
   .banner {
     position: relative;
     width: 100%;
@@ -372,6 +394,7 @@ export default {
       position: relative;
       height: 55rpx;
       margin-top: 20rpx;
+      margin-bottom: 10rpx;
       font-size: 12px;
       border: 1px solid $palette-blue;
       box-sizing: border-box;
@@ -403,7 +426,9 @@ export default {
     }
   }
   .data-chart {
-    margin: 20rpx;
+    width: 100%;
+    overflow: hidden;
+    /*margin: 20rpx;*/
     .chart-text {
       height:27px;
       line-height:27px;

@@ -7,13 +7,24 @@ export default {
   },
   methods: {
     initDecksName() {
-      this.$store.dispatch('getDecksName')
+      this.$store.dispatch('getDecksName').then(res => {
+        // console.log('decksname', res)
+      })
+    },
+    initCardSeries() {
+      this.$store.dispatch('getSeriesData').then(res => {
+        // console.log('series', res)
+      })
     }
   },
   created () {
-    require('./utils/sdk-v1.7.0')
+    // require('./utils/sdk-v1.7.0')
+    // wx.BaaS.init(this.clientId)
+    wx.BaaS = requirePlugin('sdkPlugin')
+    wx.BaaS.wxExtend(wx.login, wx.getUserInfo, wx.requestPayment)
     wx.BaaS.init(this.clientId)
     this.initDecksName()
+    this.initCardSeries()
   },
 }
 </script>
@@ -32,9 +43,15 @@ export default {
   -moz-transition: width 2s;
   -webkit-transition: width 2s;
   -o-transition: width 2s;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .color-green {
   color: $palette-green;
+}
+.color-light-green {
+  color: $palette-light-green;
 }
 .color-red {
   color: $palette-orange;
@@ -44,6 +61,14 @@ export default {
 }
 .float-right {
   float: right;
+}
+.font-bold {
+  font-weight: 700;
+}
+.ads {
+  ad {
+    transform: scale(0.9) !important;
+  }
 }
 .header-title {
   width: 100%;

@@ -15,7 +15,7 @@ export default {
     // 页面前带有 ^ 符号的，会被编译成首页，其他页面可以选填，我们会自动把 webpack entry 里面的入口页面加进去
     pages: ['^pages/index/main'],
     window: {
-      backgroundTextStyle: 'light',
+      backgroundTextStyle: 'dark',
       navigationBarBackgroundColor: '#fff',
       navigationBarTitleText: '炉石传说情报站',
       navigationBarTextStyle: 'black'
@@ -51,7 +51,7 @@ export default {
     },
     "plugins": {
       "sdkPlugin": {
-        "version": "1.8.0",
+        "version": "1.8.1",
         "provider": "wxc6b86e382a1e3294"
       }
     }

@@ -1,3 +1,5 @@
+const adsOpenFlag = false
+
 function formatNumber (n) {
   const str = n.toString()
   return str[1] ? str : `0${str}`
@@ -133,6 +135,7 @@ const race = {
 const factionColors = ['#ff7d0a', '#abd473', '#69ccf0', '#f58cba', '#ccc', '#fff569', '#0070de', '#9482c9', '#c79c6e']
 
 export default {
+  adsOpenFlag,
   formatNumber,
   formatTime,
   formatNowTime,

@@ -8,7 +8,7 @@
         <div class="desc">
           <div class="desc-item"><p>总对局数：</p><p>{{archetypeDetail.game_count}}</p></div>
           <div class="desc-item"><p>总体胜率：</p>
-            <p class="color-green" :class="{'color-red': archetypeDetail.win_rate<50}">{{archetypeDetail.win_rate}}%</p>
+            <p class="color-light-green" :class="{'color-red': archetypeDetail.win_rate<50}">{{archetypeDetail.win_rate}}%</p>
           </div>
         </div>
       </div>
@@ -26,6 +26,9 @@
         <DeckCards :cards="archetypeDetail.pop_cards" @cardClick="handleCardClick"></DeckCards>
       </div>
     </div>
+    <div class="ads" v-if="adsOpenFlag">
+      <ad unit-id="adunit-5507cac6947d0ea4"></ad>
+    </div>
     <div class="panel matchup">
       <h1 class="header-title grad-header-gray">对抗情况</h1>
       <div class="panel-block">
@@ -40,13 +43,14 @@
       </div>
       <div class="panel-block">
         <DeckTable :tableName="'vs.'+selectedFaction.name" :date="updateDate" :tableTitle="tableTitle" :tableData="selectedFaction.data"
-                   @cellClick="handleDeckNameClick" ref="deckTable"></DeckTable>
+                   @cellClick="handleDeckNameClick"></DeckTable>
       </div>
     </div>
   </div>
 </template>
 <script>
 import utils from '@/utils'
+import { mapGetters } from 'vuex'
 import {getArchetypeDetail} from "@/api/dbapi";
 import DeckCards from '@/components/DeckCards'
 import DeckTable from '@/components/DeckTable'
@@ -90,9 +94,15 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'archetypeList'
+    ]),
     genArchetypeName() {
       return this.getDeckCName(this.archetypeDetail.archetype_name)
     },
+    adsOpenFlag() {
+      return utils.adsOpenFlag
+    }
   },
   methods: {
     resetPageData() {
@@ -112,20 +122,44 @@ export default {
       return name
     },
     genArchetypeDetail() {
-      getArchetypeDetail({recordID: this.archetypeId, name: this.archetypeName}).then(res => {
-        this.archetypeDetail = res
-        this.updateDate = res.update_time
-        this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
-        let matchupData = JSON.parse(res.matchup)
-        for (let index in matchupData) {
-          if (matchupData.hasOwnProperty(index)) {
-            this.matchupDetail[this.factions[index]] = matchupData[index]
-          }
+      if (this.archetypeId) {
+        this.archetypeDetail = this.archetypeList.filter(item => {
+          return this.archetypeId === item.id
+        })[0]
+      } else if (this.archetypeName) {
+        this.archetypeDetail = this.archetypeList.filter(item => {
+          return this.archetypeName === item.archetype_name
+        })[0]
+      }
+      this.updateDate = this.archetypeDetail.update_time
+      this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
+      let matchupData = JSON.parse(this.archetypeDetail.matchup)
+      for (let index in matchupData) {
+        if (matchupData.hasOwnProperty(index)) {
+          this.matchupDetail[this.factions[index]] = matchupData[index]
         }
-        this.genTableData(this.matchupDetail[this.selectedFaction.id])
-      }).catch(err => {
-        console.log(err)
-      })
+      }
+      this.genTableData(this.matchupDetail[this.selectedFaction.id])
+
+      // getArchetypeDetail({recordID: this.archetypeId, name: this.archetypeName}).then(res => {
+      //   console.log('genArchetypeDetail 1', res)
+      //   this.archetypeDetail = res
+      //   this.updateDate = res.update_time
+      //   this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
+      //   let matchupData = JSON.parse(res.matchup)
+      //   for (let index in matchupData) {
+      //     if (matchupData.hasOwnProperty(index)) {
+      //       this.matchupDetail[this.factions[index]] = matchupData[index]
+      //     }
+      //   }
+      //   this.genTableData(this.matchupDetail[this.selectedFaction.id])
+      //   wx.hideNavigationBarLoading()
+      //   wx.stopPullDownRefresh();
+      // }).catch(err => {
+      //   console.log(err)
+      //   wx.hideNavigationBarLoading()
+      //   wx.stopPullDownRefresh();
+      // })
     },
     genFactionIcons() {
       this.factionIcons = []
@@ -160,7 +194,6 @@ export default {
     handleIconsClick(item) {
       this.selectedFaction = {id: item.id, name: item.name, data: []}
       this.genTableData(this.matchupDetail[item.id])
-      this.$refs.deckTable.sortTableData()
     },
     handleDeckNameClick(item) {
       let queryId = item.ename
@@ -196,6 +229,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../style/color';
 .container {
+  width: 100%;
   overflow: hidden;
   .banner {
     position: relative;

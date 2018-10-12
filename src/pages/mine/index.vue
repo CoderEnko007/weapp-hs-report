@@ -1,5 +1,12 @@
 <template>
   <div class="container">
+    <div class="banner">
+      <img :src="logo" mode="aspectFill">
+      <div class="desc">
+        <p>更专业的原创内容，更全面的新闻资讯</p>
+        <p>就在NGA炉石专区</p>
+      </div>
+    </div>
     <div class="userinfo">
       <img :src="userInfo.avatarUrl">
       <button v-if="!userInfo.openid" open-type="getUserInfo" @getuserinfo="userInfoHandler">请登录</button>
@@ -33,6 +40,7 @@ export default {
   data() {
     return {
       deckList: [],
+      logo: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9QyXTPpyOMVypO.png'
     }
   },
   computed: {
@@ -55,7 +63,10 @@ export default {
       if (this.userInfo.id) {
         wx.showNavigationBarLoading();
         this.$store.dispatch('getCollectedDecks', this.userInfo.id).then(res => {
-          this.deckList = res.list
+          console.log(res.list)
+          this.deckList = res.list.filter(val => {
+            return !(!val || val === "");
+          })
           wx.hideNavigationBarLoading()
           wx.stopPullDownRefresh();
         }).catch(err => {
@@ -63,10 +74,11 @@ export default {
           wx.hideNavigationBarLoading()
           wx.stopPullDownRefresh();
         })
+      } else {
+        wx.stopPullDownRefresh();
       }
     },
     handleDeckClick(item) {
-      console.log('handleDeckClick', item.id)
       let url = ''
       if (item.trending) {
         url = `/pages/decks/deckDetail/main?id=${item.id}&trending=1`
@@ -86,7 +98,6 @@ export default {
   onShow() {
     // console.log('onShow', this.$store.state.cards.collectedDecks)
     // this.deckList = this.$store.state.cards.collectedDecks
-    console.log(this.deckList)
     this.genUserCollection()
   },
   onShareAppMessage(res) {
@@ -94,16 +105,41 @@ export default {
       title: '炉石传说情报站',
       path: '/pages/index/main'
     }
-  }
+  },
+  onPullDownRefresh() {
+    this.genUserCollection()
+  },
 }
 </script>
 <style lang="scss" scoped>
 .container {
   background-color: #f7f7f7;
 }
+.banner {
+  position: relative;
+  height: 40px;
+  width: 100%;
+  padding: 10rpx 0;
+  background-color: #fff0cd;
+  img {
+    width: 100px;
+    height: 100%;
+    margin-left: 12px;
+  }
+  .desc {
+    position: absolute;
+    bottom: 5px;
+    left: 45px;
+    right: 5px;
+    color: #591804;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: right;
+  }
+}
 .userinfo {
   position: relative;
-  padding: 50rpx 20rpx;
+  padding: 20rpx 20rpx;
   background-color: #fff;
   button, p {
     position: absolute;

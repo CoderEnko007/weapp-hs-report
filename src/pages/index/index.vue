@@ -1,9 +1,10 @@
 <template>
   <div class="container">
-    <div class="banner">
-      <img :src="banner" mode="aspectFill">
-      <h1>释放你的潜能吧</h1>
-    </div>
+    <!--<div class="banner">-->
+      <!--<img :src="banner" mode="aspectFill">-->
+      <!--&lt;!&ndash;<h1>释放你的潜能吧</h1>&ndash;&gt;-->
+    <!--</div>-->
+    <Swiper :banners="banners" @swiperClick="swiperClick" v-if="banners"></Swiper>
     <div class="rank-panel">
       <div class="content">
         <div class="rank-mode-btn">
@@ -35,21 +36,24 @@
   </div>
 </template>
 <script>
-import {getRankData, getArchetypeList} from "@/api/dbapi";
+import {getRankData, getArchetypeList, getBanners} from "@/api/dbapi";
 import {formatNowTime, ShadeColor} from "@/utils";
 import * as echarts from '../../libs/echarts.simple.min'
 import mpvueEcharts from 'mpvue-echarts'
 import TierList from '@/components/TierList'
+import Swiper from '@/components/Swiper'
 
 let chart = null
 
 export default {
   components: {
+    Swiper,
     mpvueEcharts,
     TierList
   },
   data () {
     return {
+      banners: [],
       option: null,
       echarts,
       winrate: {
@@ -57,7 +61,7 @@ export default {
         'wild': [],
         'arena': []
       },
-      banner: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1fyFXDHuOFhyZYRs.jpg',
+      banner: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9hNfJeRwXbBrTe.jpg',
       selectedMode: 'standard',
       modeChangeDisabled: false,
       selectedData: null,
@@ -85,7 +89,8 @@ export default {
         {name: 'Tier 2', cname: '第2梯队', list: []},
         {name: 'Tier 3', cname: '第3梯队', list: []},
         {name: 'Tier 4', cname: '第4梯队', list: []},
-      ]
+      ],
+      refreshFlag: 0,
     }
   },
   computed: {
@@ -175,7 +180,6 @@ export default {
           'winrate': params.data+'%'
         }
       });
-
       return chart
     },
     Login() {
@@ -208,18 +212,31 @@ export default {
           }
         })
         this.initChart()
+        this.stopPullDown(true)
       }).catch(err => {
+        this.stopPullDown(false)
         console.log(err)
       })
     },
     genArchetypeList() {
-      getArchetypeList().then(res => {
+      this.$store.dispatch('getArchetypeList').then(res => {
         for (let tier of this.tierList) {
-          tier.list = res.objects.filter(item => {
+          tier.list = res.filter(item => {
             return item.tier === tier.name
           })
         }
+        this.stopPullDown(true)
       }).catch(err => {
+        console.log(err)
+        this.stopPullDown(false)
+      })
+    },
+    genBanners() {
+      getBanners().then(res => {
+        this.banners = res.objects
+        this.stopPullDown(true)
+      }).catch(err => {
+        this.stopPullDown(false)
         console.log(err)
       })
     },
@@ -227,10 +244,28 @@ export default {
       wx.navigateTo({
         url: `/pages/decks/archetypeDetail/main?id=${item.id}`
       })
+    },
+    stopPullDown(success) {
+      if (success) {
+        this.refreshFlag += 1;
+        if (this.refreshFlag >= 3) {
+          wx.stopPullDownRefresh();
+          wx.hideNavigationBarLoading()
+        }
+      } else {
+        wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
+      }
     }
   },
   mounted() {
     this.Login()
+    this.genBanners()
+    this.genRankData()
+    this.genArchetypeList()
+  },
+  onPullDownRefresh() {
+    this.genBanners()
     this.genRankData()
     this.genArchetypeList()
   },
@@ -245,22 +280,6 @@ export default {
 <style scoped lang="scss">
 @import '../../style/color';
 .container {
-  .banner {
-    position: relative;
-    height: 200rpx;
-    img {
-      height: 100%;
-      width: 100%;
-    }
-    h1 {
-      position: absolute;
-      left: 20rpx;
-      bottom: 25rpx;
-      color: #fff;
-      font-weight: 700;
-      font-size: 1.4em;
-    }
-  }
   .rank-panel {
     .title {
       padding: 0 20rpx;

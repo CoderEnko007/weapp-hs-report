@@ -104,6 +104,7 @@ export default {
           array.push({id: key, name: utils.faction[key].name})
         }
       }
+      array.push({id: 'Neutral', name: '中立'})
       array.unshift({id: 'all', name: '全部职业'})
       this.filterTabBar[0].items = array
       array = utils.mode
@@ -141,21 +142,12 @@ export default {
       this.genCardsList(true)
     },
     obtainSeriesList() {
-      getSeriesData().then(res => {
-        let array = res.map(item => {
-          return {
-            id: item.setId,
-            name: item.cname,
-            mode: item.mode
-          }
-        })
-        array.unshift({id: 'all', name: '全部扩展包', mode: 'all'})
-        if (array.length%2) {
-          array.push({})
-        }
-        this.$store.commit('setSeries', array)
-        this.filterTabBar[3].items = array
-      })
+      let array = this.$store.state.cards.series
+      array.unshift({id: 'all', name: '全部扩展包', mode: 'all'})
+      if (array.length%2) {
+        array.push({})
+      }
+      this.filterTabBar[3].items = array
     },
     handleCardClick(item) {
       // 如果过滤器菜单打开则关闭

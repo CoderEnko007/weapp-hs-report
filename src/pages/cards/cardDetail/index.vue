@@ -57,6 +57,7 @@ export default {
   },
   methods: {
     initCardDetail() {
+      wx.showNavigationBarLoading();
       getCardDetail(parseInt(this.cardId)).then(res => {
         this.cardDetail = res[0]
         this.cardDetail.bgImg = genOrigImageURL(this.cardDetail.hsId)
@@ -77,9 +78,11 @@ export default {
           this.cardDetail.type += '-'+utils.race[this.cardDetail.race].name
         }
         wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
       }).catch(err => {
         console.log(err)
         wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
       })
     },
     previewCard() {
