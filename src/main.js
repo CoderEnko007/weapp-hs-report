@@ -21,39 +21,33 @@ export default {
       navigationBarTextStyle: 'black'
     },
     tabBar: {
-      selectedColor: "#910302",
+      selectedColor: "#433e88",
       list: [{
         pagePath: "pages/index/main",
         text: '首页',
-        iconPath: "static/icons/main.png",
-        selectedIconPath: "static/icons/main_active.png"
+        iconPath: "static/icons-v2/tabicon-1b.png",
+        selectedIconPath: "static/icons-v2/tabicon-1a.png"
       }, {
         pagePath: "pages/trending/main",
         text: '最热套牌',
-        iconPath: "static/icons/rank.png",
-        selectedIconPath: "static/icons/rank_active.png"
+        iconPath: "static/icons-v2/tabicon-2b.png",
+        selectedIconPath: "static/icons-v2/tabicon-2a.png"
       }, {
         pagePath: "pages/decks/main",
         text: '套牌',
-        iconPath: "static/icons/decks.png",
-        selectedIconPath: "static/icons/decks_active.png"
+        iconPath: "static/icons-v2/tabicon-3b.png",
+        selectedIconPath: "static/icons-v2/tabicon-3a.png"
       }, {
         pagePath: "pages/cards/main",
         text: '单卡',
-        iconPath: "static/icons/cards.png",
-        selectedIconPath: "static/icons/cards_active.png"
+        iconPath: "static/icons-v2/tabicon-4b.png",
+        selectedIconPath: "static/icons-v2/tabicon-4a.png"
       }, {
         pagePath: "pages/mine/main",
         text: '我的',
-        iconPath: "static/icons/mine.png",
-        selectedIconPath: "static/icons/mine_active.png"
+        iconPath: "static/icons-v2/tabicon-5b.png",
+        selectedIconPath: "static/icons-v2/tabicon-5a.png"
       }]
-    },
-    "plugins": {
-      "sdkPlugin": {
-        "version": "1.8.1",
-        "provider": "wxc6b86e382a1e3294"
-      }
     }
   }
 }

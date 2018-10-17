@@ -1,26 +1,33 @@
 <template>
   <div class="container">
     <div class="tier-header" @click="handleHeaderClick">
-      <span class="tier-fade-title grad-header-light-blue"></span>
       <div class="tier-title">
-        <span v-if="showListFlag" class="icon iconfont">&#xe602;</span>
-        <span v-else class="icon iconfont">&#xe624;</span>
-        <span>{{tierData.cname}}</span>
+        <div class="title-block">
+          <img :src="tierData.icon">
+          <span class="title">{{tierData.cname}}</span>
+          <span v-if="showListFlag" class="icon iconfont">&#xe602;</span>
+          <span v-else class="icon iconfont">&#xe624;</span>
+        </div>
       </div>
     </div>
     <div class="tier-block" v-if="showList">
       <div class="tier-item"
            v-for="(item, index) in genTierList" :key="index"
-           :style="{'background-image': 'url('+item.bgImage+')'}"
            @click="handleItemClick(item)">
-        <div class="tier-desc">
+        <div class="icon">
           <img :src="item.image" mode="aspectFit">
-          <span class="deck-name">{{item.cname}}</span>
-          <div class="deck-winrate">胜率：
-            <span class="color-green" :class="{'color-red': item.win_rate<50}">{{item.win_rate}}%</span>
-          </div>
-          <span class="iconfont">&#xe600;</span>
         </div>
+        <div class="tier-desc">
+          <div class="desc-left">
+            <p class="name">{{item.cname}}</p>
+            <p class="desc-meta">对局数 {{item.game_count}}</p>
+          </div>
+          <div class="desc-right">
+            <p class="name">胜率</p>
+            <p class="desc-meta color-green" :class="{'color-red': item.win_rate<50}">{{item.win_rate}}%</p>
+          </div>
+        </div>
+        <span class="iconfont">&#xe600;</span>
       </div>
     </div>
   </div>
@@ -76,33 +83,36 @@ export default {
 <style lang="scss" scoped>
 @import '../style/color';
 .container {
-  padding: 0 15rpx 15rpx;
   .tier-header {
     position: relative;
     width: 100%;
-    height: 30px;
-    font-size: 14px;
+    height: 40px;
     overflow: hidden;
-    .tier-fade-title {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 5px;
-    }
     .tier-title {
       position: absolute;
       width: 100%;
       height: 100%;
-      line-height: 30px;
-      font-weight: 700;
-      left: 14px;
-      color: white;
+      line-height: 40px;
+      .title-block {
+        font-size: 14px;
+        font-weight: 700;
+        color: #333;
+        .title {
+          margin-left:26px;
+        }
+      }
       .icon {
         float: right;
         font-size: 20px;
-        font-weight: 200;
-        margin-right: 32px;
-        color: #000;
+        font-weight:100;
+        color: #999;
+      }
+      img {
+        position:absolute;
+        width: 20px;
+        height: 15px;
+        top:50%;
+        transform:translateY(-50%);
       }
     }
   }
@@ -111,54 +121,81 @@ export default {
     justify-content: space-around;
     flex-wrap: wrap;
     width: 100%;
-    padding: 5px 0;
-    transition: all .5m;
     .tier-item {
       position: relative;
       width: 100%;
-      height: 80rpx;
-      line-height: 80rpx;
+      height: 60px;
+      line-height: 60px;
       font-size: 14px;
-      background: no-repeat 125px -42px;
-      border-bottom: 1px solid #eee;
-      img {
-        position: absolute;
+      background: #fff;
+      &:active  {
+        background: #eee;
+      }
+      .icon {
+        position: relative;
+        float: left;
         width: 70rpx;
-        height: 70rpx;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-      .deck-name {
-        margin-left: 50px;
-      }
-      .deck-winrate {
-        position: absolute;
-        display: inline-block;
-        right: 100px;
-        span {
-          font-weight: 700;
+        height: 100%;
+        img {
+          position: absolute;
+          width: 70rpx;
+          height: 70rpx;
+          top: 50%;
+          transform: translateY(-50%);
         }
       }
       .tier-desc {
-        background: linear-gradient(-90deg, #fbf7f6 1%,hsla(12,38%,97%,.7) 110px,#fbf7f6 245px);
-        .iconfont {
+        position: relative;
+        height: 100%;
+        margin-left: 90rpx;
+        border-bottom: 1rpx solid #eee;
+        padding: 27rpx 0;
+        box-sizing:border-box;
+        .desc-left {
+          float: left;
+          .name {
+            height: 37rpx;
+            line-height: 37rpx;
+            font-size: 13px;
+            color: #333;
+          }
+          .desc-meta {
+            height: 30rpx;
+            line-height: 30rpx;
+            margin-top: 4rpx;
+            font-size: 11px;
+            color: #999;
+          }
+        }
+        .desc-right {
           float: right;
-          margin-right: 20px;
+          margin-right: 40rpx;
+          text-align: right;
+          .name {
+            height: 22rpx;
+            line-height: 22rpx;
+            font-size: 11px;
+            color: #999;
+          }
+          .desc-meta {
+            height: 32rpx;
+            line-height: 32rpx;
+            margin-top: 10rpx;
+            font-size: 14px;
+            font-weight: bold;
+            /*color: #333;*/
+          }
         }
       }
+      .iconfont {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 14px;
+      }
     }
-  }
-  .slide-fade-enter-active {
-    transition: all .3s ease;
-  }
-  .slide-fade-leave-active {
-    transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
-  }
-  .slide-fade-enter, .slide-fade-leave-to
-    /* .slide-fade-leave-active for below version 2.1.8 */ {
-    transform: translateX(10px);
-    opacity: 0;
   }
 }
 </style>

@@ -101,6 +101,7 @@ export default {
   data() {
     return {
       recordID : '5ba5febd17ae230c5b1b3da1',
+      deckID: '',
       trending: false,
       decksName: '',
       bannerImg: null,
@@ -166,7 +167,13 @@ export default {
     },
     genDeckData() {
       wx.showNavigationBarLoading();
-      getDeckDetail(this.recordID, this.trending).then(res => {
+      let params = {}
+      if (this.recordID) {
+        params = {recordID: this.recordID}
+      } else if (this.deckID) {
+        params = {deckID: this.deckID}
+      }
+      getDeckDetail(params, this.trending).then(res => {
         this.checkDeckCollected()
         this.deckDetail = res
         this.bannerImg = this.deckDetail["background_img"].replace('256x', '512x')
@@ -298,6 +305,7 @@ export default {
     this.toast = getComponentByTag(this, '_toast')
     this.resetPageData()
     this.recordID = this.$root.$mp.query.id
+    this.deckID = this.$root.$mp.query.deckID
     this.decksName = this.$store.state.cards.decksName
     this.trending = !!this.$root.$mp.query.trending
     this.genDeckData()

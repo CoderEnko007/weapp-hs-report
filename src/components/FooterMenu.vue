@@ -78,7 +78,7 @@ export default {
     }
     &:after {
       border: none;
-      border-radius: none;
+      border-radius: 0;
     }
   }
   .separator {

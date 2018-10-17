@@ -1,22 +1,24 @@
 <template>
   <div class="container">
-    <!--<div class="banner">-->
-      <!--<img :src="banner" mode="aspectFill">-->
-      <!--&lt;!&ndash;<h1>释放你的潜能吧</h1>&ndash;&gt;-->
-    <!--</div>-->
-    <Swiper :banners="banners" @swiperClick="swiperClick" v-if="banners"></Swiper>
+    <Swiper :banners="banners" :date="report_date" @swiperClick="swiperClick" v-if="banners"></Swiper>
     <div class="rank-panel">
-      <div class="content">
-        <div class="rank-mode-btn">
-          <div class="feature-btn" v-for="(item, index) in rankMode" :key="index" @click="modeBtnClick(item)">
-            <img class="btn-img" :src="selectedMode===item.mode?item.active_icon:item.icon" mode="aspectFit">
-            <p :class="selectedMode===item.mode?'active':''">{{item.text}}</p>
+      <div class="headline">
+        <span class="title">职业胜率</span>
+        <div class="btn-group">
+          <div class="btn-block"
+               v-for="(item, index) in rankMode"
+               :key="index"
+               @click="modeBtnClick(item)">
+            <button class="c-button" :class="selectedMode===item.mode?'btn-active':''">{{item.text}}</button>
+            <div class="separator" v-if="index !== 2">|</div>
           </div>
         </div>
+      </div>
+      <div class="content">
         <div class="chart">
           <img :src="bgImg" class="bg-img" mode="aspectFill">
           <div class="echarts">
-            <p class="selected-data" >{{report_date}}&nbsp;&nbsp;&nbsp;&nbsp;{{getSelectData}}</p>
+            <p class="selected-data" >{{getSelectData}}</p>
             <mpvue-echarts lazyLoad :echarts="echarts" :onInit="handleInit" ref="echarts" />
             <div class="hero-icons">
               <div class="icons" v-for="(item, index) in heroes" :key="index">
@@ -28,9 +30,14 @@
       </div>
     </div>
     <div class="tier-panel">
-      <div class="tier-title"><span>标准模式套牌排行榜</span></div>
-      <div class="tier-block" v-for="(tier, index) in tierList" :key="index">
-        <TierList :tierData="tier" @itemClick="handleTierClick"></TierList>
+      <div class="headline">
+        <span class="title">职业形态排行</span>
+        <span class="headline-meta">标准模式</span>
+      </div>
+      <div class="tier-content">
+        <div class="tier-block" v-for="(tier, index) in tierList" :key="index">
+          <TierList :tierData="tier" @itemClick="handleTierClick"></TierList>
+        </div>
       </div>
     </div>
   </div>
@@ -61,18 +68,16 @@ export default {
         'wild': [],
         'arena': []
       },
-      banner: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9hNfJeRwXbBrTe.jpg',
       selectedMode: 'standard',
       modeChangeDisabled: false,
       selectedData: null,
       report_date: '',
       rankMode: [
-        {mode: 'standard', icon: '/static/icons/Mode_Standard.png', active_icon: '/static/icons/Mode_Standard_active.png', text: '标准模式'},
-        {mode: 'wild', icon: '/static/icons/Mode_Wild.png', active_icon: '/static/icons/Mode_Wild_active.png', text: '狂野模式'},
+        {mode: 'standard', icon: '/static/icons/Mode_Standard.png', active_icon: '/static/icons/Mode_Standard_active.png', text: '标准'},
+        {mode: 'wild', icon: '/static/icons/Mode_Wild.png', active_icon: '/static/icons/Mode_Wild_active.png', text: '狂野'},
         {mode: 'arena', icon: '/static/icons/Mode_Arena.png', active_icon: '/static/icons/Mode_Arena_active.png', text: '竞技场'}
       ],
       bgImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1fyuymPfaqGcpxdT.jpg',
-      btnBgImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g5R2tFfwpRtajax.jpg',
       heroes: [
         {name: 'druid', icon: '/static/heroIcons/druid-1.png'},
         {name: 'hunter', icon: '/static/heroIcons/hunter-1.png'},
@@ -85,10 +90,10 @@ export default {
         {name: 'warrior', icon: '/static/heroIcons/warrior-1.png'},
       ],
       tierList: [
-        {name: 'Tier 1', cname: '第1梯队', list: []},
-        {name: 'Tier 2', cname: '第2梯队', list: []},
-        {name: 'Tier 3', cname: '第3梯队', list: []},
-        {name: 'Tier 4', cname: '第4梯队', list: []},
+        {name: 'Tier 1', cname: '第1梯队', icon: '/static/icons-v2/tierlist-t1.png', list: []},
+        {name: 'Tier 2', cname: '第2梯队', icon: '/static/icons-v2/tierlist-t2.png', list: []},
+        {name: 'Tier 3', cname: '第3梯队', icon: '/static/icons-v2/tierlist-t3.png', list: []},
+        {name: 'Tier 4', cname: '第4梯队', icon: '/static/icons-v2/tierlist-t4.png', list: []},
       ],
       refreshFlag: 0,
     }
@@ -118,7 +123,7 @@ export default {
       }
     },
     initChart() {
-      let colors = ['#ff7d0a', '#abd473', '#69ccf0', '#f58cba', '#fff', '#fff569', '#0070de', '#9482c9', '#c79c6e']
+      let colors = ['#ff7d0a', '#abd473', '#69ccf0', '#f58cba', '#ddd', '#fff569', '#0070de', '#9482c9', '#c79c6e']
       this.option = {
         grid: {x: 20, y: -25, x2: 20, y2: 10},
         xAxis: {
@@ -135,7 +140,7 @@ export default {
           }
         },
         series: [{
-          animationDuration: 500,
+          animationDuration: 200,
           type: 'bar',
           data: this.winrate[this.selectedMode],
           itemStyle: {
@@ -161,6 +166,8 @@ export default {
       this.option.yAxis.min = Math.floor(min/10)*10
       let max = Math.max.apply(null, this.winrate[this.selectedMode])
       this.option.yAxis.max = Math.ceil(max/10)*10
+      this.option.yAxis.max = this.option.yAxis.max-2>max?this.option.yAxis.max-2:this.option.yAxis.max
+      console.log(min, this.option.yAxis.min, max, this.option.yAxis.max)
       this.$refs.echarts.init()
     },
     handleInit (canvas, width, height) {
@@ -281,32 +288,45 @@ export default {
 @import '../../style/color';
 .container {
   .rank-panel {
-    .title {
-      padding: 0 20rpx;
-      font-size: 14px;
-      font-weight: 400;
-    }
-    .content {
-      .rank-mode-btn {
-        position: relative;
-        width: 100%;
+    padding: 15px;
+    .headline {
+      .btn-group {
+        position: absolute;
+        width: 125px;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
         display: flex;
-        justify-content: space-around;
-        font-size: 12px;
-        padding: 15rpx 40rpx;
-        background: $palette-text-yellow linear-gradient(65deg, #fbf7f6 1%, hsla(12, 38%, 97%, .5) 750rpx, #fbf7f6 245px);
-        box-sizing:border-box;
-        .feature-btn {
-          width: 120rpx;
-          text-align: center;
-          .btn-img {
-            width: 30px;
-            height: 30px;
-            margin: 0 auto;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        .btn-block {
+          display:flex;
+          justify-content:space-between;
+          flex-wrap:nowrap;
+          button {
+            height: 16px;
+            line-height: 16px;
+            font-size: 14px;
+            font-weight: normal;
+            color: #999;
+          }
+          .btn-active {
+            color: $palette-blue;
+            font-weight: bold;
+          }
+          .separator {
+            width: 25rpx;
+            height: 16px;
+            line-height: 16px;
             text-align: center;
+            font-size: 14px;
+            color: #EEEEEE;
           }
         }
       }
+    }
+    .content {
+      margin-top: 15px;
       .chart {
         position: relative;
         width: 100%;
@@ -349,31 +369,21 @@ export default {
     }
   }
   .tier-panel {
-    .tier-title {
-      position: relative;
-      margin: 20rpx;
-      font-size: 14px;
-      text-align: center;
-      &:after, &:before {
-        position: absolute;
-        top: 50%;
-        background: #ddd;
-        content: "";
-        height: 1px;
-        width: 30%
+    padding: 0 15px;
+    .headline {
+      .headline-meta {
+        height: 24rpx;
+        line-height: 24rpx;
+        margin-left:8px;
+        font-size: 19rpx;
+        color: #999;
+        border: 1rpx solid #ddd;
+        border-radius: 12px;
+        padding: 3rpx 10rpx;
       }
-      &:before {
-        left: 0
-      }
-      &:after {
-        right: 0;
-      }
-      .icon {
-        font-size: 16px;
-        font-weight: 300;
-        color: $palette-blue;
-        padding-right: 5px;
-      }
+    }
+    .tier-content {
+      margin-top: 9px;
     }
   }
 }

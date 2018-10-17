@@ -2,27 +2,65 @@
   <div class="container">
     <div class="banner" :style="{'background-image': bannerImg?'url('+bannerImg+')':''}">
       <div class="overview">
-        <div class="archetype-name">
-          <p>{{genArchetypeName}}</p>
+        <div class="archetype-name"  mode="aspectFit">
+          <div class="icon">
+            <img :src="genFactionIcon">
+          </div>
+          <div class="name">
+            <p class="cname">{{genArchetypeName}}</p>
+            <p class="ename">{{archetypeDetail.archetype_name}}</p>
+          </div>
         </div>
         <div class="desc">
-          <div class="desc-item"><p>总对局数：</p><p>{{archetypeDetail.game_count}}</p></div>
-          <div class="desc-item"><p>总体胜率：</p>
-            <p class="color-light-green" :class="{'color-red': archetypeDetail.win_rate<50}">{{archetypeDetail.win_rate}}%</p>
+          <div class="desc-item" v-show="archetypeDetail.win_rate">
+            <p class="item-name">总胜率</p>
+            <p class="item-meta color-light-green" :class="{'color-red': archetypeDetail.win_rate<50}">{{archetypeDetail.win_rate}}%</p>
+          </div>
+          <div class="desc-item" v-show="archetypeDetail.game_count">
+            <p class="item-name">总对局数</p>
+            <p class="item-meta">{{archetypeDetail.game_count}}</p>
+          </div>
+          <div class="desc-item" v-show="archetypeDetail.popularity">
+            <p class="item-name">职业占比</p>
+            <p class="item-meta">{{archetypeDetail.popularity}}%</p>
           </div>
         </div>
       </div>
     </div>
-    <div class="panel card-list">
-      <div class="core-cards">
-        <div class="core-cards-header header-title grad-header-light-blue">
-          <h1 class="float-left">核心卡牌</h1>
-          <button class="header-btn zan-btn zan-btn--small zan-btn--plain" @click="gotoDecks">查看相关卡组</button>
+    <div class="panel pop-deck" v-if="bestDeck.show">
+      <div class="headline">
+        <span class="title">最热门套牌</span>
+        <div class="more-btn" @click="gotoDecks">
+          <span class="name">全部相关套牌</span>
+          <span class="iconfont">&#xe600;</span>
         </div>
+      </div>
+      <div class="deck-item" @click="handlePopDeckClick">
+        <div class="icon">
+          <img :src="genFactionIcon" mode="aspectFit">
+        </div>
+        <div class="tier-desc">
+          <div class="desc-left">
+            <p class="name">{{bestDeck.cname}}</p>
+            <p class="desc-meta">对局数 {{bestDeck.game_count}}</p>
+          </div>
+          <div class="desc-right">
+            <p class="name">胜率</p>
+            <p class="desc-meta color-green" :class="{'color-red': bestDeck.win_rate<50}">{{bestDeck.win_rate}}</p>
+          </div>
+        </div>
+        <span class="iconfont">&#xe600;</span>
+      </div>
+    </div>
+    <!--<div class="separator"></div>-->
+    <div class="panel card-list">
+      <div class="headline"><span class="title">形态构筑</span></div>
+      <div class="core-cards">
+        <div class="title"><span>核心组件</span></div>
         <DeckCards :cards="archetypeDetail.core_cards" @cardClick="handleCardClick"></DeckCards>
       </div>
       <div class="pop-cards" v-show="archetypeDetail.pop_cards.length>2">
-        <h1 class="header-title grad-header-light-blue">热门卡牌</h1>
+        <div class="title"><span>热门卡牌</span></div>
         <DeckCards :cards="archetypeDetail.pop_cards" @cardClick="handleCardClick"></DeckCards>
       </div>
     </div>
@@ -30,20 +68,11 @@
       <ad unit-id="adunit-5507cac6947d0ea4"></ad>
     </div>
     <div class="panel matchup">
-      <h1 class="header-title grad-header-gray">对抗情况</h1>
+      <div class="headline"><span class="title">对抗情况</span></div>
+      <HeroesPanel :dataList="factionIcons" @itemClick="handleIconsClick"></HeroesPanel>
       <div class="panel-block">
-        <ul class="faction-list">
-          <li :class="{'faction-item': true, 'faction-item-action': selectedFaction.id===item.id}"
-              v-for="(item, index) in factionIcons"
-              :key="index"
-              @click="handleIconsClick(item)">
-            <img :src="item.image" mode="aspectFit">
-          </li>
-        </ul>
-      </div>
-      <div class="panel-block">
-        <DeckTable :tableName="'vs.'+selectedFaction.name" :date="updateDate" :tableTitle="tableTitle" :tableData="selectedFaction.data"
-                   @cellClick="handleDeckNameClick"></DeckTable>
+        <DeckTable :selectedFaction="selectedFaction" :date="updateDate" :tableTitle="tableTitle" :tableData="selectedFaction.data"
+                   @itemClick="handleDeckItemClick"></DeckTable>
       </div>
     </div>
   </div>
@@ -54,27 +83,39 @@ import { mapGetters } from 'vuex'
 import {getArchetypeDetail} from "@/api/dbapi";
 import DeckCards from '@/components/DeckCards'
 import DeckTable from '@/components/DeckTable'
+import TierList from '@/components/TierList'
+import HeroesPanel from '@/components/HeroesPanel'
 
 const defaultDetail = {
   faction: '',
   archetype_name: '',
-  game_count: null,
-  win_rate: null,
+  game_count: '',
+  win_rate: '',
+  popularity: '',
   core_cards: [],
   pop_cards: [],
   best_matchup: [],
   worst_matchup: [],
   matchup: []
 }
+const defaultBestDeck = {
+  show: false,
+  deck_id: '',
+  cname: '',
+  win_rate: '',
+  game_count: ''
+}
 
 export default {
   components: {
     DeckCards,
-    DeckTable
+    DeckTable,
+    TierList,
+    HeroesPanel
   },
   data() {
     return {
-      archetypeId: '5ba893085c1e040c8792477f',
+      archetypeId: '5bc4333d02eed116ab1d4a84',
       archetypeName: '',
       archetypeDetail: Object.assign({}, defaultDetail),
       bannerImg: null,
@@ -83,14 +124,15 @@ export default {
       updateDate: null,
       selectedFaction: {id: 'Druid', name: '德鲁伊', data: []},
       tableTitle: [
-        {id: 'winrate', name: '胜率'},
+        {id: 'games', name: '对局数'},
         {id: 'popularity', name: '热度'},
-        {id: 'games', name: '对局总数'}
+        {id: 'winrate', name: '胜率'},
       ],
       factions: ['Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior'],
       matchupDetail: {
         'Druid': [], 'Hunter': [], 'Mage': [], 'Paladin': [], 'Priest': [], 'Rogue': [], 'Shaman': [], 'Warlock': [], 'Warrior': [],
       },
+      bestDeck: Object.assign({}, defaultBestDeck),
     }
   },
   computed: {
@@ -100,9 +142,17 @@ export default {
     genArchetypeName() {
       return this.getDeckCName(this.archetypeDetail.archetype_name)
     },
+    getEname() {
+      return this.archetypeDetail.archetype_name
+    },
+    genFactionIcon() {
+      if (this.archetypeDetail.faction) {
+        return utils.faction[this.archetypeDetail.faction].image
+      }
+    },
     adsOpenFlag() {
       return utils.adsOpenFlag
-    }
+    },
   },
   methods: {
     resetPageData() {
@@ -112,6 +162,7 @@ export default {
       this.matchupDetail = {
         'Druid': [], 'Hunter': [], 'Mage': [], 'Paladin': [], 'Priest': [], 'Rogue': [], 'Shaman': [], 'Warlock': [], 'Warrior': [],
       }
+      this.bestDeck = Object.assign({}, defaultBestDeck)
     },
     getDeckCName(name) {
       for (let item of this.decksName) {
@@ -141,31 +192,18 @@ export default {
       }
       this.genTableData(this.matchupDetail[this.selectedFaction.id])
 
-      // getArchetypeDetail({recordID: this.archetypeId, name: this.archetypeName}).then(res => {
-      //   console.log('genArchetypeDetail 1', res)
-      //   this.archetypeDetail = res
-      //   this.updateDate = res.update_time
-      //   this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
-      //   let matchupData = JSON.parse(res.matchup)
-      //   for (let index in matchupData) {
-      //     if (matchupData.hasOwnProperty(index)) {
-      //       this.matchupDetail[this.factions[index]] = matchupData[index]
-      //     }
-      //   }
-      //   this.genTableData(this.matchupDetail[this.selectedFaction.id])
-      //   wx.hideNavigationBarLoading()
-      //   wx.stopPullDownRefresh();
-      // }).catch(err => {
-      //   console.log(err)
-      //   wx.hideNavigationBarLoading()
-      //   wx.stopPullDownRefresh();
-      // })
+      let bestDeckData = JSON.parse(this.archetypeDetail.best_deck)
+      this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype_name)
+      this.bestDeck.deck_id = bestDeckData[0]
+      this.bestDeck.win_rate = bestDeckData[1]
+      this.bestDeck.game_count = bestDeckData[2]
+      this.bestDeck.show = true
     },
     genFactionIcons() {
       this.factionIcons = []
       for (let key in utils.faction) {
         if (utils.faction.hasOwnProperty(key)) {
-          this.factionIcons.push({id: key, name: utils.faction[key].name, image: utils.faction[key].image1})
+          this.factionIcons.push({id: key, name: utils.faction[key].name, image: utils.faction[key].image})
         }
       }
     },
@@ -195,10 +233,16 @@ export default {
       this.selectedFaction = {id: item.id, name: item.name, data: []}
       this.genTableData(this.matchupDetail[item.id])
     },
-    handleDeckNameClick(item) {
+    handleDeckItemClick(item) {
       let queryId = item.ename
       wx.navigateTo({
         url: `/pages/decks/decksList/main?id=${this.selectedFaction.id}&name=${queryId}`
+      })
+    },
+    handlePopDeckClick() {
+      console.log(this.bestDeck)
+      wx.navigateTo({
+        url: `/pages/decks/deckDetail/main?deckID=${this.bestDeck.deck_id}`
       })
     },
     gotoDecks() {
@@ -223,57 +267,43 @@ export default {
       title: this.archetypeName,
       path: `/pages/decks/archetypeDetail/main?id=${this.archetypeId}`
     }
+  },
+  onPullDownRefresh() {
+    wx.showNavigationBarLoading();
+    let params={}
+    if (this.archetypeId) {
+      params = {recordID: this.archetypeId}
+    } else if (this.archetypeName) {
+      params = {name: this.archetypeName}
+    } else {
+      wx.stopPullDownRefresh();
+      wx.hideNavigationBarLoading()
+      return
+    }
+    getArchetypeDetail(params).then(res => {
+      this.archetypeDetail = res
+      wx.stopPullDownRefresh();
+      wx.hideNavigationBarLoading()
+    }).catch(err => {
+      console.log(err)
+      wx.stopPullDownRefresh();
+      wx.hideNavigationBarLoading()
+    })
   }
 }
 </script>
 <style lang="scss" scoped>
 @import '../../../style/color';
+@import '../../../style/common';
 .container {
   width: 100%;
   overflow: hidden;
   .banner {
     position: relative;
     width: 100%;
-    height: 220rpx;
+    height: 400rpx;
     overflow: hidden;
-    background: no-repeat 0 -45px;
     background-size: 100%;
-    .overview {
-      position: absolute;
-      width: 100%;
-      top: 6px;
-      z-index: 2;
-      .archetype-name {
-        width: 100%;
-        height: 35px;
-        p {
-          width: 100%;
-          text-align: center;
-          color: white;
-          font-size: 24px;
-          letter-spacing: 10px;
-          font-weight: 700;
-        }
-      }
-      .desc {
-        width: 75%;
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: nowrap;
-        margin: 8px auto 0;
-        .desc-item {
-          position: relative;
-          width: 300rpx;
-          color: white;
-          font-size: 14px;
-          p {
-            display: inline-block;
-            height: 20px;
-            line-height: 20px;
-          }
-        }
-      }
-    }
     &:after {
       content: '';
       position: absolute;
@@ -281,58 +311,142 @@ export default {
       left: 0;
       bottom: 0;
       right: 0;
-      background-color: rgba(0,0,0,.4);
+      background: linear-gradient(to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4));
       z-index: 1;
     }
-  }
-  .card-list {
-    .card-type {
+    .overview {
       width: 100%;
-      height: 30px;
-      line-height: 30px;
-      color: white;
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 5px;
-      margin: 5px 0;
-      padding-left: 14px;
-    }
-  }
-  .matchup {
-    .panel-block {
-      width: 100%;
-      margin-top: 8px;
-      .faction-list {
-        display: flex;
-        justify-content: space-around;
-        flex-wrap: nowrap;
+      padding: 97rpx 0 40rpx;
+      box-sizing: border-box;
+      .archetype-name {
+        position: relative;
         width: 100%;
-        box-sizing: border-box;
-        .faction-item {
-          position: relative;
-          width: 32px;
-          height: 32px;
-          font-size: 12px;
-          color: white;
-          text-align: center;
+        margin-left: 40rpx;
+        z-index: 2;
+        .icon {
+          float: left;
+          width: 88rpx;
           img {
-            width: 100%;
-            height: 100%;
-            border-radius: 6px;
-            box-sizing: border-box;
-            border: 2px solid transparent;
+            position: absolute;
+            width: 88rpx;
+            height: 88rpx;
+            top: 50%;
+            transform: translateY(-50%);
           }
         }
-        .faction-item-action {
-          img {
-            border: 2px solid $palette-orange!important;
+        .name {
+          height: 100%;
+          margin-left: 107rpx;
+          color: #fff;
+          .cname {
+            height:50rpx;
+            line-height:50rpx;
+            font-size: 25px;
+          }
+          .ename {
+            height:24rpx;
+            line-height:24rpx;
+            margin-top: 19rpx;
+            font-size: 12px;
+          }
+        }
+      }
+      .desc {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        padding: 0 30rpx;
+        margin-top:40rpx;
+        box-sizing: border-box;
+        .desc-item {
+          position: relative;
+          width: 172rpx;
+          height: 130rpx;
+          color: white;
+          text-align: center;
+          z-index: 2;
+          .item-name {
+            margin-top: 21rpx;
+            font-size: 13px;
+          }
+          .item-meta {
+            margin-top: 7rpx;
+            font-weight: bold;
+            font-size: 16px;
           }
         }
       }
     }
   }
+  .pop-deck {
+    .deck-item {
+      background-color: #fff;
+      &:active {
+        background-color: #eee;
+      }
+    }
+    .tier-desc {
+      border: none;
+    }
+  }
+  .card-list {
+    margin-bottom: 40rpx !important;
+    .core-cards, .pop-cards{
+      .title {
+        position: relative;
+        height: 33rpx;
+        line-height: 33rpx;
+        margin-bottom: 20rpx;
+        font-size: 12px;
+        color: #999;
+        text-align: center;
+        &:after, &:before {
+          position: absolute;
+          top: 50%;
+          background: #ddd;
+          content: "";
+          height: 1px;
+          width: 64rpx
+        }
+        &:before {
+          left: 420rpx;
+        }
+        &:after {
+          right: 420rpx;
+        }
+      }
+    }
+    .pop-cards {
+      margin-top: 30rpx;
+    }
+  }
+  .headline {
+    height:96rpx;
+    line-height:96rpx;
+    .more-btn {
+      position: relative;
+      float: right;
+      height: 100%;
+      line-height: 96rpx;
+      font-weight:normal;
+      .name {
+        margin-right: 10rpx;
+        color: $palette-blue;
+        font-size: 13px;
+      }
+      .iconfont {
+        color: $palette-blue;
+      }
+    }
+  }
   .panel {
-    margin: 10px 10px 15px;
+    margin: 0 15px;
+  }
+  .separator {
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 1rpx solid #eee;
+    margin: 20rpx 0;
   }
 }
 </style>

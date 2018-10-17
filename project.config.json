@@ -7,10 +7,10 @@
 		"minified": false,
 		"newFeature": true
 	},
-	"miniprogramRoot": "./dist/",
+	"miniprogramRoot": "dist/",
 	"compileType": "miniprogram",
 	"appid": "wx68185c439fa57f83",
-	"projectname": "weapp-hs-report-back",
+	"projectname": "weapp-hs-report-v2",
 	"condition": {
 		"search": {
 			"current": -1,

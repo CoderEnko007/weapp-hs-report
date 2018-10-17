@@ -7,7 +7,7 @@ const cardsTableID = 51267
 const deckNameTableID = 52136
 const trendingTableID = 53120
 const decksCollectionTableID = 53284
-const bannerTableID = 53928
+const bannerTableID = 54392
 
 const tableID = {
   winrateTableID,

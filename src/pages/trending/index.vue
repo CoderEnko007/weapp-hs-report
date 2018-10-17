@@ -1,8 +1,11 @@
 <template>
   <div class="container">
     <div class="banner">
-      <h1>热门套牌</h1>
-      <p>下列是最近48小时内热度持续上升的精选套牌</p>
+      <div class="meta">
+        <h1>热门套牌</h1>
+        <p class="date">{{updateDate}}</p>
+        <p class="desc">最近48小时内热度持续上升的精选套牌</p>
+      </div>
     </div>
     <div class="deck-list">
       <div class="deck-item">
@@ -21,15 +24,24 @@ export default {
   },
   data() {
     return {
-      banner: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g5tQ1SlvhLFoEyg.jpg',
-      deckList: []
+      deckList: [],
+      report_date: ''
+    }
+  },
+  computed: {
+    updateDate() {
+      if (this.report_date) {
+        let formatDate = new Date(this.report_date)
+        return formatDate.getMonth()+1 + '月' + formatDate.getDate() + '日更新'
+      }
     }
   },
   methods: {
     genTrendingList() {
       wx.showNavigationBarLoading();
       getTrendingList().then(res => {
-        this.deckList = res.objects
+        this.deckList = res.list
+        this.report_date = res.date
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
       }).catch(err => {
@@ -63,38 +75,37 @@ export default {
 .banner {
   position: relative;
   width: 100%;
-  height: 220rpx;
+  height: 325rpx;
   overflow: hidden;
-  background: url("https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g5tQ1SlvhLFoEyg.jpg") no-repeat 0 0;
+  background: url("https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gBxG4I1yASfPkMn.jpg") no-repeat 0 0;
   background-size: 100%;
-  z-index: 1;
-  &:after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background-color: rgba(0,0,0,.4);
-    z-index: 1;
-  }
-  h1 {
-    position: absolute;
-    right: 20rpx;
-    top: 75rpx;
+  .meta {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding-top: 64rpx;
+    padding-left: 30rpx;
     color: #fff;
-    font-weight: 700;
-    font-size: 1.4em;
-    z-index: 2;
-  }
-  p {
-    position: absolute;
-    right: 20rpx;
-    bottom: 20rpx;
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.8em;
-    z-index: 2;
+    box-sizing:border-box;
+    h1 {
+      height: 56rpx;
+      line-height: 56rpx;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    p.date {
+      height: 44rpx;
+      line-height: 44rpx;
+      font-size: 13px;
+      margin-top: 9rpx;
+    }
+    p.desc {
+      position: absolute;
+      height: 44rpx;
+      right: 30rpx;
+      bottom: 30rpx;
+      font-size: 13px;
+    }
   }
 }
 .deck-list {

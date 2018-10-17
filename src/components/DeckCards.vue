@@ -78,24 +78,27 @@ export default {
   box-sizing: border-box;
   .card-tile {
     width: 47%;
-    height: 55rpx;
-    line-height: 55rpx;
+    height: 58rpx;
+    line-height: 58rpx;
     font-size: 14px;
-    margin-top: 1rpx;
-    text-shadow: -1rpx -1rpx 0 #000, 1rpx -1rpx 0 #000, -1rpx 1rpx 0 #000, 1rpx 1rpx 0 #000;
-    border: 1px solid #000;
+    margin-top: 5rpx;
+    /*text-shadow: -1rpx -1rpx 0 #000, 1rpx -1rpx 0 #000, -1rpx 1rpx 0 #000, 1rpx 1rpx 0 #000;*/
+    border: 1px solid transparent;
+    border-radius: 8rpx;
     /*box-sizing: border-box;*/
     .card-gem {
       float: left;
       width: 55rpx;
       height: 100%;
       text-align: center;
+      border-radius:8rpx 0 0 8rpx;
     }
     .card-frame {
       position: relative;
       height: 100%;
       font-size: 12px;
       overflow: hidden;
+      border-radius:0 8rpx 8rpx 0;
       .card-asset {
         position: absolute;
         width: 200rpx;

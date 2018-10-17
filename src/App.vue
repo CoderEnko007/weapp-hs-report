@@ -18,11 +18,11 @@ export default {
     }
   },
   created () {
-    // require('./utils/sdk-v1.7.0')
-    // wx.BaaS.init(this.clientId)
-    wx.BaaS = requirePlugin('sdkPlugin')
-    wx.BaaS.wxExtend(wx.login, wx.getUserInfo, wx.requestPayment)
+    require('./utils/sdk-v1.8.1')
     wx.BaaS.init(this.clientId)
+    // wx.BaaS = requirePlugin('sdkPlugin')
+    // wx.BaaS.wxExtend(wx.login, wx.getUserInfo, wx.requestPayment)
+    // wx.BaaS.init(this.clientId)
     this.initDecksName()
     this.initCardSeries()
   },
@@ -47,6 +47,12 @@ export default {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+.m-30 {
+  margin: 0 30rpx;
+}
+.p-30 {
+  padding: 0 30rpx;
+}
 .color-green {
   color: $palette-green;
 }
@@ -64,6 +70,13 @@ export default {
 }
 .font-bold {
   font-weight: 700;
+}
+.clear {
+  &:after {
+    content:"";
+    display:block;
+    clear: both;
+  }
 }
 .ads {
   ad {
@@ -86,6 +99,37 @@ export default {
     line-height:60rpx;
     margin-right: 15px;
     border-radius:10px;
+  }
+}
+.headline {
+  position: relative;
+  height: 21px;
+  line-height: 21px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  .title {
+    margin-left: 6px;
+  }
+  &:before {
+    position: absolute;
+    height: 16px;
+    width: 2px;
+    border-radius: 12px;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    content: '';
+    background: $palette-blue;
+  }
+}
+.c-button {
+  background-color: white;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+  &:after {
+    border: none;
   }
 }
 .grad-header-light-blue {

@@ -201,15 +201,26 @@ export function getDeckList(params, limit=20, page=0, orderBy='-game_count') {
   })
 }
 
-export function getDeckDetail(recordID, trending_flag=false ) {
+export function getDeckDetail(params, trending_flag=false ) {
   return new Promise((resolve, reject) => {
     let tableObj = trending_flag?new wx.BaaS.TableObject(tableID.trendingTableID):new wx.BaaS.TableObject(tableID.decksTableID)
-    console.log(trending_flag, tableObj, recordID)
-    tableObj.get(recordID).then(res => {
-      resolve(res.data)
-    }, err => {
-      reject(err)
-    })
+    if (params && params.recordID) {
+      tableObj.get(params.recordID).then(res => {
+        resolve(res.data)
+      }, err => {
+        reject(err)
+      })
+    } else if (params && params.deckID) {
+      let query = new wx.BaaS.Query()
+      query.compare('deck_id', '=', params.deckID)
+      tableObj.setQuery(query).find().then(res => {
+        resolve(res.data.objects[0])
+      }, err => {
+        reject(err)
+      })
+    } else {
+      reject('no data')
+    }
   })
 }
 
@@ -236,7 +247,6 @@ export function getArchetypeList(params, limit=1000, page=0, orderBy='-win_rate'
 export function getArchetypeDetail(params) {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.archetypeTableID)
-    console.log('getArchetypeDetail', params)
     if (params && params.recordID) {
       tableObj.get(params.recordID).then(res => {
         resolve(res.data)
@@ -251,6 +261,8 @@ export function getArchetypeDetail(params) {
       }, err => {
         reject(err)
       })
+    } else {
+      reject('no data')
     }
   })
 }
@@ -260,7 +272,11 @@ export function getTrendingList(parmas, limit=20, page=0, orderBy='-win_rate') {
     let tableObj = new wx.BaaS.TableObject(tableID.trendingTableID)
     let query = new wx.BaaS.Query()
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
-      resolve(res.data)
+      let result = {
+        date: res.data.objects[0].create_time,
+        list: res.data.objects
+      }
+      resolve(result)
     }, err => {
       reject(err)
     })
