@@ -2,9 +2,9 @@
   <div class="container">
     <div class="banner" :style="{'background-image': bannerImg?'url('+bannerImg+')':''}">
       <div class="overview">
-        <div class="archetype-name"  mode="aspectFit">
+        <div class="archetype-name">
           <div class="icon">
-            <img :src="genFactionIcon">
+            <img :src="genFactionIcon" mode="aspectFit">
           </div>
           <div class="name">
             <p class="cname">{{genArchetypeName}}</p>
@@ -46,7 +46,7 @@
           </div>
           <div class="desc-right">
             <p class="name">胜率</p>
-            <p class="desc-meta color-green" :class="{'color-red': bestDeck.win_rate<50}">{{bestDeck.win_rate}}</p>
+            <p class="desc-meta" :style="{color: '#000'}">{{bestDeck.win_rate}}</p>
           </div>
         </div>
         <span class="iconfont">&#xe600;</span>
@@ -173,31 +173,42 @@ export default {
       return name
     },
     genArchetypeDetail() {
+      wx.showNavigationBarLoading();
+      let params={}
       if (this.archetypeId) {
-        this.archetypeDetail = this.archetypeList.filter(item => {
-          return this.archetypeId === item.id
-        })[0]
+        params = {recordID: this.archetypeId}
       } else if (this.archetypeName) {
-        this.archetypeDetail = this.archetypeList.filter(item => {
-          return this.archetypeName === item.archetype_name
-        })[0]
+        params = {name: this.archetypeName}
+      } else {
+        wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
+        return
       }
-      this.updateDate = this.archetypeDetail.update_time
-      this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
-      let matchupData = JSON.parse(this.archetypeDetail.matchup)
-      for (let index in matchupData) {
-        if (matchupData.hasOwnProperty(index)) {
-          this.matchupDetail[this.factions[index]] = matchupData[index]
+      getArchetypeDetail(params).then(res => {
+        this.archetypeDetail = res
+        this.updateDate = this.archetypeDetail.update_time
+        this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
+        let matchupData = JSON.parse(this.archetypeDetail.matchup)
+        for (let index in matchupData) {
+          if (matchupData.hasOwnProperty(index)) {
+            this.matchupDetail[this.factions[index]] = matchupData[index]
+          }
         }
-      }
-      this.genTableData(this.matchupDetail[this.selectedFaction.id])
+        this.genTableData(this.matchupDetail[this.selectedFaction.id])
 
-      let bestDeckData = JSON.parse(this.archetypeDetail.best_deck)
-      this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype_name)
-      this.bestDeck.deck_id = bestDeckData[0]
-      this.bestDeck.win_rate = bestDeckData[1]
-      this.bestDeck.game_count = bestDeckData[2]
-      this.bestDeck.show = true
+        let bestDeckData = JSON.parse(this.archetypeDetail.pop_deck)
+        this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype_name)
+        this.bestDeck.deck_id = bestDeckData[0]
+        this.bestDeck.win_rate = bestDeckData[1]
+        this.bestDeck.game_count = bestDeckData[2]
+        this.bestDeck.show = true
+        wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
+      }).catch(err => {
+        console.log(err)
+        wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
+      })
     },
     genFactionIcons() {
       this.factionIcons = []
@@ -240,7 +251,6 @@ export default {
       })
     },
     handlePopDeckClick() {
-      console.log(this.bestDeck)
       wx.navigateTo({
         url: `/pages/decks/deckDetail/main?deckID=${this.bestDeck.deck_id}`
       })
@@ -251,7 +261,7 @@ export default {
       })
     }
   },
-  mounted() {
+  onReady() {
     this.resetPageData()
     this.archetypeId = this.$root.$mp.query.id
     this.archetypeName = this.$root.$mp.query.name
@@ -269,26 +279,7 @@ export default {
     }
   },
   onPullDownRefresh() {
-    wx.showNavigationBarLoading();
-    let params={}
-    if (this.archetypeId) {
-      params = {recordID: this.archetypeId}
-    } else if (this.archetypeName) {
-      params = {name: this.archetypeName}
-    } else {
-      wx.stopPullDownRefresh();
-      wx.hideNavigationBarLoading()
-      return
-    }
-    getArchetypeDetail(params).then(res => {
-      this.archetypeDetail = res
-      wx.stopPullDownRefresh();
-      wx.hideNavigationBarLoading()
-    }).catch(err => {
-      console.log(err)
-      wx.stopPullDownRefresh();
-      wx.hideNavigationBarLoading()
-    })
+    this.genArchetypeDetail()
   }
 }
 </script>
@@ -421,8 +412,6 @@ export default {
     }
   }
   .headline {
-    height:96rpx;
-    line-height:96rpx;
     .more-btn {
       position: relative;
       float: right;

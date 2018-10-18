@@ -36,6 +36,15 @@ export default {
       wx.switchTab({
         url: '/pages/index/main'
       })
+      // var pages = getCurrentPages(); // 当前页面
+      // var beforePage = pages[pages.length - 2]; // 前一个页面
+      // console.log(pages);
+      // console.log(beforePage);
+      // wx.navigateBack({
+      //   success: function() {
+      //     beforePage.onReady(); // 执行前一个页面的onLoad方法
+      //   }
+      // });
     },
     handleCollect() {
       this.$emit('collectClick')
@@ -56,18 +65,22 @@ export default {
   display: flex;
   justify-content: space-around;
   width: 750rpx;
-  border-top: 2px solid $palette-bg-gray;
+  border-top: 1rpx solid $palette-bg-gray;
+  background-color: #fff;
+  border-bottom:1rpx solid $palette-bg-gray;
   .like-block {
+    height: 80rpx;
     width: 240rpx;
   }
   button {
     width: 240rpx;
     height: 80rpx;
+    line-height: 80rpx;
     padding: 0;
     display: inline-block;
     background-color: white;
     border-radius: 0;
-    font-size: 14px;
+    font-size: 13px;
     .icon {
       font-size: 16px;
       color: $palette-blue;
@@ -86,7 +99,7 @@ export default {
     top: 50%;
     transform: translateY(-50%);
     height: 40rpx;
-    border-left: 2px solid $palette-bg-gray;
+    border-left: 1rpx solid $palette-bg-gray;
     z-index: 1;
   }
 }

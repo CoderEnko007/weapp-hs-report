@@ -103,8 +103,8 @@ export default {
 }
 .headline {
   position: relative;
-  height: 21px;
-  line-height: 21px;
+  height: 96rpx;
+  line-height: 96rpx;
   font-size: 16px;
   font-weight: bold;
   color: #333;

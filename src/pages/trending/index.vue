@@ -8,24 +8,24 @@
       </div>
     </div>
     <div class="deck-list">
-      <div class="deck-item">
-        <DecksBoard :list="deckList" @itemClick="handleDeckClick"></DecksBoard>
-      </div>
+      <DeckList :list="deckList" @itemClick="handleDeckClick"></DeckList>
     </div>
   </div>
 </template>
 <script>
+import utils from '@/utils'
 import {getTrendingList} from "@/api/dbapi";
-import DecksBoard from '@/components/DecksBoard';
+import DeckList from '@/components/DeckList';
 
 export default {
   components: {
-    DecksBoard
+    DeckList
   },
   data() {
     return {
       deckList: [],
-      report_date: ''
+      report_date: '',
+      decksName: []
     }
   },
   computed: {
@@ -34,13 +34,27 @@ export default {
         let formatDate = new Date(this.report_date)
         return formatDate.getMonth()+1 + '月' + formatDate.getDate() + '日更新'
       }
-    }
+    },
   },
   methods: {
+    formatDeckList() {
+      for (let index in this.deckList) {
+        if (this.deckList.hasOwnProperty(index)) {
+          this.deckList[index].image = utils.faction[this.deckList[index].faction].image
+          let temp = this.decksName.filter(item => {
+            return item.ename === this.deckList[index].deck_name
+          })
+          if (temp[0] && temp[0].cname) {
+            this.deckList[index].cname = temp[0].cname
+          }
+        }
+      }
+    },
     genTrendingList() {
       wx.showNavigationBarLoading();
       getTrendingList().then(res => {
         this.deckList = res.list
+        this.formatDeckList()
         this.report_date = res.date
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
@@ -57,6 +71,7 @@ export default {
     }
   },
   mounted() {
+    this.decksName = this.$store.state.cards.decksName
     this.genTrendingList()
   },
   onPullDownRefresh() {
@@ -110,7 +125,8 @@ export default {
 }
 .deck-list {
   width: 100%;
-  /*padding-top: 220rpx;*/
+  padding: 0 30rpx;
+  box-sizing:border-box;
   overflow: hidden;
   z-index: -1;
 }

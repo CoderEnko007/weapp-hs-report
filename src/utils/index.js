@@ -90,15 +90,15 @@ export const getComponentByTag = (parent, tag) => {
   }
 }
 const faction = {
-  'Druid': { name: '德鲁伊', shortName: '德', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFc20lKfIhjC.jpg', image: '/static/heroIcons/druid.png', image1: '/static/heroIcons/druid-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jbHYTxXEHZT.png' },
-  'Hunter': { name: '猎人', shortName: '猎', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFgjRrvyMTUs.jpg', image: '/static/heroIcons/hunter.png', image1: '/static/heroIcons/hunter-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jHdZrCYiZiB.png' },
-  'Mage': { name: '法师', shortName: '法', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaNBmsQn1UY6Z.jpg', image: '/static/heroIcons/mage.png', image1: '/static/heroIcons/mage-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jAjReEqnPWw.png' },
-  'Paladin': { name: '圣骑士', shortName: '骑', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFUHziUqK4kL.jpg', image: '/static/heroIcons/paladin.png', image1: '/static/heroIcons/paladin-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jmzEBqiaOAm.png' },
-  'Priest': { name: '牧师', shortName: '牧', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFIo6rAizi9c.jpg', image: '/static/heroIcons/priest.png', image1: '/static/heroIcons/priest-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jWqcYCRHuMK.png' },
-  'Rogue': { name: '潜行者', shortName: '贼', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFaOXMWKfYI6.jpg', image: '/static/heroIcons/rogue.png', image1: '/static/heroIcons/rogue-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jrIogSSyDse.png' },
-  'Shaman': { name: '萨满', shortName: '萨', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFo845cbDc3f.jpg', image: '/static/heroIcons/shaman.png', image1: '/static/heroIcons/shaman-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jMNbWFmTvqa.png' },
-  'Warlock': { name: '术士', shortName: '术', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFLBpAfNQ9Z3.jpg',image: '/static/heroIcons/warlock.png', image1: '/static/heroIcons/warlock-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jhkIYpkPlEM.png' },
-  'Warrior': { name: '战士', shortName: '战', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFdMDI6ZB2X1.jpg', image: '/static/heroIcons/warrior.png', image1: '/static/heroIcons/warrior-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jlljaMZFJFc.png' }
+  'Druid': { name: '德鲁伊', shortName: '德', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFc20lKfIhjC.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpltcxS8QuoF.png', image: '/static/heroIcons/druid.png', image1: '/static/heroIcons/druid-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jbHYTxXEHZT.png' },
+  'Hunter': { name: '猎人', shortName: '猎', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFgjRrvyMTUs.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpssc3FfPpb9.png', image: '/static/heroIcons/hunter.png', image1: '/static/heroIcons/hunter-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jHdZrCYiZiB.png' },
+  'Mage': { name: '法师', shortName: '法', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaNBmsQn1UY6Z.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpZZbM5Wg2rZ.png', image: '/static/heroIcons/mage.png', image1: '/static/heroIcons/mage-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jAjReEqnPWw.png' },
+  'Paladin': { name: '圣骑士', shortName: '骑', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFUHziUqK4kL.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpNrmopXuBrw.png', image: '/static/heroIcons/paladin.png', image1: '/static/heroIcons/paladin-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jmzEBqiaOAm.png' },
+  'Priest': { name: '牧师', shortName: '牧', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFIo6rAizi9c.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEp0ZaS5tmS0t.png', image: '/static/heroIcons/priest.png', image1: '/static/heroIcons/priest-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jWqcYCRHuMK.png' },
+  'Rogue': { name: '潜行者', shortName: '贼', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFaOXMWKfYI6.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpmjMvZ0t7Va.png', image: '/static/heroIcons/rogue.png', image1: '/static/heroIcons/rogue-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jrIogSSyDse.png' },
+  'Shaman': { name: '萨满', shortName: '萨', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFo845cbDc3f.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpVruPt5OpaH.png', image: '/static/heroIcons/shaman.png', image1: '/static/heroIcons/shaman-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jMNbWFmTvqa.png' },
+  'Warlock': { name: '术士', shortName: '术', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFLBpAfNQ9Z3.jpg',bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpATFeYS3XPb.png', image: '/static/heroIcons/warlock.png', image1: '/static/heroIcons/warlock-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jhkIYpkPlEM.png' },
+  'Warrior': { name: '战士', shortName: '战', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFdMDI6ZB2X1.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEp4aLjlesJNW.png', image: '/static/heroIcons/warrior.png', image1: '/static/heroIcons/warrior-1.png', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jlljaMZFJFc.png' }
 }
 
 const mode = [
@@ -106,13 +106,13 @@ const mode = [
   {id: 'Wild', name: '狂野模式'},
 ]
 
-const rarity = [
-  {id: 'free', name: '免费'},
-  {id: 'common', name: '普通'},
-  {id: 'rare', name: '稀有'},
-  {id: 'epic', name: '史诗'},
-  {id: 'legendary', name: '传说'}
-]
+const rarity = {
+  'free': {name: '基础', color: '#5e5e5e'},
+  'common': {name: '普通', color: '#5e5e5e'},
+  'rare': {name: '稀有', color: '#1768c6'},
+  'epic': {name: '史诗', color: '#705dc7'},
+  'legendary': {name: '传说', color: '#f5a623'}
+}
 
 const type = {
   'MINION': {name: '随从'},
