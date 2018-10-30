@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <NavBar :showCapsule="true"></NavBar>
     <div class="banner" :style="{'background-image': bannerImg?'url('+bannerImg+')':''}">
       <div class="overview">
         <div class="archetype-name">
@@ -27,7 +28,7 @@
         </div>
       </div>
     </div>
-    <div class="panel pop-deck" v-if="bestDeck.show">
+    <div class="pop-deck" v-if="bestDeck.show">
       <div class="headline">
         <span class="title">最热门套牌</span>
         <div class="more-btn" @click="gotoDecks">
@@ -52,9 +53,56 @@
         <span class="iconfont">&#xe600;</span>
       </div>
     </div>
+    <div class="bw-game-panel">
+      <div class="headline"><span class="title">优劣对局</span></div>
+      <div class="board-panel">
+        <div class="board" v-show="bestMatchup.show">
+          <div class="deck-item" @click="handleBestMatchupClick">
+            <div class="icon">
+              <img :src="bestMatchup.image" mode="aspectFit">
+            </div>
+            <div class="tier-desc">
+              <div class="desc-left">
+                <p class="name">
+                  <span>{{bestMatchup.cname}}</span>
+                  <span class="name-meta">最优势对局</span>
+                </p>
+                <p class="desc-meta">对局数 {{bestMatchup.game_count}}</p>
+              </div>
+              <div class="desc-right">
+                <p class="name">胜率</p>
+                <p class="desc-meta" :class="{'color-green': bestMatchup.win_rate>50, 'color-red': bestMatchup.win_rate<50}">{{bestMatchup.win_rate}}%</p>
+              </div>
+            </div>
+            <span class="iconfont">&#xe600;</span>
+          </div>
+        </div>
+        <div class="board" v-show="worstMatchup.show">
+          <div class="deck-item" @click="handleWorstMatchupClick">
+            <div class="icon">
+              <img :src="worstMatchup.image" mode="aspectFit">
+            </div>
+            <div class="tier-desc">
+              <div class="desc-left">
+                <p class="name">
+                  <span>{{worstMatchup.cname}}</span>
+                  <span class="name-meta">最劣势对局</span>
+                </p>
+                <p class="desc-meta">对局数 {{worstMatchup.game_count}}</p>
+              </div>
+              <div class="desc-right">
+                <p class="name">胜率</p>
+                <p class="desc-meta" :class="{'color-green': worstMatchup.win_rate>50, 'color-red': worstMatchup.win_rate<50}">{{worstMatchup.win_rate}}%</p>
+              </div>
+            </div>
+            <span class="iconfont">&#xe600;</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <!--<div class="separator"></div>-->
+    <div class="headline"><span class="title">形态构筑</span></div>
     <div class="panel card-list">
-      <div class="headline"><span class="title">形态构筑</span></div>
       <div class="core-cards">
         <div class="title"><span>核心组件</span></div>
         <DeckCards :cards="archetypeDetail.core_cards" @cardClick="handleCardClick"></DeckCards>
@@ -67,12 +115,12 @@
     <div class="ads" v-if="adsOpenFlag">
       <ad unit-id="adunit-5507cac6947d0ea4"></ad>
     </div>
-    <div class="panel matchup">
+    <div class="matchup">
       <div class="headline"><span class="title">对抗情况</span></div>
-      <HeroesPanel :dataList="factionIcons" @itemClick="handleIconsClick"></HeroesPanel>
+      <div class="panel"><HeroesPanel :dataList="factionIcons" @itemClick="handleIconsClick"></HeroesPanel></div>
       <div class="panel-block">
         <DeckTable :selectedFaction="selectedFaction" :date="updateDate" :tableTitle="tableTitle" :tableData="selectedFaction.data"
-                   @itemClick="handleDeckItemClick"></DeckTable>
+                   :tableName="'对阵'+selectedFaction.name" @itemClick="handleDeckItemClick"></DeckTable>
       </div>
     </div>
   </div>
@@ -85,6 +133,7 @@ import DeckCards from '@/components/DeckCards'
 import DeckTable from '@/components/DeckTable'
 import TierList from '@/components/TierList'
 import HeroesPanel from '@/components/HeroesPanel'
+import NavBar from '@/components/NavBar'
 
 const defaultDetail = {
   faction: '',
@@ -106,12 +155,22 @@ const defaultBestDeck = {
   game_count: ''
 }
 
+const defaultBWGame = {
+  show: false,
+  ename: '',
+  cname: '',
+  win_rate: '',
+  game_count: '',
+  image: ''
+}
+
 export default {
   components: {
     DeckCards,
     DeckTable,
     TierList,
-    HeroesPanel
+    HeroesPanel,
+    NavBar
   },
   data() {
     return {
@@ -133,10 +192,13 @@ export default {
         'Druid': [], 'Hunter': [], 'Mage': [], 'Paladin': [], 'Priest': [], 'Rogue': [], 'Shaman': [], 'Warlock': [], 'Warrior': [],
       },
       bestDeck: Object.assign({}, defaultBestDeck),
+      bestMatchup: Object.assign({}, defaultBWGame),
+      worstMatchup: Object.assign({}, defaultBWGame)
     }
   },
   computed: {
     ...mapGetters([
+      'navHeight',
       'archetypeList'
     ]),
     genArchetypeName() {
@@ -163,6 +225,8 @@ export default {
         'Druid': [], 'Hunter': [], 'Mage': [], 'Paladin': [], 'Priest': [], 'Rogue': [], 'Shaman': [], 'Warlock': [], 'Warrior': [],
       }
       this.bestDeck = Object.assign({}, defaultBestDeck)
+      this.bestMatchup = Object.assign({}, defaultBWGame),
+      this.worstMatchup = Object.assign({}, defaultBWGame)
     },
     getDeckCName(name) {
       for (let item of this.decksName) {
@@ -185,25 +249,58 @@ export default {
         return
       }
       getArchetypeDetail(params).then(res => {
-        this.archetypeDetail = res
-        this.updateDate = this.archetypeDetail.update_time
-        this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
-        let matchupData = JSON.parse(this.archetypeDetail.matchup)
-        for (let index in matchupData) {
-          if (matchupData.hasOwnProperty(index)) {
-            this.matchupDetail[this.factions[index]] = matchupData[index]
+        if (!res) {
+          wx.showModal({
+            title: '提示',
+            content: '抱歉，暂无该卡组详情',
+            showCancel: false,
+            success (res) {
+              wx.navigateBack()
+            }
+          })
+        } else {
+          this.archetypeDetail = res
+          this.updateDate = this.archetypeDetail.update_time
+          this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
+          let matchupData = JSON.parse(this.archetypeDetail.matchup)
+          for (let index in matchupData) {
+            if (matchupData.hasOwnProperty(index)) {
+              this.matchupDetail[this.factions[index]] = matchupData[index]
+            }
           }
-        }
-        this.genTableData(this.matchupDetail[this.selectedFaction.id])
+          this.genTableData(this.matchupDetail[this.selectedFaction.id])
 
-        let bestDeckData = JSON.parse(this.archetypeDetail.pop_deck)
-        this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype_name)
-        this.bestDeck.deck_id = bestDeckData[0]
-        this.bestDeck.win_rate = bestDeckData[1]
-        this.bestDeck.game_count = bestDeckData[2]
-        this.bestDeck.show = true
-        wx.stopPullDownRefresh();
-        wx.hideNavigationBarLoading()
+          let bestDeckData = JSON.parse(this.archetypeDetail.pop_deck)
+          this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype_name)
+          this.bestDeck.deck_id = bestDeckData[0]
+          this.bestDeck.win_rate = bestDeckData[1]
+          this.bestDeck.game_count = bestDeckData[2]
+          this.bestDeck.show = true
+
+          let bestMatchupData = JSON.parse(this.archetypeDetail.best_matchup)
+          this.bestMatchup.ename = bestMatchupData[0]
+          this.bestMatchup.cname = this.getDeckCName(bestMatchupData[0])
+          this.bestMatchup.win_rate = parseFloat(bestMatchupData[1]).toFixed(2)
+          this.bestMatchup.game_count = bestMatchupData[2]
+          let bestMatchupFaction = bestMatchupData[0].split(' ')
+          bestMatchupFaction = bestMatchupFaction[bestMatchupFaction.length-1]
+          this.bestMatchup.image = utils.faction[bestMatchupFaction].image
+          this.bestMatchup.faction = bestMatchupFaction
+          this.bestMatchup.show = true
+
+          let worstMatchupData = JSON.parse(this.archetypeDetail.worst_matchup)
+          this.worstMatchup.ename = worstMatchupData[0]
+          this.worstMatchup.cname = this.getDeckCName(worstMatchupData[0])
+          this.worstMatchup.win_rate = parseFloat(worstMatchupData[1]).toFixed(2)
+          this.worstMatchup.game_count = worstMatchupData[2]
+          let worstMatchupFaction = worstMatchupData[0].split(' ')
+          worstMatchupFaction = worstMatchupFaction[worstMatchupFaction.length-1]
+          this.worstMatchup.image = utils.faction[worstMatchupFaction].image
+          this.worstMatchup.faction = worstMatchupFaction
+          this.worstMatchup.show = true
+          wx.stopPullDownRefresh();
+          wx.hideNavigationBarLoading()
+        }
       }).catch(err => {
         console.log(err)
         wx.stopPullDownRefresh();
@@ -228,7 +325,7 @@ export default {
           deckName: name?name.cname:data[0],
           ename: data[0],
           games: parseInt(data[3].replace(',', '')),
-          winrate: parseFloat(data[1].replace('%', '')),
+          winrate: parseFloat(data[1].replace('%', '')).toFixed(1),
           popularity: parseFloat(data[2].replace('%', ''))
         }
         array.push(formatData)
@@ -259,14 +356,28 @@ export default {
       wx.navigateTo({
         url: `/pages/decks/decksList/main?id=${this.archetypeDetail.faction}&name=${this.archetypeDetail.archetype_name}`
       })
+    },
+    handleWorstMatchupClick() {
+      console.log(this.worstMatchup)
+      wx.navigateTo({
+        url: `/pages/decks/decksList/main?id=${this.worstMatchup.faction}&name=${this.worstMatchup.ename}`
+      })
+    },
+    handleBestMatchupClick() {
+      console.log(this.bestMatchup)
+      wx.navigateTo({
+        url: `/pages/decks/decksList/main?id=${this.bestMatchup.faction}&name=${this.bestMatchup.ename}`
+      })
     }
   },
-  onReady() {
+  onLoad() {
     this.resetPageData()
     this.archetypeId = this.$root.$mp.query.id
     this.archetypeName = this.$root.$mp.query.name
     this.decksName = this.$store.state.cards.decksName
     this.genFactionIcons()
+  },
+  onReady() {
     this.genArchetypeDetail()
   },
   onUnload() {
@@ -370,14 +481,29 @@ export default {
     }
   }
   .pop-deck {
-    .deck-item {
-      background-color: #fff;
-      &:active {
-        background-color: #eee;
-      }
-    }
     .tier-desc {
       border: none;
+    }
+  }
+  .bw-game-panel {
+    .board-panel {
+      margin-bottom: 10rpx;
+      .board {
+        .deck-item .tier-desc .desc-left .name {
+          display: flex;
+          align-items: center;
+          .name-meta{
+            height: 24rpx;
+            line-height: 24rpx;
+            margin-left:8px;
+            font-size: 19rpx;
+            color: #666;
+            border: 1rpx solid #ddd;
+            border-radius: 12px;
+            padding: 3rpx 10rpx;
+          }
+        }
+      }
     }
   }
   .card-list {
@@ -412,6 +538,7 @@ export default {
     }
   }
   .headline {
+    margin: 0 30rpx;
     .more-btn {
       position: relative;
       float: right;
@@ -436,6 +563,18 @@ export default {
     box-sizing: border-box;
     border-bottom: 1rpx solid #eee;
     margin: 20rpx 0;
+  }
+
+  .deck-item {
+    padding:0 30rpx;
+    box-sizing:border-box;
+    background-color: #fff;
+    &:active {
+      background-color: #eee;
+    }
+    .iconfont {
+      right: 30rpx
+    }
   }
 }
 </style>

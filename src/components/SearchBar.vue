@@ -21,28 +21,27 @@ export default {
 </script>
 <style lang="scss" scoped>
 .search-bar {
-  position: relative;
   display: flex;
-  padding: 8rpx 14rpx;
+  /*padding: 20rpx 30rpx;*/
   .search-bar-form {
     position: relative;
-    background-color: #fff;
+    background-color: #f8f8f8;
     flex: auto;
-    border: 1rpx solid #4f4f4f;
-    border-radius: 25px;
+    /*border: 1rpx solid #4f4f4f;*/
+    border-radius: 34rpx;
     .serach-bar-box {
-      padding-left: 60rpx;
-      font-size: 12px;
-      color: #ccc;
+      padding-left: 72rpx;
+      font-size: 14px;
+      color: #999;
       .zan-icon {
         position: absolute;
-        left: 20rpx;
+        left: 32rpx;
         top: 50%;
         transform: translateY(-50%);
       }
       input {
-        height: 50rpx;
-        line-height: 50rpx;
+        height: 68rpx;
+        line-height: 68rpx;
       }
     }
   }

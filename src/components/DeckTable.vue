@@ -2,8 +2,9 @@
 <div class="data-table" :style="{'min-height': 350+'px'}">
   <div class="table">
     <div class="table-tr header">
-      <div class="table-td vs-name"><span>对阵{{selectedFaction.name}}</span></div>
+      <div class="table-td table-name"><span>{{tableName}}</span></div>
       <div class="table-td text-center col-other order"
+           :class="{'pr-30': index === tableTitle.length-1}"
            v-for="(item, index) in tableTitle"
            :key="index"
            @click="handleOrderClick(item)">
@@ -14,7 +15,7 @@
       </div>
     </div>
     <div class="table-tr content" v-for="(item, index) in genTableData" :key="index" @click="handleItemClick(item)">
-      <div class="table-td text-center col-1st">
+      <div class="table-td col-1st">
         <img :src="genFactionIcon" mode="aspectFit">
         <div class="deckName">
           <p class="cname">{{item.deckName}}</p>
@@ -23,7 +24,7 @@
       </div>
       <div class="table-td text-center col-other"><span>{{item.games}}</span></div>
       <div class="table-td text-center col-other"><span>{{item.popularity}}%</span></div>
-      <div class="table-td text-center col-other color-green" :class="{'color-red': item.winrate<50}">
+      <div class="table-td text-center col-other col-last color-green" :class="{'color-red': item.winrate<50}">
         <span :style="{'font-weight': 'bold'}">{{item.winrate}}%</span>
       </div>
     </div>
@@ -35,7 +36,7 @@ import utils from '@/utils'
 
 export default {
   name: 'DeckTable',
-  props: ['selectedFaction', 'date', 'tableTitle', 'tableData'],
+  props: ['selectedFaction', 'date', 'tableTitle', 'tableData', 'tableName'],
   data() {
     return {
       orderBy: '',
@@ -50,7 +51,6 @@ export default {
       return this.tableData
     },
     genFactionIcon() {
-      console.log(this.selectedFaction)
       return utils.faction[this.selectedFaction.id].image
     }
   },
@@ -105,6 +105,8 @@ export default {
       position: relative;
       width: 265rpx;
       text-align: left;
+      box-sizing: border-box;
+      padding-left: 30rpx;
       img {
         position: absolute;
         width: 64rpx;
@@ -123,12 +125,19 @@ export default {
           line-height: 37rpx;
         }
         p.ename {
+          width:180rpx;
           height: 30rpx;
           line-height: 30rpx;
           font-size: 11px;
           color: #999;
+          overflow:hidden;
+          text-overflow:ellipsis;
+          white-space:nowrap;
         }
       }
+    }
+    .col-last {
+      padding-right: 30rpx;
     }
     .col-other {
       width: 120rpx;
@@ -138,9 +147,11 @@ export default {
     height: 86rpx;
     line-height: 86rpx;
     border-bottom: 1rpx solid #eee;
-    .vs-name {
+    .table-name {
+      width: 265rpx;
       color: #999;
-      margin-left: 3rpx;
+      box-sizing: border-box;
+      padding-left: 33rpx;
     }
     .order {
       position: relative;
@@ -151,7 +162,8 @@ export default {
         width: 22rpx;
         height: 36rpx;
         line-height:26rpx;
-        right:7rpx;
+        margin-left: 5rpx;
+        /*right:7rpx;*/
         top:50%;
         transform:translateY(-50%);
       }
@@ -166,12 +178,6 @@ export default {
     .table-td {
       height: 120rpx;
       line-height: 120rpx;
-    }
-    .separator {
-      width: 100%;
-      height: 1px;
-      background-color: red;
-      margin-left: 90rpx;
     }
   }
   .text-center {

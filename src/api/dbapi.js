@@ -179,7 +179,21 @@ export function getDeckName(params, limit=1000) {
 
 export function getDeckList(params, limit=20, page=0, orderBy='-game_count') {
   return new Promise((resolve, reject) => {
-    let tableObj = new wx.BaaS.TableObject(tableID.decksTableID)
+    let tableObj = new wx.BaaS.TableObject(tableID.standDecksTableID)
+    if (params.mode && params.mode === 'Wild') {
+      tableObj = new wx.BaaS.TableObject(tableID.wildDecksTableID)
+    }
+    let timeRangeQuery = new wx.BaaS.Query()
+    if (params && params.last_30_days!==undefined) {
+      // last_30_days为true是返回全部卡组，不做过滤
+      if (!params.last_30_days) {
+        timeRangeQuery.compare('last_30_days', '=', params.last_30_days)
+      }
+    }
+    let modeQuery = new wx.BaaS.Query()
+    if (params && params.mode) {
+      modeQuery.compare('mode', '=', params.mode)
+    }
     let factionQuery = new wx.BaaS.Query()
     if (params && params.faction) {
       factionQuery.compare('faction', '=', params.faction)
@@ -192,8 +206,9 @@ export function getDeckList(params, limit=20, page=0, orderBy='-game_count') {
     if (params && params.collectList) {
       collectionQuery.in('deck_id', params.collectList)
     }
-    let query = wx.BaaS.Query.and(factionQuery, archetypeQuery, collectionQuery)
+    let query = wx.BaaS.Query.and(timeRangeQuery, modeQuery, factionQuery, archetypeQuery, collectionQuery)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+      console.log('aaa', res.data)
       resolve(res.data)
     }, err => {
       reject(err)
@@ -201,9 +216,21 @@ export function getDeckList(params, limit=20, page=0, orderBy='-game_count') {
   })
 }
 
-export function getDeckDetail(params, trending_flag=false ) {
+export function getDeckDetail(params, trending_flag=false, collected=false ) {
   return new Promise((resolve, reject) => {
-    let tableObj = trending_flag?new wx.BaaS.TableObject(tableID.trendingTableID):new wx.BaaS.TableObject(tableID.decksTableID)
+    let id
+    if (trending_flag) {
+      id = tableID.trendingTableID
+    } else if (collected) {
+      id = tableID.decksCollectionTableID
+    } else {
+      if (params.mode !== undefined && params.mode === 'Wild') {
+        id = tableID.wildDecksTableID
+      } else {
+        id = tableID.standDecksTableID
+      }
+    }
+    let tableObj = new wx.BaaS.TableObject(id)
     if (params && params.recordID) {
       tableObj.get(params.recordID).then(res => {
         resolve(res.data)
@@ -287,7 +314,7 @@ export function getUserCollectionDecks(userID, limit=9999, page=0, orderBy='-cre
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.decksCollectionTableID)
     let query = new wx.BaaS.Query()
-    query.compare('created_by', '=', userID)
+    query.compare('user_id', '=', userID)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
       resolve(res.data)
     }, err => {
@@ -300,10 +327,11 @@ export function setUserCollection(data) {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.decksCollectionTableID)
     let record = tableObj.create()
-    record.set('created_by', data.user_id)
-    record.set('deck_id', data.deck_id)
-    record.set('trending', data.trending)
-    record.save().then(res => {
+    if (data.deckDetail.write_perm) {
+      delete data.deckDetail.write_perm
+    }
+    data.deckDetail.user_id = data.query.user_id
+    record.set(data.deckDetail).save().then(res => {
       resolve(res.data)
     }, err => {
       reject(err)
@@ -315,8 +343,8 @@ export function cancelUserCollection(data) {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.decksCollectionTableID)
     let query = new wx.BaaS.Query()
-    query.compare('created_by', '=', data.user_id)
-    query.compare('deck_id', '=', data.deck_id)
+    query.compare('user_id', '=', data.user_id)
+    query.compare('id', '=', data.collection_id)
     tableObj.delete(query).then(res => {
       resolve(res.data)
     }, err => {

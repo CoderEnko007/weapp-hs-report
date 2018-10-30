@@ -1,30 +1,31 @@
 <template>
   <div class="container">
-    <div class="banner">
-      <img :src="logo" mode="aspectFill">
-      <div class="desc">
-        <p>更专业的原创内容，更全面的新闻资讯</p>
-        <p>就在NGA炉石专区</p>
-      </div>
-    </div>
+    <NavBar></NavBar>
     <div class="userinfo">
       <img :src="userInfo.avatarUrl">
-      <button v-if="!userInfo.openid" open-type="getUserInfo" @getuserinfo="userInfoHandler">请登录</button>
+      <button v-if="!userInfo.openid" open-type="getUserInfo" @getuserinfo="userInfoHandler">点击登录</button>
       <p v-else>{{userInfo.nickName}}</p>
     </div>
-    <div class="about zan-panel">
-      <div class="zan-cell zan-cell--access" @click="handleAboutClick">
-        <div class="zan-cell__bd">关于小程序</div>
-        <div class="zan-cell__ft"></div>
+    <div class="panel nga-block">
+      <div class="left-block">
+        <p class="text">NGA炉石专区</p>
+        <p class="desc">更专业的原创内容，更全面的炉石资讯</p>
+      </div>
+      <div class="logo">
+        <img :src="logo" mode="aspectFill">
       </div>
     </div>
-    <div class="collection zan-panel">
-      <div class="zan-cell">
-        <div class="zan-cell__bd">我的收藏</div>
-      </div>
-      <div class="panel panel-list">
-        <DecksBoard :list="getDeckList" @itemClick="handleDeckClick"></DecksBoard>
-      </div>
+    <div class="panel" @click="handleAboutClick">
+      <span class="text">关于小程序</span>
+      <span class="iconfont">&#xe600;</span>
+    </div>
+    <div class="panel" @click="handleCollectionClick">
+      <span class="text">我的收藏</span>
+      <span class="iconfont">&#xe600;</span>
+    </div>
+    <div class="code">
+      <h1>打赏作者</h1>
+      <img :src="codeImg" mode="aspectFill" @click="handleClickCodeImg">
     </div>
   </div>
 </template>
@@ -32,20 +33,24 @@
 import { mapGetters } from 'vuex'
 import {getDeckList, getUserCollectionDecks} from "@/api/dbapi";
 import DecksBoard from '@/components/DecksBoard';
+import NavBar from '@/components/NavBar'
 
 export default {
   components: {
     DecksBoard,
+    NavBar,
   },
   data() {
     return {
       deckList: [],
-      logo: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9QyXTPpyOMVypO.png'
+      logo: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9QyXTPpyOMVypO.png',
+      codeImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9oGSrxprEojAfB.jpg'
     }
   },
   computed: {
     ...mapGetters([
-      'userInfo'
+      'userInfo',
+      'navHeight'
     ]),
     getDeckList() {
       return this.deckList
@@ -63,7 +68,6 @@ export default {
       if (this.userInfo.id) {
         wx.showNavigationBarLoading();
         this.$store.dispatch('getCollectedDecks', this.userInfo.id).then(res => {
-          console.log(res.list)
           this.deckList = res.list.filter(val => {
             return !(!val || val === "");
           })
@@ -93,6 +97,23 @@ export default {
       wx.navigateTo({
         url: `/pages/mine/about/main`
       })
+    },
+    handleCollectionClick() {
+      if (this.userInfo.id) {
+        wx.navigateTo({
+          url: `/pages/mine/collection/main`
+        })
+      } else {
+        wx.showToast({
+          title: '请登录',
+          icon: 'none'
+        })
+      }
+    },
+    handleClickCodeImg() {
+      wx.previewImage({
+        urls: [this.codeImg]
+      })
     }
   },
   onShow() {
@@ -112,9 +133,6 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.container {
-  background-color: #f7f7f7;
-}
 .banner {
   position: relative;
   height: 40px;
@@ -139,20 +157,13 @@ export default {
 }
 .userinfo {
   position: relative;
-  padding: 20rpx 20rpx;
   background-color: #fff;
   button, p {
-    position: absolute;
-    left: 160rpx;
-    top:0;
-    bottom: 0;
-    margin:auto;
-    font-size: 14px;
-    width: 150rpx;
-    height: 50rpx;
-    line-height: 50rpx;
+    font-size: 15px;
+    height: 60rpx;
+    line-height: 60rpx;
     padding: 0;
-    text-align: left;
+    text-align: center;
     background-color: transparent;
     border: none;
   }
@@ -160,10 +171,83 @@ export default {
     border: none;
   }
   img {
-    width: 100rpx;
-    height: 100rpx;
+    display: block;
+    width: 140rpx;
+    height: 140rpx;
     border-radius: 50%;
-    margin-left: 20rpx;
+    margin: 50rpx auto 20rpx;
+  }
+}
+.panel {
+  height: 120rpx;
+  margin: 0 30rpx;
+  box-sizing: border-box;
+  border-bottom:1rpx solid #eee;
+  .text {
+    height: 42rpx;
+    line-height: 120rpx;
+    font-size: 15px;
+  }
+  .iconfont {
+    float: right;
+    line-height:120rpx
+  }
+}
+.nga-block {
+  position: relative;
+  .left-block {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    .text {
+      height: 42rpx;
+      line-height: 42rpx;
+      font-size: 15px;
+      color: #333;
+    }
+    .desc {
+      height: 22rpx;
+      line-height: 22rpx;
+      margin-top: 13rpx;
+      font-size: 11px;
+      color: #999;
+    }
+  }
+  .logo {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200rpx;
+    height: 90rpx;
+    background-color: #FFEFCD;
+    border-radius: 12px;
+    img {
+      position:absolute;
+      top:0;
+      right:0;
+      left:0;
+      bottom:0;
+      margin:auto;
+      width: 160rpx;
+      height: 63rpx;
+    }
+  }
+}
+.code {
+  margin: 0 30rpx;
+  box-sizing: border-box;
+  h1 {
+    margin-top: 38rpx;
+    margin-bottom: 24rpx;
+    font-size: 15px;
+    color: #333333;
+  }
+  img {
+    display: block;
+    width: 220px;
+    margin: 0 auto;
   }
 }
 </style>

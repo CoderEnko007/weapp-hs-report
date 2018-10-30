@@ -1,63 +1,75 @@
 <template>
   <div class="container">
-    <div class="panel">
-      <div class="panel-header">
-        <h1><span class="icon iconfont">&#xe729;</span>职业套牌</h1>
+    <NavBar></NavBar>
+    <div class="panel faction-frame">
+      <div class="headline">
+        <span class="title">职业套牌</span>
+        <div class="more-btn" @click="gotoDecks">
+          <span class="name">查看全部套牌</span>
+          <span class="iconfont">&#xe600;</span>
+        </div>
       </div>
       <div class="panel-block">
         <ul class="faction">
           <li class="faction-item" v-for="(item, index) in factionFrames" :key="index" @click="handleFactionClick(item)">
-            <img :src="item.image" alt="item.id" mode="aspectFit">
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        <h1><span class="icon iconfont">&#xe729;</span>卡组胜率与热度</h1>
-      </div>
-      <div class="panel-block">
-        <ul class="winrate">
-          <li :class="{'winrate-item': true, 'winrate-item-action': selectedFaction.id===item.id}"
-              v-for="(item, index) in factionIcons"
-              :key="index"
-              @click="handleIconsClick(item)">
-            <div class="icon">
-              <img :src="item.image" mode="aspectFit">
-              <p>{{item.name}}</p>
+            <img :src="item.image" mode="aspectFit">
+            <div class="faction">
+              <p class="cname">{{item.cname}}</p>
+              <p class="ename">{{item.id}}</p>
             </div>
           </li>
         </ul>
       </div>
-      <div class="panel-block">
-        <DeckTable :tableName="selectedFaction.name" :date="updateDate" :tableTitle="tableTitle" :tableData="factionDeckData"
-                   @cellClick="handleDeckNameClick"></DeckTable>
+    </div>
+    <div class="panel-list">
+      <div class="headline">
+        <span class="title">卡组胜率与热度</span>
+        <span class="headline-meta">标准模式</span>
+      </div>
+      <div class="m-30">
+        <HeroesPanel :dataList="factionIcons" @itemClick="handleIconsClick"></HeroesPanel>
+      </div>
+      <div class="panel-list">
+        <DeckTable :selectedFaction="selectedFaction"
+                   :tableTitle="tableTitle"
+                   :tableName="selectedFaction.name+'形态'"
+                   :tableData="selectedFaction.data"
+                   @itemClick="handleDeckItemClick"></DeckTable>
       </div>
     </div>
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import utils from '@/utils'
 import {getWinRateData} from "@/api/dbapi";
 import DeckTable from '@/components/DeckTable'
+import HeroesPanel from '@/components/HeroesPanel'
+import NavBar from '@/components/NavBar'
 
 export default {
   components: {
-    DeckTable
+    DeckTable,
+    HeroesPanel,
+    NavBar
   },
   data() {
     return {
       factionFrames: null,
       factionIcons: null,
-      selectedFaction: {id: 'Druid', name: '德鲁伊'},
-      factionDeckData: [],
+      selectedFaction: {id: 'Druid', name: '德鲁伊', data: []},
       tableTitle: [
-        {id: 'winrate', name: '胜率'},
+        {id: 'games', name: '对局数'},
         {id: 'popularity', name: '热度'},
-        {id: 'games', name: '对局总数'}
+        {id: 'winrate', name: '胜率'},
       ],
       updateDate: null,
     }
+  },
+  computed: {
+    ...mapGetters([
+      'navHeight'
+    ]),
   },
   methods: {
     genFactionIcons() {
@@ -65,18 +77,17 @@ export default {
       this.factionIcons = []
       for (let key in utils.faction) {
         if (utils.faction.hasOwnProperty(key)) {
-          this.factionFrames.push({id: key, image: utils.faction[key].deckIcon})
-          this.factionIcons.push({id: key, name: utils.faction[key].name, image: utils.faction[key].image1})
+          this.factionFrames.push({id: key, image: utils.faction[key].image1, cname: utils.faction[key].name})
+          this.factionIcons.push({id: key, name: utils.faction[key].name, image: utils.faction[key].image})
         }
       }
     },
-    genWinRateData(orderBy='games') {
+    genWinRateData() {
       wx.showNavigationBarLoading();
-      getWinRateData({faction: this.selectedFaction.id}, orderBy).then(res => {
+      getWinRateData({faction: this.selectedFaction.id}).then(res => {
         let otherDeckIndex = 0
         let decksName = this.$store.state.cards.decksName
-        this.factionDeckData = []
-        this.updateDate = res[0].create_time
+        this.selectedFaction.data = []
         for (let index in res) {
           if (res.hasOwnProperty(index)) {
             let ename = res[index].archetype
@@ -94,14 +105,14 @@ export default {
               winrate: res[index].winrate.toFixed(1),
               popularity: res[index].popularity.toFixed(1)
             }
-            this.factionDeckData.push(formatData)
+            this.selectedFaction.data.push(formatData)
           }
         }
         // 默认排序下将'其他'放到最后
-        let temp = this.factionDeckData[otherDeckIndex]
+        let temp = this.selectedFaction.data[otherDeckIndex]
         temp.deckName = '其他'
-        this.factionDeckData.splice(otherDeckIndex, 1)
-        this.factionDeckData.push(temp)
+        this.selectedFaction.data.splice(otherDeckIndex, 1)
+        this.selectedFaction.data.push(temp)
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
       }).catch(err => {
@@ -116,16 +127,22 @@ export default {
       })
     },
     handleIconsClick(item) {
-      this.selectedFaction = {id: item.id, name: item.name}
+      this.selectedFaction.id = item.id
+      this.selectedFaction.name = item.name
       this.genWinRateData()
     },
-    handleDeckNameClick(item) {
+    handleDeckItemClick(item) {
       let queryId = item.ename
       if(item.ename.toLowerCase() === 'other') {
         queryId = this.selectedFaction.id
       }
       wx.navigateTo({
         url: `/pages/decks/decksList/main?id=${this.selectedFaction.id}&name=${queryId}`
+      })
+    },
+    gotoDecks() {
+      wx.navigateTo({
+        url: `/pages/decks/decksList/main`
       })
     }
   },
@@ -151,83 +168,83 @@ export default {
   position: relative;
   width: 100%;
   height: 100%;
-  .panel{
-    padding: 6px 8px;
-    .panel-header {
-      width: 100%;
-      font-size: 14px;
-      .icon {
-        padding-right: 4px;
-        color: $palette-red;
-      }
-    }
-  }
   .panel-block {
-    width: 100%;
-    margin-top: 8px;
     ul {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       flex-wrap: wrap;
       width: 100%;
       box-sizing: border-box;
     }
     .faction-item {
-      width: 33%;
+      position: relative;
+      width: 220rpx;
+      height: 110rpx;
+      border: 1rpx solid #DDDDDD;
+      border-radius: 20rpx;
+      margin-bottom: 15rpx;
       img {
-        width: 100%;
-        height: 105rpx;
+        position: absolute;
+        left: 20rpx;
+        top: 50%;
+        width: 68rpx;
+        height: 68rpx;
+        transform: translateY(-50%);
+        border-radius: 50%;
+      }
+      .faction {
+        position: absolute;
+        left: 101rpx;
+        top: 50%;
+        transform: translateY(-50%);
+        .cname {
+          font-size: 13px;
+          color: #333333;
+          line-height: 30rpx;
+        }
+        .ename {
+          margin-top: 11rpx;
+          font-size: 13px;
+          color: #999999;
+          line-height: 26rpx;
+        }
       }
     }
-    .winrate {
-      .winrate-item {
+  }
+  .panel-list {
+    .headline {
+      margin: 0 30rpx;
+      .headline-meta {
+        height: 24rpx;
+        line-height: 24rpx;
+        margin-left:8px;
+        font-size: 19rpx;
+        color: #999;
+        border: 1rpx solid #ddd;
+        border-radius: 12px;
+        padding: 3rpx 10rpx;
+      }
+    }
+  }
+  .faction-frame {
+    padding: 0 30rpx;
+    .headline {
+      .more-btn {
         position: relative;
-        width: 20%;
-        height: 120rpx;
-        font-size: 12px;
-        color: white;
-        text-align: center;
-        .icon{
-          position: absolute;
-          width: 100rpx;
-          height: 100rpx;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          img {
-            width: 100%;
-            height: 100%;
-            border-radius: 6px;
-            box-sizing: border-box;
-            border: 2px solid transparent;
-          }
-          p {
-            position: absolute;
-            width: 92%;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 0 0 6px 6px;
-            background-color: rgba(0, 0, 0, .6);
-          }
+        float: right;
+        height: 100%;
+        line-height: 96rpx;
+        font-weight:normal;
+        .name {
+          margin-right: 10rpx;
+          color: $palette-blue;
+          font-size: 13px;
         }
-      }
-      .winrate-item-action {
-        img {
-          border: 2px solid $palette-orange!important;
+        .iconfont {
+          color: $palette-blue;
         }
       }
     }
-  }
-  .color-green {
-    color: green;
-  }
-  .color-red {
-    color: $palette-orange;
-  }
-  .table-icon {
-    font-size: 12px;
-    margin-left: 5px;
   }
 }
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <NavBar></NavBar>
     <div class="filter">
       <div class="search-bar">
         <SearchBar @handleConfirm="handleSearch" placeholder="请输入卡牌名称、规则或者属性"></SearchBar>
@@ -34,7 +35,7 @@
       </div>
     </div>
     </div>
-    <div v-show="selectedFilterTabItem!==null" :class="{mask: true, gray_bgc: selectedFilterTabItem!==null}"></div>
+    <div v-show="selectedFilterTabItem!==null" :class="{mask: true, gray_bgc: selectedFilterTabItem!==null}" @click="handleMaskClick"></div>
     <div class="cards_list" :style="{height:600+'px'}">
       <CardList :list="cardsList" @cardClick="handleCardClick"></CardList>
       <ZanLoadmore v-if="!cardsList.length" v-bind="{ nodata: true }" />
@@ -44,12 +45,14 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import utils from '@/utils'
 import SearchBar from '@/components/SearchBar'
 import FilterMenu from '@/components/FilterMenu'
 import CardList from '@/components/CardList'
 import {getSeriesData, getCardsList, genCardsImageURL} from "@/api/dbapi";
 import ZanLoadmore from '@/components/loadmore'
+import NavBar from '@/components/NavBar'
 
 const defaultFilter = {
   search: null,
@@ -64,7 +67,8 @@ export default {
     ZanLoadmore,
     SearchBar,
     FilterMenu,
-    CardList
+    CardList,
+    NavBar,
   },
   data() {
     return {
@@ -92,9 +96,9 @@ export default {
     }
   },
   computed: {
-    showMenu() {
-      return this.selectedFilterTabItem != null
-    }
+    ...mapGetters([
+      'navHeight'
+    ]),
   },
   methods: {
     genFilterMenuItems() {
@@ -107,12 +111,20 @@ export default {
       array.push({id: 'Neutral', name: '中立'})
       array.unshift({id: 'all', name: '全部职业'})
       this.filterTabBar[0].items = array
+
       array = utils.mode
       array.unshift({id: 'all', name: '全部模式'})
       this.filterTabBar[1].items = utils.mode
-      array = utils.rarity
+
+      array = []
+      for (let key in utils.rarity) {
+        if (utils.rarity.hasOwnProperty(key)) {
+          array.push({id: key, name: utils.rarity[key].name})
+        }
+      }
       array.unshift({id: 'all', name: '全部稀有度'})
       this.filterTabBar[2].items = array
+
       for (let filter of this.filterTabBar) {
         if (filter.items.length % 2) {
           filter.items.push({})
@@ -140,6 +152,9 @@ export default {
         default: console.log(filter.name+' not found');
       }
       this.genCardsList(true)
+    },
+    handleMaskClick() {
+      this.selectedFilterTabItem = null
     },
     obtainSeriesList() {
       let array = this.$store.state.cards.series
@@ -226,15 +241,26 @@ export default {
   width: 100%;
   background-color: #fff;
   z-index: 2;
+  .search-bar {
+    padding: 20rpx 30rpx;
+  }
 }
 .cost_filter {
   position: relative;
-  padding: 0 15rpx;
+  padding: 0 30rpx;
   .cards_cost {
     display: flex;
     justify-content: space-around;
     width: 100%;
     li {
+      display:flex;
+      text-align:center;
+      position: relative;
+      height: 75rpx;
+      line-height: 75rpx;
+      a {
+        margin: auto;
+      }
       .type_icon {
         position: relative;
         width: 27px;
@@ -291,7 +317,7 @@ export default {
   position: relative;
   width: 100%;
   height: 100%;
-  padding-top: 200rpx;
+  padding-top: 136px;
 }
 .mask {
   position:fixed;
@@ -300,6 +326,7 @@ export default {
   width:100%;
   height: 100%;
   transition: all .2s;
+  z-index: 1;
 }
 .gray_bgc {
   background-color: rgba(0, 0, 0, 0.3);
@@ -310,7 +337,7 @@ export default {
   .menu_block {
     position: absolute;
     width: 100%;
-    z-index: 1;
+    z-index: 2;
   }
 }
 </style>

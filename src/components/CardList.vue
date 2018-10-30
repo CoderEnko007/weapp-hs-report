@@ -1,11 +1,3 @@
-<template>
-  <div class="card-list">
-    <div class="card" v-for="(item, index) in list" :key="index" @click="handleClick(item)">
-      <img :src="item.image" mode="aspectFit">
-      <p>{{item.name}}</p>
-    </div>
-  </div>
-</template>
 <script>
 export default {
   name: 'CardList',
@@ -17,6 +9,14 @@ export default {
   },
 }
 </script>
+<template>
+  <div class="card-list">
+    <div class="card" v-for="(item, index) in list" :key="index" @click="handleClick(item)">
+      <img :src="item.image" mode="aspectFit">
+      <p>{{item.name}}</p>
+    </div>
+  </div>
+</template>
 <style lang="scss" scoped>
 .card-list {
   width: 100%;

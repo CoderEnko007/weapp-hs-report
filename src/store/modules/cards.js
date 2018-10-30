@@ -61,7 +61,8 @@ const cards = {
             decksName.push({
               'faction': item.faction,
               'ename': item.ename,
-              'cname': item.cname
+              'cname': item.cname,
+              'mode': item.mode
             })
           }
           commit('SET_DECKSNAME', decksName)
@@ -74,30 +75,48 @@ const cards = {
     getCollectedDecks({commit, state}, userID) {
       return new Promise((resolve, reject) => {
         getUserCollectionDecks(userID).then(res => {
-          let collectList = res.objects.map(item => {
-            return item.deck_id
-          })
-          getDeckList({collectList: collectList}).then(deckRes => {
-            let decks = []
-            for(let collect of collectList) {
-              let array = deckRes.objects.filter(item => {
-                return item.deck_id === collect
-              })
-              if (array.length > 0) {
-                decks.push(array[0])
-              }
-            }
-            commit('SET_COLLECTED_DECKS', decks)
-            resolve({total_count: res.meta.total_count, list: decks})
-          }, err => {
-            reject(err)
-          })
+          commit('SET_COLLECTED_DECKS', res.objects)
+          resolve({list: res.objects})
+        }, err => {
+          reject(err)
         })
+        // getUserCollectionDecks(userID).then(res => {
+        //   let collectList = res.objects.map(item => {
+        //     return {
+        //       deck_id: item.deck_id,
+        //       time: item.created_at
+        //     }
+        //   })
+        //   return collectList
+        // }).then(res => {
+        //   let collectList = res.map(item => {
+        //     return item.deck_id
+        //   })
+        //   getDeckList({collectList: collectList}).then(deckRes => {
+        //     let decks = []
+        //     for(let index in collectList) {
+        //       if (collectList.hasOwnProperty(index)) {
+        //         let array = deckRes.objects.filter(item => {
+        //           return item.deck_id === collectList[index]
+        //         })
+        //         if (array.length > 0) {
+        //           // 记录收藏的时间
+        //           array[0].collect_time = res[index].time
+        //           decks.push(array[0])
+        //         }
+        //       }
+        //     }
+        //     commit('SET_COLLECTED_DECKS', decks)
+        //     resolve({list: decks})
+        //   }, err => {
+        //     reject(err)
+        //   })
+        // })
       })
     },
     addCollectedDeck({commit, state}, data) {
       return new Promise((resolve, reject) => {
-        setUserCollection(data.query).then(res => {
+        setUserCollection(data).then(res => {
           commit('ADD_COLLECTED_DECKS', data.deckDetail)
           resolve(res)
         }, err => {

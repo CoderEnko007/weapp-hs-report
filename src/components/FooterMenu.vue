@@ -2,24 +2,18 @@
   <div class="footer-menu">
     <button open-type="share" class="share">
       <span class="icon iconfont">&#xe63b;</span>
-      <span>点击分享</span>
+      <span>分享给好友</span>
     </button>
-    <div class="like-block" v-if="showCollectBtn">
-      <div class="separator" :style="{left: 125+'px'}"></div>
-      <button class="like" @click="handleCollect">
-        <span class="active icon iconfont" v-if="collected">&#xe601;</span>
-        <span class="icon iconfont" v-else>&#xe603;</span>
-        <span>收藏</span>
-      </button>
-      <div class="separator" :style="{right: 125+'px'}"></div>
-    </div>
-    <div v-else>
-      <div class="separator"></div>
-    </div>
-    <button @click="backToHome">
-      <span class="icon iconfont">&#xe615;</span>
-      <span>返回首页</span>
+    <div class="separator" v-if="showCollectBtn"></div>
+    <button class="like" v-if="showCollectBtn" @click="handleCollect">
+      <span class="active icon iconfont" v-if="collected">&#xe601;</span>
+      <span class="icon iconfont" v-else>&#xe603;</span>
+      <span>收藏套牌</span>
     </button>
+    <!--<button @click="backToHome">-->
+      <!--<span class="icon iconfont">&#xe615;</span>-->
+      <!--<span>返回首页</span>-->
+    <!--</button>-->
   </div>
 </template>
 <script>
@@ -36,15 +30,6 @@ export default {
       wx.switchTab({
         url: '/pages/index/main'
       })
-      // var pages = getCurrentPages(); // 当前页面
-      // var beforePage = pages[pages.length - 2]; // 前一个页面
-      // console.log(pages);
-      // console.log(beforePage);
-      // wx.navigateBack({
-      //   success: function() {
-      //     beforePage.onReady(); // 执行前一个页面的onLoad方法
-      //   }
-      // });
     },
     handleCollect() {
       this.$emit('collectClick')
@@ -64,6 +49,7 @@ export default {
   position: relative;
   display: flex;
   justify-content: space-around;
+  flex-wrap: nowrap;
   width: 750rpx;
   border-top: 1rpx solid $palette-bg-gray;
   background-color: #fff;

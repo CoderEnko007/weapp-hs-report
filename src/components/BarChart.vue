@@ -9,7 +9,7 @@
 import * as echarts from '../libs/echarts.simple.min'
 import mpvueEcharts from 'mpvue-echarts'
 let barChart = null
-const defaultColors = '#206994'
+const defaultColors = '#433E88'
 export default {
   name: 'BarChart',
   props: ['chartData', 'canvasId', 'colors'],
@@ -68,7 +68,7 @@ export default {
         series: [{
           animation: false,
           type: 'bar',
-          barWidth: 30,
+          barWidth: 15,
           data: this.chartData.yAxis,
           itemStyle: {
             normal: {

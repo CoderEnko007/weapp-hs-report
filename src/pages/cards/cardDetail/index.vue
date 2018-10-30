@@ -1,9 +1,10 @@
 <template>
   <div class="card-detail">
+    <NavBar :showCapsule="true"></NavBar>
     <div class="header" @click="previewCard">
       <img :src="cardDetail.bgImg" class="bg-img" mode="aspectFiit">
       <img :src="cardDetail.cardImg" class="card-img" mode="aspectFit">
-      <img :src="cardDetail.heroIcon" class="icon-img" mode="aspectFit">
+      <!--<img :src="cardDetail.heroIcon" class="icon-img" mode="aspectFit">-->
     </div>
     <div class="detail">
       <p class="name">{{cardDetail.name}}</p>
@@ -12,16 +13,20 @@
       <p v-show="cardDetail.type" class="normal"><span class="f2">类型</span>：{{cardDetail.type}}</p>
       <p v-show="cardDetail.flavor" class="flavor">{{cardDetail.flavor}}</p>
     </div>
-    <div class="footer">
-      <FooterMenu></FooterMenu>
-    </div>
+    <!--<div class="footer">-->
+      <!--<FooterMenu></FooterMenu>-->
+    <!--</div>-->
+    <floatBtnGroup></floatBtnGroup>
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import utils from '@/utils'
 import {genOrigImageURL, genCardsImageURL, gen512CardsImageURL} from '@/utils'
 import {getCardDetail} from "@/api/dbapi";
 import FooterMenu from '@/components/FooterMenu'
+import floatBtnGroup from '@/components/floatBtnGroup'
+import NavBar from '@/components/NavBar'
 
 const heroes = {
   Druid: {name: '德鲁伊', image: '/static/heroIcons/druid.png'},
@@ -47,13 +52,20 @@ const defaultCardDetail = {
 }
 export default {
   components: {
-    FooterMenu
+    FooterMenu,
+    floatBtnGroup,
+    NavBar
   },
   data() {
     return {
       cardId: null,
       cardDetail: Object.assign({}, defaultCardDetail),
     }
+  },
+  computed: {
+    ...mapGetters([
+      'navHeight'
+    ]),
   },
   methods: {
     initCardDetail() {
@@ -103,9 +115,16 @@ export default {
     this.cardDetail = Object.assign({}, defaultCardDetail)
   },
   onShareAppMessage(res) {
-    return {
-      title: this.cardDetail.name,
-      path: `/pages/cards/cardDetail/main?id=${this.cardId}`
+    if (res.from === 'button') {
+      return {
+        title: this.cardDetail.name,
+        path: `/pages/cards/cardDetail/main?id=${this.cardId}`
+      }
+    } else {
+      return {
+        title: '炉石传说情报站',
+        path: '/pages/index/main'
+      }
     }
   }
 }

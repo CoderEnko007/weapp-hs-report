@@ -7,6 +7,5 @@ app.$mount()
 export default {
   config: {
     enablePullDownRefresh: true,
-    backgroundTextStyle: "dark"
   }
 }

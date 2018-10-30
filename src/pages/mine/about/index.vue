@@ -1,38 +1,65 @@
 <template>
 <div class="container">
+  <NavBar :showCapsule="true"></NavBar>
   <div class="banner">
     <img :src="bannerImg" mode="aspectFill">
-    <h1>炉石传说情报站</h1>
+    <div class="text">
+      <h1>炉石传说情报站</h1>
+      <p>祝大家早日上传说</p>
+    </div>
   </div>
   <div class="content">
     <div class="panel">
-      <div class="panel-header">
-        <h1><span class="icon iconfont">&#xe604;</span>关于炉石情报站</h1>
+      <div class="headline">
+        <span class="title">数据说明</span>
       </div>
       <div class="desc">
-        <p class="indent_2">本小程序中的卡组及数据均来自HSReplay，由于HSReplay每隔1小时就会更新全站数据，而爬取数据需要一定时间，因此小程序中的数据可能会与HSReplay有所偏差，但是一天内的变化不会太大，大家放心食用。目前仅提供标准模式卡组和数据，祝大家早日上传说。</p>
-        <p class="indent_2">如果使用中发现什么bug或者有什么建议，欢迎大家联系我。</p>
-        <p>邮箱：yf381966217@163.com</p>
+        <p>· 本小程序中的卡组及数据均来自HSReplay</p>
+        <p>· HSReplay每隔1小时就会更新全站数据，而爬取数据需要一定时间，因此小程序中的数据可能会与实时数据有所偏差，但是一天内的变化不会太大，大家放心食用。</p>
+        <p>· 目前仅提供标准模式卡组和数据，更多功能敬请期待。</p>
       </div>
+      <div class="separator"></div>
     </div>
-    <div class="panel code">
-      <img :src="codeImg" mode="aspectFill" @click="handleClickCodeImg">
+  </div>
+  <div class="contact">
+    <div class="headline">
+      <span class="title">联系作者</span>
+    </div>
+    <p class="text">在使用中发现什么bug或者有什么建议，欢迎大家联系我。</p>
+    <div class="email">
+      <span class="text">发邮件</span>
+      <div class="capsule" @click="handleCopyBtn"><span>复制</span></div>
+      <span class="desc">{{email}}</span>
     </div>
   </div>
 </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
+import NavBar from '@/components/NavBar'
+
 export default {
+  components: {
+    NavBar
+  },
   data() {
     return {
-      bannerImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g7yChfIyViFMUoB.jpg',
-      codeImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9oGSrxprEojAfB.jpg'
+      bannerImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gDPyMJP8arlwMXm.png',
+      email: 'yf381966217@163.com'
     }
   },
+  ...mapGetters([
+    'navHeight',
+  ]),
   methods: {
-    handleClickCodeImg() {
-      wx.previewImage({
-        urls: [this.codeImg]
+    handleCopyBtn() {
+      wx.setClipboardData({
+        data: this.email,
+        success: function (res) {
+          wx.showToast({
+            title: '复制成功'
+          })
+        }
       })
     }
   },
@@ -50,45 +77,102 @@ export default {
 .container {
   .banner {
     position: relative;
-    height: 200rpx;
+    height: 325rpx;
     img {
       height: 100%;
       width: 100%;
     }
-    h1 {
+    .text {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #fff;
-      font-weight: 700;
-      font-size: 1.4em;
+      left: 30rpx;
+      top: 64rpx;
+      h1 {
+        font-size: 28px;
+        color: #FFFFFF;
+        line-height: 28px;
+      }
+      p {
+        margin-top: 9rpx;
+        font-size: 13px;
+        color: #FFFFFF;
+        line-height: 44rpx;
+      }
     }
   }
   .content {
+    margin: 0 30rpx;
     .panel{
-      padding: 6px 8px;
-      .panel-header {
-        width: 100%;
-        font-size: 16px;
-        .icon {
-          font-size: 16px;
-          padding-right: 4px;
-          color: $palette-red;
+      .headline {
+        &:before {
+          display: none;
+        }
+        .title {
+          margin: 0;
         }
       }
       .desc {
-        margin: 5px 7px;
-        font-size: 14px;
-        .indent_2 {
-          text-indent: 2em;
+        font-size: 13px;
+        color: #666666;
+        line-height: 40rpx;
+        margin-bottom: 10rpx;
+        p {
+          margin-bottom: 1em;
         }
       }
+      .separator {
+        width: 100%;
+        box-sizing: border-box;
+        border-bottom: 1rpx solid #eee;
+        margin: 20rpx 0;
+      }
     }
-    .code {
-      text-align: center;
-      img {
-        width: 220px;
+  }
+  .contact {
+    margin: 0 30rpx;
+    .headline {
+      &:before {
+        display: none;
+      }
+      .title {
+        margin: 0;
+      }
+    }
+    p.text {
+      font-size: 13px;
+      color: #666666;
+      line-height: 40px;
+    }
+    .email {
+      height: 120rpx;
+      box-sizing:border-box;
+      border-bottom:1rpx solid #eee;
+      .text {
+        line-height:120rpx;
+        font-size: 15px;
+        color: #333333;
+      }
+      .desc {
+        float: right;
+        right: 101rpx;
+        height: 40rpx;
+        font-size: 13px;
+        color: #999999;
+        margin-right:13rpx;
+        margin-top:40rpx;
+      }
+      .capsule {
+        float: right;
+        right: 0;
+        height: 40rpx;
+        width: 88rpx;
+        padding:0 15rpx;
+        font-size: 12px;
+        border-radius: 20rpx;
+        box-sizing: border-box;
+        border: 1rpx solid #ddd;
+        text-align: center;
+        margin-top:40rpx;
+        color: #999999;
       }
     }
   }

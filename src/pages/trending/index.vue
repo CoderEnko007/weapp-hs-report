@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <NavBar></NavBar>
     <div class="banner">
       <div class="meta">
         <h1>热门套牌</h1>
@@ -10,16 +11,22 @@
     <div class="deck-list">
       <DeckList :list="deckList" @itemClick="handleDeckClick"></DeckList>
     </div>
+    <div class="ads" v-if="adsOpenFlag">
+      <ad unit-id="adunit-5507cac6947d0ea4"></ad>
+    </div>
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import utils from '@/utils'
 import {getTrendingList} from "@/api/dbapi";
 import DeckList from '@/components/DeckList';
+import NavBar from '@/components/NavBar'
 
 export default {
   components: {
-    DeckList
+    DeckList,
+    NavBar,
   },
   data() {
     return {
@@ -29,11 +36,17 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'navHeight'
+    ]),
     updateDate() {
       if (this.report_date) {
         let formatDate = new Date(this.report_date)
         return formatDate.getMonth()+1 + '月' + formatDate.getDate() + '日更新'
       }
+    },
+    adsOpenFlag() {
+      return utils.adsOpenFlag
     },
   },
   methods: {
@@ -46,7 +59,10 @@ export default {
           })
           if (temp[0] && temp[0].cname) {
             this.deckList[index].cname = temp[0].cname
+          } else {
+            this.deckList[index].cname = this.deckList[index].deck_name
           }
+          this.deckList[index].win_rate = this.deckList[index].win_rate.toFixed(1)
         }
       }
     },
@@ -65,6 +81,7 @@ export default {
       })
     },
     handleDeckClick(item) {
+      console.log(item)
       wx.navigateTo({
         url: `/pages/decks/deckDetail/main?id=${item.id}&trending=1`
       })

@@ -1,6 +1,6 @@
 <template>
   <div class="cards-list">
-    <div :class="['card-tile', {'menu-item-empty': !card.name}]" v-for="(card, index) in cards" :key="index" @click="cardClick(card)">
+    <div :class="['card-tile', {'menu-item-empty': !card.name}]" v-for="(card, index) in formatData" :key="index" @click="cardClick(card)">
       <div :class="['card-gem', {
         'rarity-common': card.rarity==='FREE'||card.rarity==='COMMON',
         'rarity-rare': card.rarity==='RARE',
@@ -34,7 +34,7 @@ export default {
   props: ['cards'],
   data() {
     return {
-
+      formatData: null
     }
   },
   methods: {
@@ -51,15 +51,15 @@ export default {
   watch: {
     cards: function(val) {
       if (typeof(val) === 'string' && this.cards) {
-        this.cards = JSON.parse(this.cards)
-        for (let card of this.cards) {
+        this.formatData = JSON.parse(this.cards)
+        for (let card of this.formatData) {
           card['img'] = this.genTileImage(card.card_hsid)
           if (card.rarity === 'LEGENDARY') {
             card['count'] = '★'
           }
         }
-        if (this.cards.length % 2) {
-          this.cards.push({})
+        if (this.formatData.length % 2) {
+          this.formatData.push({})
         }
       }
     }

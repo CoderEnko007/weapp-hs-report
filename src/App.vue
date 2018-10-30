@@ -2,7 +2,8 @@
 export default {
   data() {
     return {
-      clientId: 'ec59002ba0fc4c74bf50'
+      clientId: 'ec59002ba0fc4c74bf50',
+      navHeight: null,
     }
   },
   methods: {
@@ -15,6 +16,11 @@ export default {
       this.$store.dispatch('getSeriesData').then(res => {
         // console.log('series', res)
       })
+    },
+    setNavHeight() {
+      this.$store.dispatch('setNavHeight').then(res => {
+        // console.log(res)
+      })
     }
   },
   created () {
@@ -25,6 +31,7 @@ export default {
     // wx.BaaS.init(this.clientId)
     this.initDecksName()
     this.initCardSeries()
+    this.setNavHeight()
   },
 }
 </script>
@@ -52,6 +59,9 @@ export default {
 }
 .p-30 {
   padding: 0 30rpx;
+}
+.pr-30 {
+  padding-right: 30rpx;
 }
 .color-green {
   color: $palette-green;
@@ -137,5 +147,11 @@ export default {
 }
 .grad-header-gray {
   background: linear-gradient(65deg,#555,#eee calc(100% - 120px),rgba(49,49,49,0) calc(100% - 50px),rgba(49,49,49,0));
+}
+.loading {
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  color: #ddd;
 }
 </style>

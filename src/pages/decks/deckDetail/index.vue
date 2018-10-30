@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <NavBar :showCapsule="true"></NavBar>
     <div class="banner" :style="{'background-image': bannerImg?'url('+bannerImg+')':''}">
       <div class="overview">
         <div class="deck-name">
@@ -42,42 +43,41 @@
       <FooterMenu showCollectBtn="true" :collected="deckCollected" @collectClick="handleCollection" ref="btnGroup"></FooterMenu>
     </div>
     <div class="card-list">
-      <div class="headline"><span class="title">套牌组成</span></div>
-      <DeckCards :cards="deckDetail.card_list" @cardClick="handleCardClick"></DeckCards>
-      <div class="rarity-panel">
+      <div class="headline m-30"><span class="title">套牌组成</span></div>
+      <div class="m-30">
+        <DeckCards :cards="deckDetail.card_list" @cardClick="handleCardClick"></DeckCards>
+      </div>
+      <div class="rarity-panel m-30">
         <div class="capsule" v-for="(item, index) in rarityChartData" :key="index" v-if="item.value>0">
           <div class="icons" :style="{'background-color': item.color}"></div>
           <span class="name">{{item.cname}}</span>
           <span class="value">{{item.value}}</span>
         </div>
       </div>
-      <div class="type-panel">
+      <div class="type-panel m-30">
         <div class="capsule" v-for="(item, index) in typeChartData" :key="index" v-if="item.value>0">
           <span class="name">{{item.cname}}</span>
           <span class="value">{{item.value}}</span>
         </div>
       </div>
-      <div class="deck-code">
+      <div class="deck-code m-30">
         <div class="code"><span>{{deckDetail.deck_code}}</span></div>
         <button @click="copyDeckCode">复制神秘代码</button>
-      </div>
-      <div class="data-chart">
-        <div class="headline"><span class="title">对阵各职业胜率</span></div>
-        <BarChart :chartData="winrateChartData" canvasId="factionBar" :colors="factionColors" @barClick="handleWinRateBarClick"></BarChart>
-        <div class="chart-text" v-if="selectWinRate.name">
-          对阵{{selectWinRate.name}}胜率为：
-          <span class="color-green" :class="{'color-red': selectWinRate.value<50}" :style="{'font-weight': 700}">
-            {{selectWinRate.value}}%
-          </span>
-        </div>
-        <div class="chart-text" v-else>点一下柱状图看看</div>
       </div>
       <div class="ads" v-if="adsOpenFlag">
         <ad unit-id="adunit-5507cac6947d0ea4"></ad>
       </div>
-      <div class="data-chart">
-        <div class="headline"><span class="title">费用分布</span></div>
-        <BarChart :chartData="costChartData" canvasId="costBar"></BarChart>
+      <div class="separator" v-else></div>
+      <div class="winrate-block m-30">
+        <div class="headline"><span class="title">对阵各职业胜率</span></div>
+        <WinRateBoard :list="winrateChartData"></WinRateBoard>
+      </div>
+      <div class="m-30">
+        <div class="separator"></div>
+        <div class="data-chart">
+          <div class="headline"><span class="title">费用分布</span></div>
+          <BarChart :chartData="costChartData" canvasId="costBar"></BarChart>
+        </div>
       </div>
     </div>
     <div class="safe-panel" :style="{'height': 60+'rpx'}"></div>
@@ -94,6 +94,8 @@ import BarChart from '@/components/BarChart'
 import PieChart from '@/components/PieChart'
 import FooterMenu from '@/components/FooterMenu'
 import ZanToast from '@/components/toast'
+import NavBar from '@/components/NavBar'
+import WinRateBoard from '@/components/WinRateBoard'
 
 const defaultDetail = {
   background_img: '',
@@ -112,12 +114,16 @@ const defaultDetail = {
   faction_win_rate: ''
 }
 
+// const deckSource = ['deck', 'trending', 'collection']
+
 export default {
   components: {
+    NavBar,
     DeckCards,
     BarChart,
     PieChart,
     FooterMenu,
+    WinRateBoard,
     _toast: ZanToast
   },
   data() {
@@ -125,6 +131,8 @@ export default {
       recordID : '5bc2f3c5b5aa5821082c76b8',
       deckID: '',
       trending: false,
+      collected: false,
+      deckMode: 'Standard',
       decksName: '',
       bannerImg: null,
       deckDetail: Object.assign({}, defaultDetail),
@@ -138,7 +146,7 @@ export default {
       typeChartData: [],
       rarityChartData: [],
       rarityColor: [],
-      winrateChartData: {xAxis: [], yAxis: []},
+      winrateChartData: [],
       selectWinRate: {name: '', value: ''},
       deckCollected: false,
       showArchetype: false
@@ -146,6 +154,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'navHeight',
       'userInfo'
     ]),
     genFactionIcon() {
@@ -190,9 +199,10 @@ export default {
       }
       this.typeChartData = []
       this.rarityChartData = []
-      this.winrateChartData ={xAxis: [], yAxis: []}
+      this.winrateChartData = []
       this.selectWinRate = {name: '', value: ''}
       this.deckCollected = false
+      this.showArchetype = false
     },
     genDeckData() {
       wx.showNavigationBarLoading();
@@ -202,55 +212,68 @@ export default {
       } else if (this.deckID) {
         params = {deckID: this.deckID}
       }
-      console.log(this.recordID, this.deckID)
-      getDeckDetail(params, this.trending).then(res => {
-        this.checkDeckCollected()
-        this.deckDetail = res
-        this.getArchetype()
-        this.bannerImg = utils.faction[this.deckDetail['faction']].bgImage1
-        this.costChartData.yAxis = JSON.parse(this.deckDetail.statistic)
-        let costMax = Math.max.apply(null, this.costChartData.yAxis)
-        this.costChartData.max = 5-costMax%10>0?costMax+5-costMax%10:costMax+10-costMax%10
-        this.costChartData = JSON.stringify(this.costChartData)
+      params.mode = this.deckMode
+      getDeckDetail(params, this.trending, this.collected).then(res => {
+        if (!res) {
+          wx.showModal({
+            title: '提示',
+            content: '抱歉，暂未收录该卡组',
+            showCancel: false,
+            success (res) {
+              wx.navigateBack()
+            }
+          })
+        } else {
+          this.checkDeckCollected()
+          this.deckDetail = res
+          this.getArchetype()
+          this.bannerImg = utils.faction[this.deckDetail['faction']].bgImage1
+          this.costChartData.yAxis = JSON.parse(this.deckDetail.statistic)
+          let costMax = Math.max.apply(null, this.costChartData.yAxis)
+          this.costChartData.max = 5-costMax%10>0?costMax+5-costMax%10:costMax+10-costMax%10
+          this.costChartData = JSON.stringify(this.costChartData)
 
-        // 卡牌类型数据
-        let clazz = JSON.parse(this.deckDetail.clazzCount)
-        for (let index in clazz) {
-          if (clazz.hasOwnProperty(index)) {
-            this.typeChartData.push({
-              name: index.toLowerCase(),
-              cname: utils.type[index.toUpperCase()].name,
-              value: clazz[index]
-            })
+          // 卡牌类型数据
+          this.typeChartData = []
+          let clazz = JSON.parse(this.deckDetail.clazzCount)
+          for (let index in clazz) {
+            if (clazz.hasOwnProperty(index)) {
+              this.typeChartData.push({
+                name: index.toLowerCase(),
+                cname: utils.type[index.toUpperCase()].name,
+                value: clazz[index]
+              })
+            }
           }
-        }
-        // 卡牌稀有度数据
-        let rarity = JSON.parse(this.deckDetail.rarityCount)
-        this.rarityColor = []
-        for (let index in rarity) {
-          if (rarity.hasOwnProperty(index)) {
-            this.rarityChartData.push({
-              name: index.toLowerCase(),
-              cname: utils.rarity[index.toLowerCase()].name,
-              value: rarity[index],
-              color: utils.rarity[index.toLowerCase()].color
-            })
+          // 卡牌稀有度数据
+          this.rarityChartData = []
+          let rarity = JSON.parse(this.deckDetail.rarityCount)
+          let commonCards = {name: '', cname: '基础/普通', value: 0, color: utils.rarity['free'].color}
+          this.rarityColor = []
+          for (let index in rarity) {
+            if (rarity.hasOwnProperty(index)) {
+              if (index.toLowerCase() === 'free' || index.toLowerCase() === 'common') {
+                commonCards.value += rarity[index]
+              } else {
+                this.rarityChartData.push({
+                  name: index.toLowerCase(),
+                  cname: utils.rarity[index.toLowerCase()].name,
+                  value: rarity[index],
+                  color: utils.rarity[index.toLowerCase()].color
+                })
+              }
+            }
           }
+          this.rarityChartData.unshift(commonCards)
+          // 对阵各职业胜率数据
+          this.winrateChartData = JSON.parse(this.deckDetail.faction_win_rate)
+          this.winrateChartData = this.winrateChartData.map(item => {
+            item.win_rate = parseFloat(item.win_rate).toFixed(1)
+            return item
+          })
+          wx.hideNavigationBarLoading()
+          wx.stopPullDownRefresh();
         }
-        // 对阵各职业胜率数据
-        let winrate = JSON.parse(this.deckDetail.faction_win_rate)
-        for (let item of winrate) {
-          this.winrateChartData.xAxis.push(utils.faction[item.faction].shortName)
-          this.winrateChartData.yAxis.push(parseFloat(item.win_rate))
-        }
-        let min = Math.min.apply(null, this.winrateChartData.yAxis)
-        this.winrateChartData.min = Math.floor(min/10)*10-10
-        let max = Math.max.apply(null, this.winrateChartData.yAxis)
-        this.winrateChartData.max = Math.ceil(max/10)*10+10
-        this.winrateChartData.unit = '%'
-        this.winrateChartData = JSON.stringify(this.winrateChartData)
-        wx.hideNavigationBarLoading()
-        wx.stopPullDownRefresh();
       }).catch(err => {
         console.log(err)
         wx.hideNavigationBarLoading()
@@ -262,6 +285,8 @@ export default {
         getArchetypeDetail({name: this.deckDetail.deck_name}).then(res => {
           if (res) {
             this.showArchetype = true
+          } else {
+            this.showArchetype = false
           }
         }).catch(err => {
           this.showArchetype = false
@@ -298,7 +323,7 @@ export default {
       if (this.deckCollected) {
       //  如果已收藏则取消收藏
         let data = {
-            deck_id: this.deckDetail.deck_id,
+            collection_id: this.deckDetail.id,
             user_id: this.userInfo.id
         }
         this.$store.dispatch('cancelCollectedDeck', data).then(res => {
@@ -346,28 +371,40 @@ export default {
       })
     },
   },
-  onReady() {
+  mounted() {
     this.toast = getComponentByTag(this, '_toast')
-    this.resetPageData()
+  },
+  onLoad() {
     this.recordID = this.$root.$mp.query.id
-    // this.recordID = '5bc2f3c5b5aa5821082c76b8'
     this.deckID = this.$root.$mp.query.deckID
+    this.deckMode = this.$root.$mp.query.mode?this.$root.$mp.query.mode:'Standard'
     this.decksName = this.$store.state.cards.decksName
     this.trending = !!this.$root.$mp.query.trending
+    this.collected = !!this.$root.$mp.query.collected
+  },
+  onReady() {
     this.genDeckData()
   },
   onUnload() {
     this.resetPageData()
-    // this.deckCollected = false
     this.toast.clearZanToast()
   },
   onPullDownRefresh() {
+    // 下拉刷新要把json字符串转换为对象，否则getDeckData时操作对象会报错
+    this.costChartData = JSON.parse(this.costChartData)
     this.genDeckData()
   },
   onShareAppMessage(res) {
-    return {
-      title: this.genDeckName,
-      path: `/pages/decks/deckDetail/main?id=${this.recordID}`
+    if (res.from === 'button') {
+      return {
+        title: this.genDeckName,
+        path: `/pages/decks/deckDetail/main?id=${this.recordID}`
+      }
+    } else {
+      return {
+        title: '炉石传说情报站',
+        path: '/pages/index/main'
+      }
     }
   }
 }
@@ -478,14 +515,14 @@ export default {
     }
   }
   .card-list {
-    margin: 0 30rpx;
+    /*margin: 0 30rpx;*/
     .capsule {
       position: relative;
       display:inline-block;
-      width: 128rpx;
+      /*width: 128rpx;*/
       height: 48rpx;
       line-height: 48rpx;
-      padding:0 15rpx;
+      padding:0 18rpx;
       margin-right: 10rpx;
       text-align: center;
       font-size: 13px;
@@ -496,14 +533,14 @@ export default {
       .icons {
         position:absolute;
         display: inline-block;
-        width: 16rpx;
-        height: 16rpx;
+        width: 18rpx;
+        height: 18rpx;
         top:50%;
         transform:translateY(-50%);
-        border-radius: 8rpx;
+        border-radius: 9rpx;
       }
       .name {
-        margin:0 5rpx 0 20rpx;
+        margin:0 5rpx 0 25rpx;
       }
       .value {
         color: #000;
@@ -573,6 +610,12 @@ export default {
       line-height:27px;
       font-size:14px;
     }
+  }
+  .separator {
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 1rpx solid #eee;
+    margin: 30rpx 0;
   }
 }
 </style>

@@ -75,9 +75,6 @@ export default {
       this.showListFlag = !this.showListFlag
     }
   },
-  mounted() {
-
-  }
 }
 </script>
 <style lang="scss" scoped>

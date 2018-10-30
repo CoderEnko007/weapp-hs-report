@@ -51,8 +51,8 @@ export default {
     }
     .menu-item-action {
       color: #fff;
-      background-color: $palette-blue;
-      border: 1px solid $palette-blue;
+      background-color: $palette-blue-normal;
+      border: 1px solid $palette-blue-normal;
     }
     .menu-item-empty {
       border: none
