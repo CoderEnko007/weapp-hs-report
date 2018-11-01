@@ -2,9 +2,9 @@
   <div class="container">
     <NavBar></NavBar>
     <div class="userinfo">
-      <img :src="userInfo.avatarUrl">
+      <img :src="userInfo.avatar">
       <button v-if="!userInfo.openid" open-type="getUserInfo" @getuserinfo="userInfoHandler">点击登录</button>
-      <p v-else>{{userInfo.nickName}}</p>
+      <p v-else>{{userInfo.nickname}}</p>
     </div>
     <div class="panel nga-block">
       <div class="left-block">
@@ -119,6 +119,7 @@ export default {
   onShow() {
     // console.log('onShow', this.$store.state.cards.collectedDecks)
     // this.deckList = this.$store.state.cards.collectedDecks
+    console.log('bbb', this.userInfo)
     this.genUserCollection()
   },
   onShareAppMessage(res) {

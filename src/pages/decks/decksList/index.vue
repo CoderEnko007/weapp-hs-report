@@ -152,6 +152,7 @@ export default {
         }
       }
       getDeckList(this.decksFilter, 12, this.page, this.decksFilter.order).then(res => {
+        console.log(res)
         if (init) {
           this.deckList = utils.translateDeckName(res.objects, this.$store.state.cards.decksName)
           wx.stopPullDownRefresh();
@@ -244,7 +245,7 @@ export default {
       this.deckList = []
       this.decksFilter.last_30_days = item.last_30_days
       this.tabList.selectedItem = item.id
-      this.genPickerList()
+      // this.genPickerList()
       this.genDeckList(true)
     }
   },
@@ -267,6 +268,7 @@ export default {
     this.genDeckList(true)
   },
   onUnload() {
+    this.tabList.selectedItem = 1
     this.decksFilter = Object.assign({}, defaultFilter)
     this.selectedFaction = ''
     this.selectedDeckIndex = 0

@@ -117,7 +117,7 @@
     </div>
     <div class="matchup">
       <div class="headline"><span class="title">对抗情况</span></div>
-      <div class="panel"><HeroesPanel :dataList="factionIcons" @itemClick="handleIconsClick"></HeroesPanel></div>
+      <div class="panel"><HeroesPanel :dataList="factionIcons"  :selected="selectedFaction.id" @itemClick="handleIconsClick"></HeroesPanel></div>
       <div class="panel-block">
         <DeckTable :selectedFaction="selectedFaction" :date="updateDate" :tableTitle="tableTitle" :tableData="selectedFaction.data"
                    :tableName="'对阵'+selectedFaction.name" @itemClick="handleDeckItemClick"></DeckTable>
@@ -219,6 +219,7 @@ export default {
   methods: {
     resetPageData() {
       this.archetypeDetail = Object.assign({}, defaultDetail)
+      console.log(this.archetypeDetail)
       this.bannerImg = null
       this.selectedFaction = {id: 'Druid', name: '德鲁伊', data: []}
       this.matchupDetail = {

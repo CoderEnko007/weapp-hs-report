@@ -30,7 +30,7 @@ export default {
         selectedIconPath: "static/icons-v2/tabicon-1a.png"
       }, {
         pagePath: "pages/trending/main",
-        text: '最热套牌',
+        text: '热门套牌',
         iconPath: "static/icons-v2/tabicon-2b.png",
         selectedIconPath: "static/icons-v2/tabicon-2a.png"
       }, {

@@ -4,7 +4,7 @@ const user = {
   state: {
     openID: null,
     userInfo: {
-      avatarUrl: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1fyBVjNlIfqzYgwy.png'
+      avatar: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1fyBVjNlIfqzYgwy.png'
     }
   },
 
@@ -25,11 +25,22 @@ const user = {
           if (state.openID === null) {
             commit('SET_OPENID', res.openid)
           }
+          return {
+            logged: logged,
+            data: res
+          }
+        }).then(res => {
+          let MyUser = new wx.BaaS.User()
+          MyUser.get(res.data.id).then(res => {
+            if (res.data.is_authorized) {
+              commit('SET_USERINFO', res.data)
+            }
+          })
           resolve({
-            'logged': logged,
+            'logged': res.logged,
             'result': res
           })
-        }, err => {
+        }).catch(err => {
           reject(err)
         })
       })
@@ -38,10 +49,14 @@ const user = {
     getUserInfo({ commit, state}, data) {
       return new Promise((resolve, reject) => {
         getUserInfo(data).then(res => {
-          commit('SET_USERINFO', res)
-          console.log('getUserInfo', res)
-          resolve(res)
-        }, err => {
+          return res.id
+        }).then(id => {
+          let MyUser = new wx.BaaS.User()
+          MyUser.get(id).then(res => {
+            commit('SET_USERINFO', res.data)
+            resolve(res)
+          })
+        }).catch(err => {
           reject(err)
         })
       })
