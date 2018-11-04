@@ -1,6 +1,6 @@
 <template>
 <div class="container">
-  <NavBar :showCapsule="true"></NavBar>
+  <NavBar :showCapsule="true" navTitle="关于"></NavBar>
   <div class="banner">
     <img :src="bannerImg" mode="aspectFill">
     <div class="text">

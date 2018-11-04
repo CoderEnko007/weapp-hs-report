@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <NavBar :showCapsule="true"></NavBar>
+    <NavBar :showCapsule="true" navTitle="职业形态"></NavBar>
     <div class="banner" :style="{'background-image': bannerImg?'url('+bannerImg+')':''}">
       <div class="overview">
         <div class="archetype-name">

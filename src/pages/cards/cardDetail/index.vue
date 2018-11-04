@@ -1,6 +1,6 @@
 <template>
   <div class="card-detail">
-    <NavBar :showCapsule="true"></NavBar>
+    <NavBar :showCapsule="true" navTitle="单卡详情"></NavBar>
     <div class="header" @click="previewCard">
       <img :src="cardDetail.bgImg" class="bg-img" mode="aspectFiit">
       <img :src="cardDetail.cardImg" class="card-img" mode="aspectFit">

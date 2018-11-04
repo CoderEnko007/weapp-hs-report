@@ -1,6 +1,6 @@
 <template>
 <div class="container">
-  <NavBar :showCapsule="true"></NavBar>
+  <NavBar :showCapsule="true" navTitle="我的收藏"></NavBar>
   <div v-if="collectionList.length>0">
     <div class="deck-list" v-for="(item, index) in collectionList" :key="index">
       <div class="header"><p class="date">{{item.format_time}}</p></div>

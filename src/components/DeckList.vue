@@ -12,6 +12,7 @@
             <img :src="dustImage" mode="aspectFit">
             <p>{{item.dust_cost}}</p>
           </div>
+          <span class="separator">|</span>
           <span class="count">对局数 {{item.game_count}}</span>
         </div>
       </div>
@@ -93,8 +94,7 @@ export default {
             position: relative;
             height:32rpx;
             line-height:32rpx;
-            margin-top: 5rpx;
-            font-size: 12px;
+            font-size: 11px;
             img {
               position: absolute;
               width: 23rpx;
@@ -106,12 +106,18 @@ export default {
               height: 100%;
               line-height: 30rpx;
               display: inline-block;
-              margin-left: 28rpx;
+              margin-left: 33rpx;
             }
           }
-          .count {
-            margin-left: 10rpx;
+          .separator {
+            display: inline-block;
+            width: 34rpx;
+            color: #EEEEEE;
+            text-align: center;
           }
+          /*.count {*/
+            /*margin-left: 10rpx;*/
+          /*}*/
         }
       }
       .desc-right {
