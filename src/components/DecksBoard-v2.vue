@@ -1,5 +1,9 @@
 <template>
-<div class="container">
+<scroll-view class="container"
+     scroll-y='true'
+     @scrolltolower='scrollToBottom'
+     @scrolltoupper="scrollToTop"
+     :style="{height: winHeight-252+'px'}">
   <div class="table">
     <div class="table-tr" v-for="(item, index) in list" :key="index" @click="handleItemClick(item)">
       <div class="table-td col-1st">
@@ -23,20 +27,35 @@
       </div>
     </div>
   </div>
-</div>
+  <ZanLoadmore v-if="loading" v-bind="{ loading: true }" />
+  <ZanLoadmore v-else-if="nodata" v-bind="{ nodata: true }" />
+  <ZanLoadmore v-else v-bind="{ nomore: true }" />
+</scroll-view>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import utils from '@/utils'
+import ZanLoadmore from '@/components/loadmore'
+
 export default {
   name: 'DecksBoard',
-  props: ['list', 'last_30_days'],
+  props: ['list', 'last_30_days', 'loading', 'nodata'],
+  components: {
+    ZanLoadmore
+  },
   data() {
     return {
       deckName: [],
-      dustImage: utils.image.dustImage
+      dustImage: utils.image.dustImage,
+      scrollTop: 0
     }
   },
   computed: {
+    ...mapGetters([
+      'decksName',
+      'winWidth',
+      'winHeight'
+    ]),
     factions() {
       return utils.faction
     }
@@ -45,15 +64,26 @@ export default {
     handleItemClick(item) {
       this.$emit('itemClick', item)
     },
+    scrollToBottom(e) {
+      // console.log('scroll to bottom', e)
+      this.$emit('scrollToBottom')
+    },
+    scrollToTop(e) {
+      // console.log('scroll to top', e)
+      this.$emit('scrollToTop')
+    },
   },
   watch: {
     last_30_days(val1, val2) {
       console.log(val1, val2)
-    }
+    },
   }
 }
 </script>
 <style lang="scss" scoped>
+.container{
+  overflow:scroll;
+}
 .table {
   display: table;
   width: 100%;

@@ -1,120 +1,78 @@
 <template>
   <div class="container">
+    <NavBar></NavBar>
     <div class="panel-tab">
-      <div :class="{'tab-btn': true, 'tab-btn-active': selectedTabID===item.id}"
-           v-for="(item, index) in tabbar"
-           :key="index"
-           @click="tabBarClick(item)">
-        {{item.text}}
-      </div>
+      <block v-for="(item,index) in tabbar" :key="index">
+        <div :id="index" :class="{'tab-item': true, 'tab-item-active': activeIndex==index}" @click="tabBarClick">
+          {{item.text}}
+        </div>
+      </block>
     </div>
-    <div class="panel-faction">
-      <HeroesPanel :dataList="factionIcons" @itemClick="handleIconsClick"></HeroesPanel>
-    </div>
-    <div class="panel-list">
-      <DeckTable :selectedFaction="selectedFaction"
-                 :tableTitle="tableTitle"
-                 :tableName="selectedFaction.name+'形态'"
-                 :tableData="selectedFaction.data"
-                 @itemClick="handleDeckItemClick"></DeckTable>
+    <div class="tab-container">
+      <swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">
+        <swiper-item>
+          <ArchetypeList></ArchetypeList>
+        </swiper-item>
+        <swiper-item>
+          <DecksList></DecksList>
+        </swiper-item>
+      </swiper>
+      <!--<div :hidden="activeIndex != 0"><ArchetypeList></ArchetypeList></div>-->
+      <!--<div :hidden="activeIndex != 1"><DecksList></DecksList></div>-->
     </div>
   </div>
 </template>
 <script>
-import utils from '@/utils'
-import HeroesPanel from '@/components/HeroesPanel'
-import DeckTable from '@/components/DeckTable'
+import { mapGetters } from 'vuex'
 import {getWinRateData} from "@/api/dbapi";
+import NavBar from '@/components/NavBar'
+import DecksList from './components/DecksList'
+import ArchetypeList from './components/ArchetypeList'
+
 export default {
   components: {
-    HeroesPanel,
-    DeckTable
+    NavBar,
+    DecksList,
+    ArchetypeList
   },
   data() {
     return {
+      // swiper需要的参数
       tabbar: [
         {id: 'archetype', text: '按形态'},
         {id: 'faction', text: '按职业'}
       ],
-      selectedTabID: 'archetype',
-      factionIcons: [],
-      selectedFaction: {id: 'Druid', name: '德鲁伊', data: []},
-      tableTitle: [
-        {id: 'games', name: '对局数'},
-        {id: 'popularity', name: '热度'},
-        {id: 'winrate', name: '胜率'},
-      ],
+      activeIndex: 0,
+      currentTab: 0,
     }
   },
   computed: {
-
-  },
-  methods: {
-    tabBarClick(item) {
-      this.selectedTabID = item.id
-    },
-    genFactionIcons() {
-      this.factionIcons = []
-      for (let key in utils.faction) {
-        if (utils.faction.hasOwnProperty(key)) {
-          this.factionIcons.push({id: key, name: utils.faction[key].name, image: utils.faction[key].image})
-        }
-      }
-    },
-    genWinRateData() {
-      wx.showNavigationBarLoading();
-      getWinRateData({faction: this.selectedFaction.id}).then(res => {
-        let otherDeckIndex = 0
-        let decksName = this.$store.state.cards.decksName
-        this.selectedFaction.data = []
-        for (let index in res) {
-          if (res.hasOwnProperty(index)) {
-            let ename = res[index].archetype
-            if (ename.toLowerCase() === 'other') {
-              otherDeckIndex = index //记录other信息的序号，后面将其放置到最后
-              ename = this.selectedFaction.id
-            }
-            let name = decksName.filter(item => {
-              return item.ename === ename && item.faction === this.selectedFaction.id
-            })[0]
-            let formatData = {
-              deckName: name?name.cname:res[index].archetype,
-              ename: res[index].archetype,
-              games: res[index].games,
-              winrate: res[index].winrate.toFixed(1),
-              popularity: res[index].popularity.toFixed(1)
-            }
-            this.selectedFaction.data.push(formatData)
-          }
-        }
-        // 默认排序下将'其他'放到最后
-        let temp = this.selectedFaction.data[otherDeckIndex]
-        temp.deckName = '其他'
-        this.selectedFaction.data.splice(otherDeckIndex, 1)
-        this.selectedFaction.data.push(temp)
-        wx.stopPullDownRefresh();
-        wx.hideNavigationBarLoading()
-      }).catch(err => {
-        console.log(err)
-        wx.stopPullDownRefresh();
-        wx.hideNavigationBarLoading()
-      })
-    },
-    handleIconsClick(item) {
-      this.selectedFaction = {id: item.id, name: item.name, data: []}
-      this.genWinRateData()
-    },
-    handleDeckItemClick(item) {
-      console.log(item)
+    ...mapGetters([
+      'winWidth',
+      'winHeight',
+    ]),
+    contentHeight() {
+      return this.winHeight + "px";
     }
   },
-  mounted() {
-    this.genFactionIcons()
-    this.genWinRateData()
+  methods: {
+    tabBarClick(e) {
+      this.activeIndex = e.currentTarget.id;
+      this.currentTab =this.activeIndex;
+    },
+    swiperChange(e) {
+      this.currentTab = e.mp.detail.current;
+      this.activeIndex = this.currentTab;
+    },
+    onAnimationfinish() {
+      console.log("滑动完成.....")
+    },
   },
-  onPullDownRefresh() {
-    this.genWinRateData()
-    this.$store.dispatch('getDecksName')
+  // onPullDownRefresh() {
+  //   this.$store.dispatch('getDecksName')
+  // },
+  onShow() {
+    console.log('decks onShow')
   },
   onShareAppMessage(res) {
     return {
@@ -128,12 +86,16 @@ export default {
 @import '../../style/color';
 .container {
   .panel-tab {
+    position: fixed;
+    width: 100%;
+    height: 89rpx;
     display: flex;
     flex-wrap: nowrap;
     justify-content: space-around;
-    height: 89rpx;
+    background-color: #fff;
     border-bottom: 1rpx solid #eee;
-    .tab-btn {
+    z-index: 2;
+    .tab-item {
       position: relative;
       height: 100%;
       width: 232rpx;
@@ -153,7 +115,7 @@ export default {
         background-color: $palette-blue;
       }
     }
-    .tab-btn-active {
+    .tab-item-active {
       color: $palette-blue;
       font-weight: bold;
       &:after {
@@ -162,8 +124,11 @@ export default {
       }
     }
   }
-  .panel-faction {
-    margin: 20rpx 30rpx;
+  .tab-container {
+    position: fixed;
+    width: 100%;
+    margin-top: 89rpx;
+    z-index: 1;
   }
 }
 @keyframes tabBottomIn {

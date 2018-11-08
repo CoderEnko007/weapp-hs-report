@@ -21,6 +21,11 @@ export default {
       this.$store.dispatch('setNavHeight').then(res => {
         // console.log(res)
       })
+    },
+    setWinWidthHeight() {
+      this.$store.dispatch('setWinWidthHeight').then(res => {
+
+      })
     }
   },
   created () {
@@ -32,6 +37,7 @@ export default {
     this.initDecksName()
     this.initCardSeries()
     this.setNavHeight()
+    this.setWinWidthHeight()
   },
 }
 </script>
@@ -115,12 +121,13 @@ export default {
   position: relative;
   height: 96rpx;
   line-height: 96rpx;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   color: #333;
   .title {
-    margin-left: 6px;
+    /*margin-left: 6px;*/
   }
+  /*
   &:before {
     position: absolute;
     height: 16px;
@@ -132,6 +139,7 @@ export default {
     content: '';
     background: $palette-blue;
   }
+  */
 }
 .c-button {
   background-color: white;

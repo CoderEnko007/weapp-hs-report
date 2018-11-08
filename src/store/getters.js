@@ -5,8 +5,11 @@ const getters = {
   decksName: state => state.cards.decksName,
   collectedDecks: state => state.cards.collectedDecks,
   archetypeList: state => state.cards.archetypeList,
+  deckTabFilter: state => state.cards.deckTabFilter,
   navHeight: state => state.settings.navHeight,
-  isIphoneX: state => state.settings.isIphoneX
+  isIphoneX: state => state.settings.isIphoneX,
+  winWidth: state => state.settings.winWidth,
+  winHeight: state => state.settings.winHeight,
 }
 
 export default getters

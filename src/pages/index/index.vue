@@ -154,7 +154,7 @@ export default {
     },
     handleTierClick(item) {
       wx.navigateTo({
-        url: `/pages/decks/archetypeDetail/main?id=${item.id}`
+        url: `/pages/decks/archetypeDetail/main?name=${item.archetype_name}`
       })
     },
     stopPullDown(success) {

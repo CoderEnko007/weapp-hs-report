@@ -18,6 +18,7 @@
       <div class="zan-loadmore">
         <div class="zan-loading"></div>
         <div class="zan-loadmore__tips">加载中...</div>
+        <!--<div class="zan-loadmore__tips">向上滑动加载更多</div>-->
       </div>
     </block>
   </div>

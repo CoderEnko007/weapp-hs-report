@@ -1,7 +1,8 @@
 const winrateTableID = 49243
 const standDecksTableID = 53174
 const wildDecksTableID = 55625
-const archetypeTableID = 49232
+const tierTableID = 49232
+const archetypeTableID = 56176
 const rankTableID = 49198
 const seriesTableID = 51271
 const cardsTableID = 51267
@@ -14,6 +15,7 @@ const tableID = {
   winrateTableID,
   standDecksTableID,
   wildDecksTableID,
+  tierTableID,
   archetypeTableID,
   rankTableID,
   seriesTableID,

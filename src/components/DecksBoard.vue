@@ -1,103 +1,158 @@
 <template>
-  <div class="card-list">
-    <div class="zan-panel">
-      <div class="zan-card" v-for="item in list" :key="item.id" @click="handleClick(item)">
-        <div class="zan-card__thumb">
-          <img class="zan-card__img" :src="item.background_img" mode="aspectFit">
+  <div class="container">
+    <div class="table">
+      <div class="table-tr" v-for="(item, index) in list" :key="index" @click="handleItemClick(item)">
+        <div class="table-td col-1st">
+          <img :src="factions[item.faction].image2" mode="aspectFit">
+          <div class="deckName">
+            <p class="cname">{{item.cname}}</p>
+            <p class="ename">{{item.deck_name}}</p>
+          </div>
         </div>
-        <div class="zan-card__detail">
-          <div class="zan-card__detail-row">
-            <h2>{{item.deck_name}}</h2>
-          </div>
-          <div class="zan-card__detail-row zan-c-gray-darker">
-            <div class="desc">
-              <div class="detail-item dust-cost"><img :src="dustImage" mode="aspectFit"><span>{{item.dust_cost}}</span></div>
-              <div class="detail-item win-rate">胜率：
-                <span class="color-green" :class="{'color-red': item.win_rate<50}">{{item.win_rate}}%</span>
-              </div>
-              <div class="detail-item games">对局数：{{item.game_count}}</div>
-            </div>
-          </div>
+        <div class="table-td" v-if="last_30_days"><span>{{item.real_game_count}}</span></div>
+        <div class="table-td" v-else><span>{{item.game_count}}</span></div>
+        <div class="table-td icons">
+          <img :src="dustImage" mode="aspectFit">
+          <span>{{item.dust_cost}}</span>
+        </div>
+        <div v-if="last_30_days && item.real_win_rate" class="table-td col-last" :class="{'color-green': item.real_win_rate>50, 'color-red': item.real_win_rate<50}">
+          <span>{{item.real_win_rate}}%</span>
+        </div>
+        <div v-else class="table-td col-last" :class="{'color-green': item.win_rate>50, 'color-red': item.win_rate<50}">
+          <span>{{item.win_rate}}%</span>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import utils from '@/utils'
-export default {
-  name: 'DecksBoard',
-  props: ['list'],
-  data() {
-    return {
-      deckName: [],
-      dustImage: utils.image.dustImage
-    }
-  },
-  methods: {
-    handleClick(item) {
-      this.$emit('itemClick', item)
+  import { mapGetters } from 'vuex'
+  import utils from '@/utils'
+  import ZanLoadmore from '@/components/loadmore'
+
+  export default {
+    name: 'DecksBoard',
+    props: ['list', 'last_30_days', 'loading', 'nodata'],
+    components: {
+      ZanLoadmore
     },
-    translateDeckName() {
-      for (let index in this.list) {
-        if (this.list.hasOwnProperty(index)) {
-          let temp = this.decksName.filter(item => {
-            return item.ename === this.list[index].deck_name
-          })
-          if (temp[0] && temp[0].cname) {
-            this.list[index].deck_name = temp[0].cname
+    data() {
+      return {
+        deckName: [],
+        dustImage: utils.image.dustImage,
+        scrollTop: 0
+      }
+    },
+    computed: {
+      ...mapGetters([
+        'decksName',
+        'winWidth',
+        'winHeight'
+      ]),
+      factions() {
+        return utils.faction
+      }
+    },
+    methods: {
+      handleItemClick(item) {
+        this.$emit('itemClick', item)
+      },
+      scrollToBottom(e) {
+        // console.log('scroll to bottom', e)
+        this.$emit('scrollToBottom')
+      },
+      scrollToTop(e) {
+        // console.log('scroll to top', e)
+        this.$emit('scrollToTop')
+      },
+    },
+    watch: {
+      last_30_days(val1, val2) {
+        console.log(val1, val2)
+      },
+    }
+  }
+</script>
+<style lang="scss" scoped>
+  .container{
+    overflow:scroll;
+  }
+  .table {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+    .table-tr {
+      display: table-row;
+      width: 100%;
+      background-color: #fff;
+      border-bottom:1rpx solid #eee;
+      &:active  {
+        background: #eee;
+      }
+      .table-td {
+        display: table-cell;
+        position: relative;
+        width: 130rpx;
+        height: 120rpx;
+        line-height: 120rpx;
+        text-align: center;
+        span {
+          font-size: 13px;
+        }
+      }
+      .col-1st {
+        position: relative;
+        width: 300rpx;
+        text-align: left;
+        box-sizing: border-box;
+        padding-left: 30rpx;
+        img {
+          position: absolute;
+          width: 70rpx;
+          height: 70rpx;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        .deckName {
+          position: absolute;
+          display: inline-block;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-left: 90rpx;
+          p.cname {
+            font-size: 13px;
+            color: #333333;
+            height: 37rpx;
+            line-height: 37rpx;
+          }
+          p.ename {
+            width:180rpx;
+            height: 30rpx;
+            line-height: 30rpx;
+            font-size: 11px;
+            color: #999;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
           }
         }
       }
-    }
-  },
-  watch: {
-    'list': function(val) {
-      this.decksName = this.$store.state.cards.decksName
-      this.translateDeckName()
-    }
-  }
-}
-</script>
-<style lang="scss" scoped>
-.zan-card {
-  border-bottom: 1px solid #EEE;
-  .zan-card__thumb {
-    width: 90rpx;
-    height: 90rpx;
-  }
-  .zan-card__detail {
-    margin-left: 110rpx;
-  }
-  .desc {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: nowrap;
-    .detail-item {
-      display: inline-block;
-      position: relative;
-      font-size: 12px;
-      font-weight: 700;
-      img{
-        position: absolute;
-        width: 24rpx;
-        height: 24rpx;
-        top: 50%;
-        transform: translateY(-50%);
+      .icons {
+        img {
+          position: absolute;
+          width: 23rpx;
+          height: 32rpx;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        span {
+          margin-left: 28rpx;
+        }
+      }
+      .col-last {
+        font-weight: bold;
+        padding-right: 30rpx;
       }
     }
-    .dust-cost {
-      width: 100rpx;
-      span {
-        margin-left: 24rpx;
-      }
-    }
-    .win-rate {
-      width: 160rpx;
-    }
-    .games {
-      width: 195rpx;
-    }
   }
-}
 </style>

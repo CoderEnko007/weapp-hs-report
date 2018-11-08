@@ -113,8 +113,7 @@ const defaultDetail = {
   statistic: '',
   faction_win_rate: ''
 }
-
-// const deckSource = ['deck', 'trending', 'collection']
+const dataArr = []
 
 export default {
   components: {
@@ -190,7 +189,6 @@ export default {
   },
   methods: {
     resetPageData() {
-      this.recordID = ''
       this.deckDetail = Object.assign({}, defaultDetail)
       this.bannerImg = null
       this.costChartData = {
@@ -204,7 +202,7 @@ export default {
       this.deckCollected = false
       this.showArchetype = false
     },
-    genDeckData() {
+    async genDeckData() {
       wx.showNavigationBarLoading();
       let params = {}
       if (this.recordID) {
@@ -213,85 +211,76 @@ export default {
         params = {deckID: this.deckID}
       }
       params.mode = this.deckMode
-      getDeckDetail(params, this.trending, this.collected).then(res => {
-        if (!res) {
-          wx.showModal({
-            title: '提示',
-            content: '抱歉，暂未收录该卡组',
-            showCancel: false,
-            success (res) {
-              wx.navigateBack()
-            }
-          })
-        } else {
-          this.checkDeckCollected()
-          this.deckDetail = res
-          this.getArchetype()
-          this.bannerImg = utils.faction[this.deckDetail['faction']].bgImage1
-          this.costChartData.yAxis = JSON.parse(this.deckDetail.statistic)
-          let costMax = Math.max.apply(null, this.costChartData.yAxis)
-          this.costChartData.max = 5-costMax%10>0?costMax+5-costMax%10:costMax+10-costMax%10
-          this.costChartData = JSON.stringify(this.costChartData)
+      const res = await getDeckDetail(params, this.trending, this.collected)
+      if (!res) {
+        wx.showModal({
+          title: '提示',
+          content: '抱歉，暂未收录该卡组',
+          showCancel: false,
+          success (res) {
+            wx.navigateBack()
+          }
+        })
+      } else {
+        this.checkDeckCollected()
+        this.deckDetail = res
+        this.getArchetype()
+        this.bannerImg = utils.faction[this.deckDetail['faction']].bgImage1
+        this.costChartData.yAxis = JSON.parse(this.deckDetail.statistic)
+        let costMax = Math.max.apply(null, this.costChartData.yAxis)
+        this.costChartData.max = 5-costMax%10>0?costMax+5-costMax%10:costMax+10-costMax%10
+        this.costChartData = JSON.stringify(this.costChartData)
 
-          // 卡牌类型数据
-          this.typeChartData = []
-          let clazz = JSON.parse(this.deckDetail.clazzCount)
-          for (let index in clazz) {
-            if (clazz.hasOwnProperty(index)) {
-              this.typeChartData.push({
+        // 卡牌类型数据
+        this.typeChartData = []
+        let clazz = JSON.parse(this.deckDetail.clazzCount)
+        for (let index in clazz) {
+          if (clazz.hasOwnProperty(index)) {
+            this.typeChartData.push({
+              name: index.toLowerCase(),
+              cname: utils.type[index.toUpperCase()].name,
+              value: clazz[index]
+            })
+          }
+        }
+        // 卡牌稀有度数据
+        this.rarityChartData = []
+        let rarity = JSON.parse(this.deckDetail.rarityCount)
+        let commonCards = {name: '', cname: '基础/普通', value: 0, color: utils.rarity['free'].color}
+        this.rarityColor = []
+        for (let index in rarity) {
+          if (rarity.hasOwnProperty(index)) {
+            if (index.toLowerCase() === 'free' || index.toLowerCase() === 'common') {
+              commonCards.value += rarity[index]
+            } else {
+              this.rarityChartData.push({
                 name: index.toLowerCase(),
-                cname: utils.type[index.toUpperCase()].name,
-                value: clazz[index]
+                cname: utils.rarity[index.toLowerCase()].name,
+                value: rarity[index],
+                color: utils.rarity[index.toLowerCase()].color
               })
             }
           }
-          // 卡牌稀有度数据
-          this.rarityChartData = []
-          let rarity = JSON.parse(this.deckDetail.rarityCount)
-          let commonCards = {name: '', cname: '基础/普通', value: 0, color: utils.rarity['free'].color}
-          this.rarityColor = []
-          for (let index in rarity) {
-            if (rarity.hasOwnProperty(index)) {
-              if (index.toLowerCase() === 'free' || index.toLowerCase() === 'common') {
-                commonCards.value += rarity[index]
-              } else {
-                this.rarityChartData.push({
-                  name: index.toLowerCase(),
-                  cname: utils.rarity[index.toLowerCase()].name,
-                  value: rarity[index],
-                  color: utils.rarity[index.toLowerCase()].color
-                })
-              }
-            }
-          }
-          this.rarityChartData.unshift(commonCards)
-          // 对阵各职业胜率数据
-          this.winrateChartData = JSON.parse(this.deckDetail.faction_win_rate)
-          this.winrateChartData = this.winrateChartData.map(item => {
-            item.win_rate = parseFloat(item.win_rate).toFixed(1)
-            return item
-          })
-          wx.hideNavigationBarLoading()
-          wx.stopPullDownRefresh();
         }
-      }).catch(err => {
-        console.log(err)
+        this.rarityChartData.unshift(commonCards)
+        // 对阵各职业胜率数据
+        this.winrateChartData = JSON.parse(this.deckDetail.faction_win_rate)
+        this.winrateChartData = this.winrateChartData.map(item => {
+          item.win_rate = parseFloat(item.win_rate).toFixed(1)
+          return item
+        })
         wx.hideNavigationBarLoading()
         wx.stopPullDownRefresh();
-      })
+      }
     },
-    getArchetype() {
+    async getArchetype() {
       if (this.deckDetail.deck_name) {
-        getArchetypeDetail({name: this.deckDetail.deck_name}).then(res => {
-          if (res) {
-            this.showArchetype = true
-          } else {
-            this.showArchetype = false
-          }
-        }).catch(err => {
+        const res = await getArchetypeDetail({name: this.deckDetail.deck_name})
+        if (res) {
+          this.showArchetype = true
+        } else {
           this.showArchetype = false
-          console.log(err)
-        })
+        }
       }
     },
     handleCardClick(item) {
@@ -371,23 +360,39 @@ export default {
       })
     },
   },
-  mounted() {
+  async mounted() {
+    console.log('deckDetail mounted', dataArr)
+    Object.assign(this.$data, this.$options.data())
     this.toast = getComponentByTag(this, '_toast')
-  },
-  onLoad() {
     this.recordID = this.$root.$mp.query.id
     this.deckID = this.$root.$mp.query.deckID
     this.deckMode = this.$root.$mp.query.mode?this.$root.$mp.query.mode:'Standard'
     this.decksName = this.$store.state.cards.decksName
     this.trending = !!this.$root.$mp.query.trending
     this.collected = !!this.$root.$mp.query.collected
+    await Promise.all([
+      this.genDeckData()
+    ])
+    dataArr.push({...this.$data})
   },
-  onReady() {
-    this.genDeckData()
+  onShow() {
+    this.resetPageData()
+    console.log('deckDetail onShow', dataArr)
+    const dataNum = dataArr.length
+    if (!dataNum) return
+    Object.assign(this.$data, dataArr[dataNum-1])
+  },
+  onHide() {
+    this.resetPageData()
   },
   onUnload() {
-    this.resetPageData()
+    console.log('deckDetail onUnload', dataArr)
     this.toast.clearZanToast()
+    // this.resetPageData()
+    dataArr.pop()
+    const dataNum = dataArr.length
+    if (!dataNum) return
+    Object.assign(this.$data, dataArr[dataNum-1])
   },
   onPullDownRefresh() {
     // 下拉刷新要把json字符串转换为对象，否则getDeckData时操作对象会报错

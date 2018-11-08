@@ -9,21 +9,25 @@
           </div>
           <div class="name">
             <p class="cname">{{genArchetypeName}}</p>
-            <p class="ename">{{archetypeDetail.archetype_name}}</p>
+            <p class="ename">{{archetypeDetail.archetype}}</p>
           </div>
         </div>
         <div class="desc">
-          <div class="desc-item" v-show="archetypeDetail.win_rate">
+          <div class="desc-item" v-show="archetypeDetail.real_winrate">
             <p class="item-name">总胜率</p>
-            <p class="item-meta color-light-green" :class="{'color-red': archetypeDetail.win_rate<50}">{{archetypeDetail.win_rate}}%</p>
+            <p class="item-meta color-light-green" :class="{'color-red': archetypeDetail.win_rate<50}">{{archetypeDetail.real_winrate}}%</p>
           </div>
-          <div class="desc-item" v-show="archetypeDetail.game_count">
+          <div class="desc-item" v-show="archetypeDetail.real_games">
             <p class="item-name">总对局数</p>
-            <p class="item-meta">{{archetypeDetail.game_count}}</p>
+            <p class="item-meta">{{archetypeDetail.real_games}}</p>
           </div>
           <div class="desc-item" v-show="archetypeDetail.popularity">
-            <p class="item-name">职业占比</p>
+            <p class="item-name">热度</p>
             <p class="item-meta">{{archetypeDetail.popularity}}%</p>
+          </div>
+          <div class="desc-item" v-show="archetypeDetail.faction_popularity">
+            <p class="item-name">职业占比</p>
+            <p class="item-meta">{{archetypeDetail.faction_popularity}}%</p>
           </div>
         </div>
       </div>
@@ -154,7 +158,6 @@ const defaultBestDeck = {
   win_rate: '',
   game_count: ''
 }
-
 const defaultBWGame = {
   show: false,
   ename: '',
@@ -163,6 +166,7 @@ const defaultBWGame = {
   game_count: '',
   image: ''
 }
+const dataArr = []
 
 export default {
   components: {
@@ -199,13 +203,10 @@ export default {
   computed: {
     ...mapGetters([
       'navHeight',
-      'archetypeList'
+      'archetypeList',
     ]),
     genArchetypeName() {
-      return this.getDeckCName(this.archetypeDetail.archetype_name)
-    },
-    getEname() {
-      return this.archetypeDetail.archetype_name
+      return this.getDeckCName(this.archetypeDetail.archetype)
     },
     genFactionIcon() {
       if (this.archetypeDetail.faction) {
@@ -219,7 +220,6 @@ export default {
   methods: {
     resetPageData() {
       this.archetypeDetail = Object.assign({}, defaultDetail)
-      console.log(this.archetypeDetail)
       this.bannerImg = null
       this.selectedFaction = {id: 'Druid', name: '德鲁伊', data: []}
       this.matchupDetail = {
@@ -237,7 +237,7 @@ export default {
       }
       return name
     },
-    genArchetypeDetail() {
+    async genArchetypeDetail() {
       wx.showNavigationBarLoading();
       let params={}
       if (this.archetypeId) {
@@ -249,64 +249,60 @@ export default {
         wx.hideNavigationBarLoading()
         return
       }
-      getArchetypeDetail(params).then(res => {
-        if (!res) {
-          wx.showModal({
-            title: '提示',
-            content: '抱歉，暂无该卡组详情',
-            showCancel: false,
-            success (res) {
-              wx.navigateBack()
-            }
-          })
-        } else {
-          this.archetypeDetail = res
-          this.updateDate = this.archetypeDetail.update_time
-          this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
-          let matchupData = JSON.parse(this.archetypeDetail.matchup)
-          for (let index in matchupData) {
-            if (matchupData.hasOwnProperty(index)) {
-              this.matchupDetail[this.factions[index]] = matchupData[index]
-            }
+      const res = await getArchetypeDetail(params)
+      if (!res) {
+        wx.showModal({
+          title: '提示',
+          content: '抱歉，暂无该卡组详情',
+          showCancel: false,
+          success (res) {
+            wx.navigateBack()
           }
-          this.genTableData(this.matchupDetail[this.selectedFaction.id])
-
-          let bestDeckData = JSON.parse(this.archetypeDetail.pop_deck)
-          this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype_name)
-          this.bestDeck.deck_id = bestDeckData[0]
-          this.bestDeck.win_rate = bestDeckData[1]
-          this.bestDeck.game_count = bestDeckData[2]
-          this.bestDeck.show = true
-
-          let bestMatchupData = JSON.parse(this.archetypeDetail.best_matchup)
-          this.bestMatchup.ename = bestMatchupData[0]
-          this.bestMatchup.cname = this.getDeckCName(bestMatchupData[0])
-          this.bestMatchup.win_rate = parseFloat(bestMatchupData[1]).toFixed(2)
-          this.bestMatchup.game_count = bestMatchupData[2]
-          let bestMatchupFaction = bestMatchupData[0].split(' ')
-          bestMatchupFaction = bestMatchupFaction[bestMatchupFaction.length-1]
-          this.bestMatchup.image = utils.faction[bestMatchupFaction].image
-          this.bestMatchup.faction = bestMatchupFaction
-          this.bestMatchup.show = true
-
-          let worstMatchupData = JSON.parse(this.archetypeDetail.worst_matchup)
-          this.worstMatchup.ename = worstMatchupData[0]
-          this.worstMatchup.cname = this.getDeckCName(worstMatchupData[0])
-          this.worstMatchup.win_rate = parseFloat(worstMatchupData[1]).toFixed(2)
-          this.worstMatchup.game_count = worstMatchupData[2]
-          let worstMatchupFaction = worstMatchupData[0].split(' ')
-          worstMatchupFaction = worstMatchupFaction[worstMatchupFaction.length-1]
-          this.worstMatchup.image = utils.faction[worstMatchupFaction].image
-          this.worstMatchup.faction = worstMatchupFaction
-          this.worstMatchup.show = true
-          wx.stopPullDownRefresh();
-          wx.hideNavigationBarLoading()
+        })
+      } else {
+        this.archetypeDetail = res
+        this.updateDate = this.archetypeDetail.update_time
+        this.bannerImg = utils.faction[this.archetypeDetail.faction].bgImage.replace('256x', '512x')
+        let matchupData = JSON.parse(this.archetypeDetail.matchup)
+        for (let index in matchupData) {
+          if (matchupData.hasOwnProperty(index)) {
+            this.matchupDetail[this.factions[index]] = matchupData[index]
+          }
         }
-      }).catch(err => {
-        console.log(err)
+        this.genTableData(this.matchupDetail[this.selectedFaction.id])
+
+        let bestDeckData = JSON.parse(this.archetypeDetail.pop_deck)
+        this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype)
+        this.bestDeck.deck_id = bestDeckData[0]
+        this.bestDeck.win_rate = bestDeckData[1]
+        this.bestDeck.game_count = bestDeckData[2]
+        this.bestDeck.show = true
+
+        let bestMatchupData = JSON.parse(this.archetypeDetail.best_matchup)
+        this.bestMatchup.ename = bestMatchupData[0]
+        this.bestMatchup.cname = this.getDeckCName(bestMatchupData[0])
+        this.bestMatchup.win_rate = parseFloat(bestMatchupData[1]).toFixed(2)
+        this.bestMatchup.game_count = bestMatchupData[2]
+        let bestMatchupFaction = bestMatchupData[0].split(' ')
+        bestMatchupFaction = bestMatchupFaction[bestMatchupFaction.length - 1]
+        this.bestMatchup.image = utils.faction[bestMatchupFaction].image
+        this.bestMatchup.faction = bestMatchupFaction
+        this.bestMatchup.show = true
+
+        let worstMatchupData = JSON.parse(this.archetypeDetail.worst_matchup)
+        this.worstMatchup.ename = worstMatchupData[0]
+        this.worstMatchup.cname = this.getDeckCName(worstMatchupData[0])
+        this.worstMatchup.win_rate = parseFloat(worstMatchupData[1]).toFixed(2)
+        this.worstMatchup.game_count = worstMatchupData[2]
+        let worstMatchupFaction = worstMatchupData[0].split(' ')
+        worstMatchupFaction = worstMatchupFaction[worstMatchupFaction.length - 1]
+        this.worstMatchup.image = utils.faction[worstMatchupFaction].image
+        this.worstMatchup.faction = worstMatchupFaction
+        this.worstMatchup.show = true
+
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
-      })
+      }
     },
     genFactionIcons() {
       this.factionIcons = []
@@ -343,9 +339,8 @@ export default {
       this.genTableData(this.matchupDetail[item.id])
     },
     handleDeckItemClick(item) {
-      let queryId = item.ename
       wx.navigateTo({
-        url: `/pages/decks/decksList/main?id=${this.selectedFaction.id}&name=${queryId}`
+        url: `/pages/decks/archetypeDetail/main?name=${item.ename}`
       })
     },
     handlePopDeckClick() {
@@ -355,34 +350,51 @@ export default {
     },
     gotoDecks() {
       wx.navigateTo({
-        url: `/pages/decks/decksList/main?id=${this.archetypeDetail.faction}&name=${this.archetypeDetail.archetype_name}`
+        url: `/pages/decks/decksList/main?id=${this.archetypeDetail.faction}&name=${this.archetypeDetail.archetype}`
       })
     },
     handleWorstMatchupClick() {
-      console.log(this.worstMatchup)
       wx.navigateTo({
-        url: `/pages/decks/decksList/main?id=${this.worstMatchup.faction}&name=${this.worstMatchup.ename}`
+        url: `/pages/decks/archetypeDetail/main?name=${this.worstMatchup.ename}`
       })
     },
     handleBestMatchupClick() {
-      console.log(this.bestMatchup)
       wx.navigateTo({
-        url: `/pages/decks/decksList/main?id=${this.bestMatchup.faction}&name=${this.bestMatchup.ename}`
+        url: `/pages/decks/archetypeDetail/main?name=${this.bestMatchup.ename}`
       })
     }
   },
-  onLoad() {
-    this.resetPageData()
+  async mounted() {
+    console.log('archetypeDetail mounted', dataArr)
+    Object.assign(this.$data, this.$options.data())
     this.archetypeId = this.$root.$mp.query.id
     this.archetypeName = this.$root.$mp.query.name
     this.decksName = this.$store.state.cards.decksName
-    this.genFactionIcons()
+    await Promise.all([
+      this.genFactionIcons(),
+      this.genArchetypeDetail()
+    ])
+    dataArr.push({...this.$data})
   },
-  onReady() {
-    this.genArchetypeDetail()
+  onShow() {
+    this.resetPageData()
+    console.log('archetypeDetail onShow', dataArr)
+    const dataNum = dataArr.length
+    console.log('onReady 1111', dataArr[dataNum-1])
+    if (!dataNum) return
+    Object.assign(this.$data, dataArr[dataNum-1])
+  },
+  onHide() {
+    this.resetPageData()
   },
   onUnload() {
-    this.resetPageData()
+    console.log('onUnload', dataArr)
+    // this.resetPageData()
+    dataArr.pop()
+    const dataNum = dataArr.length
+    console.log('onUnload pop',  dataArr[dataNum-1])
+    if (!dataNum) return
+    Object.assign(this.$data, dataArr[dataNum-1])
   },
   onShareAppMessage(res) {
     return {

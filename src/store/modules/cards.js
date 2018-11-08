@@ -6,7 +6,8 @@ const cards = {
     series: [],
     decksName: [],
     collectedDecks: [],
-    archetypeList: []
+    archetypeList: [],
+    activeTab: 0,
   },
   mutations: {
     SET_SERIES: (state, series) => {
@@ -32,7 +33,7 @@ const cards = {
     },
     SET_ARCHETYPE_LIST: (state, list) => {
       state.archetypeList = list
-    }
+    },
   },
 
   actions: {
@@ -80,38 +81,6 @@ const cards = {
         }, err => {
           reject(err)
         })
-        // getUserCollectionDecks(userID).then(res => {
-        //   let collectList = res.objects.map(item => {
-        //     return {
-        //       deck_id: item.deck_id,
-        //       time: item.created_at
-        //     }
-        //   })
-        //   return collectList
-        // }).then(res => {
-        //   let collectList = res.map(item => {
-        //     return item.deck_id
-        //   })
-        //   getDeckList({collectList: collectList}).then(deckRes => {
-        //     let decks = []
-        //     for(let index in collectList) {
-        //       if (collectList.hasOwnProperty(index)) {
-        //         let array = deckRes.objects.filter(item => {
-        //           return item.deck_id === collectList[index]
-        //         })
-        //         if (array.length > 0) {
-        //           // 记录收藏的时间
-        //           array[0].collect_time = res[index].time
-        //           decks.push(array[0])
-        //         }
-        //       }
-        //     }
-        //     commit('SET_COLLECTED_DECKS', decks)
-        //     resolve({list: decks})
-        //   }, err => {
-        //     reject(err)
-        //   })
-        // })
       })
     },
     addCollectedDeck({commit, state}, data) {
@@ -143,7 +112,7 @@ const cards = {
           reject(err)
         })
       })
-    }
+    },
   }
 }
 

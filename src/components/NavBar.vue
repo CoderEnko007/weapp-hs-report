@@ -42,13 +42,25 @@ export default {
     handleBack() {
       let pages = getCurrentPages(); // 当前页面
       let beforePage = pages[pages.length - 2]; // 前一个页面
+      // if (beforePage.route === 'pages/decks/archetypeDetail/main') {
+      //   console.log('aaa', beforePage.options)
+      //   beforePage.setData({
+      //     archetypeName: beforePage.options.name
+      //   })
+      // } else if (beforePage.route === 'pages/decks/deckDetail/main') {
+      //   console.log('bb', beforePage.options)
+      //   beforePage.setData({
+      //     deckID: beforePage.options.deckID
+      //   })
+      // }
+      // console.log(beforePage)
       let _this = this
       wx.navigateBack({
         success: function() {
           _this.$emit('navBack')
           if (beforePage.route === 'pages/decks/archetypeDetail/main'
             || beforePage.route === 'pages/decks/deckDetail/main') {
-            beforePage.onReady()
+            // beforePage.onReady()
           }
         }
       })

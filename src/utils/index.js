@@ -105,6 +105,7 @@ export function translateDeckName(decksList, decksName) {
   }
   return decksList
 }
+
 const faction = {
   'Druid': { name: '德鲁伊', shortName: '德', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFc20lKfIhjC.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpltcxS8QuoF.png', image: '/static/heroIcons/druid.png', image1: '/static/heroIcons/druid-1.jpg', image2: '/static/heroIcons/druid-2.jpg', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jbHYTxXEHZT.png' },
   'Hunter': { name: '猎人', shortName: '猎', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFgjRrvyMTUs.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCgEpssc3FfPpb9.png', image: '/static/heroIcons/hunter.png', image1: '/static/heroIcons/hunter-1.jpg', image2: '/static/heroIcons/hunter-2.jpg', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jHdZrCYiZiB.png' },

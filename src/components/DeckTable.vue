@@ -1,5 +1,5 @@
 <template>
-<div class="data-table" :style="{'min-height': 350+'px'}">
+<div class="data-table">
   <div class="table">
     <div class="table-tr header">
       <div class="table-td table-name"><span>{{tableName}}</span></div>
@@ -9,30 +9,31 @@
            :key="index"
            @click="handleOrderClick(item)">
         <span>{{item.name}}</span>
-        <img v-if="orderBy !== '' && orderBy === item.id" :src="upOrder" mode="aspectFit">
+        <img v-if="orderBy && orderBy === item.id" :src="upOrder" mode="aspectFit">
         <img v-else-if="orderBy === '-'+item.id" :src="downOrder" mode="aspectFit">
         <img v-else :src="normalOrder" mode="aspectFit">
       </div>
     </div>
     <div class="table-tr content" v-for="(item, index) in genTableData" :key="index" @click="handleItemClick(item)">
-      <div class="table-td col-1st">
-        <img :src="genFactionIcon" mode="aspectFit">
-        <div class="deckName">
-          <p class="cname">{{item.deckName}}</p>
-          <p class="ename">{{item.ename}}</p>
+        <div class="table-td col-1st">
+          <img :src="genFactionIcon" mode="aspectFit">
+          <div class="deckName">
+            <p class="cname">{{item.deckName}}</p>
+            <p class="ename">{{item.ename}}</p>
+          </div>
         </div>
-      </div>
-      <div class="table-td text-center col-other"><span>{{item.games}}</span></div>
-      <div class="table-td text-center col-other"><span>{{item.popularity}}%</span></div>
-      <div class="table-td text-center col-other col-last color-green" :class="{'color-red': item.winrate<50}">
-        <span :style="{'font-weight': 'bold'}">{{item.winrate}}%</span>
-      </div>
+        <div class="table-td text-center col-other"><span>{{item.games}}</span></div>
+        <div class="table-td text-center col-other"><span>{{item.popularity}}%</span></div>
+        <div class="table-td text-center col-other col-last color-green" :class="{'color-red': item.winrate<50}">
+          <span :style="{'font-weight': 'bold'}">{{item.winrate}}%</span>
+        </div>
     </div>
   </div>
 </div>
 </template>
 <script>
 import utils from '@/utils'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'DeckTable',
@@ -46,6 +47,10 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'winWidth',
+      'winHeight'
+    ]),
     genTableData() {
       this.sortTableData()
       return this.tableData

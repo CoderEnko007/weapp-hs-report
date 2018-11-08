@@ -49,7 +49,7 @@
 import { mapGetters } from 'vuex'
 import utils from '@/utils'
 import {getDeckList} from "@/api/dbapi";
-import DecksBoard from '@/components/DecksBoard-v2';
+import DecksBoard from '@/components/DecksBoard';
 import ZanLoadmore from '@/components/loadmore'
 import HeroesPanel from '@/components/HeroesPanel'
 import NavBar from '@/components/NavBar'
@@ -239,6 +239,8 @@ export default {
     modeBtnClick(item) {
       this.decksFilter.mode = item.mode
       this.genPickerList()
+      // 点击模式切换后由于重置picker list，过滤器中的职业类型也需要重置为‘全部类型’
+      this.decksFilter.archetype = this.deckPickerList[this.selectedDeckIndex].id
       this.genDeckList(true)
     },
     handleHeadTabClick(item) {

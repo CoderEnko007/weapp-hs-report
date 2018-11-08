@@ -208,7 +208,6 @@ export function getDeckList(params, limit=20, page=0, orderBy='-game_count') {
     }
     let query = wx.BaaS.Query.and(timeRangeQuery, modeQuery, factionQuery, archetypeQuery, collectionQuery)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
-      console.log('aaa', res.data)
       resolve(res.data)
     }, err => {
       reject(err)
@@ -253,7 +252,7 @@ export function getDeckDetail(params, trending_flag=false, collected=false ) {
 
 export function getArchetypeList(params, limit=1000, page=0, orderBy='-win_rate') {
   return new Promise((resolve, reject) => {
-    let tableObj = new wx.BaaS.TableObject(tableID.archetypeTableID)
+    let tableObj = new wx.BaaS.TableObject(tableID.tierTableID)
     let factionQuery = new wx.BaaS.Query()
     if (params && params.faction) {
       factionQuery.compare('faction', '=', params.faction)
@@ -273,16 +272,17 @@ export function getArchetypeList(params, limit=1000, page=0, orderBy='-win_rate'
 
 export function getArchetypeDetail(params) {
   return new Promise((resolve, reject) => {
-    let tableObj = new wx.BaaS.TableObject(tableID.archetypeTableID)
     if (params && params.recordID) {
+      let tableObj = new wx.BaaS.TableObject(tableID.tierTableID)
       tableObj.get(params.recordID).then(res => {
         resolve(res.data)
       }, err => {
         reject(err)
       })
     } else if (params && params.name) {
+      let tableObj = new wx.BaaS.TableObject(tableID.archetypeTableID)
       let query = new wx.BaaS.Query()
-      query.compare('archetype_name', '=', params.name)
+      query.compare('archetype', '=', params.name)
       tableObj.setQuery(query).find().then(res => {
         resolve(res.data.objects[0])
       }, err => {
