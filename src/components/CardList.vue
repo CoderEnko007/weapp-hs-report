@@ -1,22 +1,49 @@
+<template>
+  <scroll-view scroll-y='true'
+               @scrolltolower='scrollToBottom'
+               @scrolltoupper="scrollToTop"
+               :style="{height: winHeight-222+'px'}">
+    <div class="card-list">
+      <div class="card" v-for="(item, index) in list" :key="index" @click="handleClick(item)">
+        <img :src="item.image" mode="aspectFit">
+        <p>{{item.name}}</p>
+      </div>
+    </div>
+    <ZanLoadmore v-if="loading" v-bind="{ loading: true }" />
+    <ZanLoadmore v-else-if="nodata" v-bind="{ nodata: true }" />
+    <ZanLoadmore v-else v-bind="{ nomore: true }" />
+  </scroll-view>
+</template>
 <script>
+import { mapGetters } from 'vuex'
+import ZanLoadmore from '@/components/loadmore'
 export default {
   name: 'CardList',
-  props: ['list'],
+  props: ['list', 'loading', 'nodata'],
+  components: {
+    ZanLoadmore
+  },
+  computed: {
+    ...mapGetters([
+      'winWidth',
+      'winHeight'
+    ]),
+  },
   methods: {
     handleClick(item) {
       this.$emit('cardClick', item)
-    }
+    },
+    scrollToBottom(e) {
+      // console.log('scroll to bottom', e)
+      this.$emit('scrollToBottom')
+    },
+    scrollToTop(e) {
+      // console.log('scroll to top', e)
+      this.$emit('scrollToTop')
+    },
   },
 }
 </script>
-<template>
-  <div class="card-list">
-    <div class="card" v-for="(item, index) in list" :key="index" @click="handleClick(item)">
-      <img :src="item.image" mode="aspectFit">
-      <p>{{item.name}}</p>
-    </div>
-  </div>
-</template>
 <style lang="scss" scoped>
 .card-list {
   width: 100%;
@@ -28,7 +55,7 @@ export default {
   margin-top: 15rpx;
   overflow: hidden;
   .card {
-    width: 33%;
+    width: 30%;
     height: 260rpx;
     padding: 0 0 8rpx;
     margin-bottom: 65rpx;
@@ -50,4 +77,5 @@ export default {
     }
   }
 }
+
 </style>

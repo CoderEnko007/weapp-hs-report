@@ -5,7 +5,7 @@
       <span class="meta">标准模式</span>
     </div>
     <div class="panel-faction">
-      <HeroesPanel :dataList="factionIcons" @itemClick="handleIconsClick"></HeroesPanel>
+      <HeroesPanel :dataList="factionIcons" :selected="selectedFaction.id" @itemClick="handleIconsClick"></HeroesPanel>
     </div>
     <div class="panel-block">
       <div class="filter-item">

@@ -3,7 +3,7 @@
      scroll-y='true'
      @scrolltolower='scrollToBottom'
      @scrolltoupper="scrollToTop"
-     :style="{height: winHeight-252+'px'}">
+     :style="{height: winHeight-navHeight-184+'px'}">
   <div class="table">
     <div class="table-tr" v-for="(item, index) in list" :key="index" @click="handleItemClick(item)">
       <div class="table-td col-1st">
@@ -54,7 +54,8 @@ export default {
     ...mapGetters([
       'decksName',
       'winWidth',
-      'winHeight'
+      'winHeight',
+      'navHeight'
     ]),
     factions() {
       return utils.faction

@@ -1,7 +1,7 @@
 <template>
 <div class="container">
-  <ul class="panel-list">
-    <li :class="{'panel-item': true, 'panel-item-active': selectedFaction===item.id}"
+  <ul class="hero-panel-list">
+    <li :class="{'panel-item': true, 'panel-item-active': selected===item.id}"
         v-for="(item, index) in dataList"
         :key="index"
         @click="itemClick(item)">
@@ -38,14 +38,15 @@ export default {
   position: relative;
   width: 100%;
   height: 76rpx;
-  .panel-list {
+  .hero-panel-list {
     position:absolute;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     flex-wrap: nowrap;
     width: 100%;
     top:50%;
     transform:translateY(-50%);
+    padding:0 8rpx;
     box-sizing: border-box;
     .panel-item {
       position: relative;

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="loadmore">
     <block v-if="nomore">
       <div class="zan-loadmore zan-loadmore--nomore">
         <div class="zan-loadmore__tips">
@@ -34,4 +34,7 @@
 /*.zan-loadmore {*/
   /*z-index: -999;*/
 /*}*/
+.loadmore {
+  height: 40px;
+}
 </style>

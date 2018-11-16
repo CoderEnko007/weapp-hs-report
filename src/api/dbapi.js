@@ -65,9 +65,9 @@ export function getCardsList(params, limit=20, page=0, orderBy='cost') {
     let removeHeroQuery = new wx.BaaS.Query()
     removeHeroQuery.isNotNull('artist')
     let costQuery = new wx.BaaS.Query()
-    if (params.cost) {
+    if (params && params.cost!==null) {
       if (params.cost<7) {
-        costQuery.compare('cost', '=', params.cost)
+        costQuery.compare('cost', '=', parseInt(params.cost))
       } else {
         costQuery.compare('cost', '>=', params.cost)
       }
@@ -126,6 +126,39 @@ export function getCardsList(params, limit=20, page=0, orderBy='cost') {
       searchQuery = wx.BaaS.Query.or(nameQuery, otherQuery)
     }
     let query = wx.BaaS.Query.and(removeHeroQuery, costQuery, factionQuery, modeQuery, rarityQuery, seriesQuery, searchQuery)
+    tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getArenaCards(params, limit=20, page=0, orderBy='-times_played') {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.arenaCardsTableID)
+    let costQuery = new wx.BaaS.Query()
+    if (params && params.cost!==null) {
+      if (params.cost<7) {
+        costQuery.compare('cost', '=', parseInt(params.cost))
+      } else {
+        costQuery.compare('cost', '>=', params.cost)
+      }
+    }
+    let classificationQuery = new wx.BaaS.Query()
+    if (params.faction) {
+      classificationQuery.compare('classification', '=', params.faction)
+    }
+
+    let searchQuery = new wx.BaaS.Query()
+    if (params.search) {
+      let nameQuery = new wx.BaaS.Query()
+      nameQuery.contains('name', params.search)
+      let otherQuery = new wx.BaaS.Query()
+      otherQuery.contains('text', params.search)
+      searchQuery = wx.BaaS.Query.or(nameQuery, otherQuery)
+    }
+    let query = wx.BaaS.Query.and(costQuery, classificationQuery, searchQuery)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
       resolve(res.data)
     }, err => {

@@ -6,6 +6,7 @@ const archetypeTableID = 56176
 const rankTableID = 49198
 const seriesTableID = 51271
 const cardsTableID = 51267
+const arenaCardsTableID = 57106
 const deckNameTableID = 52136
 const trendingTableID = 53120
 const decksCollectionTableID = 55506
@@ -20,6 +21,7 @@ const tableID = {
   rankTableID,
   seriesTableID,
   cardsTableID,
+  arenaCardsTableID,
   deckNameTableID,
   trendingTableID,
   decksCollectionTableID,

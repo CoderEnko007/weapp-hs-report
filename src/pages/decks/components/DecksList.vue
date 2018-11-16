@@ -61,7 +61,7 @@ import HeroesPanel from '@/components/HeroesPanel'
 import DecksBoard from '@/components/DecksBoard-v2';
 
 const defaultFilter = {
-  faction: 'Druid',
+  faction: '',
   archetype: 'all',
   mode: 'Standard',
   last_30_days: false,
@@ -79,12 +79,12 @@ const last30dOrder = [
 ]
 export default {
   name: 'DecksList',
-  props: ['selectedFaction', 'archetype'],
   components: {
     HeadTab,
     HeroesPanel,
     DecksBoard,
   },
+
   data() {
     return {
       deckList: [],
@@ -107,7 +107,7 @@ export default {
       ],
       decksFilter: Object.assign({}, defaultFilter),
       //职业选择组件参数
-      selectedFaction: 'Druid',
+      selectedFaction: '',
       factionIcons: null,
       //卡组选择栏参数
       selectedDeckIndex: 0,

@@ -1,6 +1,10 @@
 <template>
-  <div class="cards-list">
-    <div :class="['card-tile', {'menu-item-empty': !card.name}]" v-for="(card, index) in formatData" :key="index" @click="cardClick(card)">
+  <div class="cards-list" :style="{width: colNum===1?300+'rpx':'100%'}">
+    <div :class="['card-tile', {'menu-item-empty': !card.name}]"
+         v-for="(card, index) in formatData"
+         :key="index"
+         @click="cardClick(card)"
+         :style="{width: colNum===1?'100%':'47%', 'margin-top': wideSpace?20+'rpx':5+'rpx'}">
       <div :class="['card-gem', {
         'rarity-common': card.rarity==='FREE'||card.rarity==='COMMON',
         'rarity-rare': card.rarity==='RARE',
@@ -31,7 +35,7 @@ import {genTileImageURL} from "@/utils";
 
 export default {
   name: 'DeckCards',
-  props: ['cards'],
+  props: ['cards', 'colNum', 'wideSpace'],
   data() {
     return {
       formatData: null
@@ -50,17 +54,20 @@ export default {
   },
   watch: {
     cards: function(val) {
-      if (typeof(val) === 'string' && this.cards) {
-        this.formatData = JSON.parse(this.cards)
-        for (let card of this.formatData) {
-          card['img'] = this.genTileImage(card.card_hsid)
-          if (card.rarity === 'LEGENDARY') {
-            card['count'] = '★'
-          }
+      console.log(val)
+      if (typeof(val) === 'string') {
+        this.formatData = JSON.parse(val)
+      } else {
+        this.formatData = val
+      }
+      for (let card of this.formatData) {
+        card['img'] = this.genTileImage(card.card_hsid)
+        if (card.rarity === 'LEGENDARY') {
+          card['count'] = '★'
         }
-        if (this.formatData.length % 2) {
-          this.formatData.push({})
-        }
+      }
+      if (this.formatData.length % 2) {
+        this.formatData.push({})
       }
     }
   }
@@ -83,9 +90,9 @@ export default {
     font-size: 14px;
     margin-top: 5rpx;
     /*text-shadow: -1rpx -1rpx 0 #000, 1rpx -1rpx 0 #000, -1rpx 1rpx 0 #000, 1rpx 1rpx 0 #000;*/
-    border: 1px solid transparent;
+    /*border: 1px solid transparent;*/
     border-radius: 8rpx;
-    /*box-sizing: border-box;*/
+    box-sizing: border-box;
     .card-gem {
       float: left;
       width: 55rpx;

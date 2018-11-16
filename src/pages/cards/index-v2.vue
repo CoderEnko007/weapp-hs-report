@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="card-container">
     <NavBar></NavBar>
     <div class="panel-tab">
       <block v-for="(item,index) in tabbar" :key="index">
@@ -9,41 +9,38 @@
       </block>
     </div>
     <div class="tab-container">
-      <swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">
-        <swiper-item>
-          <ArchetypeList></ArchetypeList>
-        </swiper-item>
-        <swiper-item>
-          <DecksList></DecksList>
-        </swiper-item>
-      </swiper>
-      <!--<div :hidden="activeIndex != 0"><ArchetypeList></ArchetypeList></div>-->
-      <!--<div :hidden="activeIndex != 1"><DecksList></DecksList></div>-->
+      <!--<swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">-->
+        <!--<swiper-item>-->
+          <!--<SingleCards></SingleCards>-->
+        <!--</swiper-item>-->
+        <!--<swiper-item>-->
+          <!--<ArenaCards></ArenaCards>-->
+        <!--</swiper-item>-->
+      <!--</swiper>-->
+      <div :hidden="activeIndex != 0"><SingleCards></SingleCards></div>
+      <div :hidden="activeIndex != 1"><ArenaCards></ArenaCards></div>
     </div>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import {getWinRateData} from "@/api/dbapi";
 import NavBar from '@/components/NavBar'
-import DecksList from './components/DecksList'
-import ArchetypeList from './components/ArchetypeList'
-
+import SingleCards from './pages/SingleCards'
+import ArenaCards from './pages/ArenaCards'
 export default {
   components: {
     NavBar,
-    DecksList,
-    ArchetypeList
+    SingleCards,
+    ArenaCards
   },
   data() {
     return {
-      // swiper需要的参数
       tabbar: [
-        {id: 'archetype', text: '卡组形态'},
-        {id: 'faction', text: '职业卡组'}
+        {id: 'single_card', text: '单卡查询'},
+        {id: 'arena_card', text: '竞技场数据'}
       ],
-      activeIndex: 0,
-      currentTab: 0,
+      activeIndex: 1,
+      currentTab: 1,
     }
   },
   computed: {
@@ -64,15 +61,6 @@ export default {
       this.currentTab = e.mp.detail.current;
       this.activeIndex = this.currentTab;
     },
-    // onAnimationfinish() {
-    //   console.log("滑动完成.....")
-    // },
-  },
-  // onPullDownRefresh() {
-  //   this.$store.dispatch('getDecksName')
-  // },
-  onShow() {
-    console.log('decks onShow')
   },
   onShareAppMessage(res) {
     return {
@@ -84,7 +72,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import '../../style/color';
-.container {
+.card-container {
   .panel-tab {
     position: fixed;
     width: 100%;
@@ -132,7 +120,7 @@ export default {
   }
 }
 @keyframes tabBottomIn {
-   from {width: 100%; opacity: 0}
-   to {width: 53rpx; opacity: 1}
- }
+  from {width: 100%; opacity: 0}
+  to {width: 53rpx; opacity: 1}
+}
 </style>
