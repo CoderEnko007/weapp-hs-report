@@ -4,7 +4,7 @@
       <div class="number"><span>{{item.rank_no}}</span></div>
       <img :src="item.name?factions[item.name].image:''">
       <div class="faction"><span>{{item.name?factions[item.name].name:''}}</span></div>
-      <div class="winrate" :class="{'color-green': item.winrate>50, 'color-red': item.winrate<50}">
+      <div class="winrate" :class="{'color-green': item.winrate>=50, 'color-red': item.winrate<50}">
         <span v-if="item.winrate">{{item.winrate}}%</span>
       </div>
     </div>

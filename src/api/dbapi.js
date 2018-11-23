@@ -172,7 +172,7 @@ export function getCardDetail(id) {
     let tableObj = new wx.BaaS.TableObject(tableID.cardsTableID)
     let query = new wx.BaaS.Query()
     query.compare('dbfId', '=', id)
-    tableObj.setQuery(query).find().then(res => {
+    tableObj.setQuery(query).archetypeTableID().then(res => {
       resolve(res.data.objects)
     }, err => {
       reject(err)

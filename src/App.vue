@@ -29,7 +29,7 @@ export default {
     }
   },
   created () {
-    require('./utils/sdk-v1.8.1')
+    require('./utils/sdk-v1.10.0')
     wx.BaaS.init(this.clientId)
     // wx.BaaS = requirePlugin('sdkPlugin')
     // wx.BaaS.wxExtend(wx.login, wx.getUserInfo, wx.requestPayment)

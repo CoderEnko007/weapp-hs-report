@@ -17,6 +17,7 @@
                v-for="(item, index) in deckMode"
                :key="index"
                @click="modeBtnClick(item)">
+            <img class="btn-img" :src="decksFilter.mode===item.mode?item.active_icon:item.icon" mode="aspectFit">
             <button class="c-button" :class="decksFilter.mode===item.mode?'btn-active':''">{{item.text}}</button>
             <div class="separator" v-if="index !== 1">|</div>
           </div>
@@ -101,10 +102,7 @@ export default {
           {text: '最近30天卡组', last_30_days: true}
         ]
       },
-      deckMode: [
-        {mode: 'Standard', text: '标准'},
-        {mode: 'Wild', text: '狂野'},
-      ],
+      deckMode: utils.rankMode,
       decksFilter: Object.assign({}, defaultFilter),
       //职业选择组件参数
       selectedFaction: '',
@@ -326,13 +324,22 @@ export default {
           justify-content: space-between;
           flex-wrap: nowrap;
           .btn-block {
+            position: relative;
             height: 100%;
             display:flex;
             justify-content:space-between;
             flex-wrap:nowrap;
+            .btn-img {
+              position: absolute;
+              width: 32rpx;
+              height: 32rpx;
+              top: 50%;
+              transform: translateY(-50%);
+            }
             button {
               height: 100%;
               line-height: 96rpx;
+              margin-left: 40rpx;
               font-size: 14px;
               font-weight: normal;
               color: #999;

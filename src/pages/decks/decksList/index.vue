@@ -2,20 +2,21 @@
   <div class="container">
     <NavBar :showCapsule="true"></NavBar>
     <div class="panel panel-filter">
-      <div class="head-tab">
-        <HeadTab :tabList="tabList.list" :selectedItem="tabList.selectedItem" @itemClick="handleHeadTabClick"></HeadTab>
-      </div>
+      <!--<div class="head-tab">-->
+        <!--<HeadTab :tabList="tabList.list" :selectedItem="tabList.selectedItem" @itemClick="handleHeadTabClick"></HeadTab>-->
+      <!--</div>-->
       <div class="headline">
         <span class="title">职业套牌</span>
-        <div class="btn-group">
-          <div class="btn-block"
-               v-for="(item, index) in deckMode"
-               :key="index"
-               @click="modeBtnClick(item)">
-            <button class="c-button" :class="decksFilter.mode===item.mode?'btn-active':''">{{item.text}}</button>
-            <div class="separator" v-if="index !== 1">|</div>
-          </div>
-        </div>
+        <!--<div class="btn-group">-->
+          <!--<div class="btn-block"-->
+               <!--v-for="(item, index) in deckMode"-->
+               <!--:key="index"-->
+               <!--@click="modeBtnClick(item)">-->
+            <!--<img class="btn-img" :src="selectedMode===item.mode?item.active_icon:item.icon" mode="aspectFit">-->
+            <!--<button class="c-button" :class="decksFilter.mode===item.mode?'btn-active':''">{{item.text}}</button>-->
+            <!--<div class="separator" v-if="index !== 1">|</div>-->
+          <!--</div>-->
+        <!--</div>-->
       </div>
       <div class="faction-filter">
         <HeroesPanel :selected="selectedFaction" :dataList="factionIcons" @itemClick="handleIconsClick"></HeroesPanel>
@@ -96,10 +97,7 @@ export default {
       upOrder: '/static/icons-v2/rank-up.png',
       downOrder: '/static/icons-v2/rank-down.png',
       filterIcon: '/static/icons-v2/filter-active.png',
-      deckMode: [
-        {mode: 'Standard', text: '标准'},
-        {mode: 'Wild', text: '狂野'},
-      ],
+      deckMode: utils.rankMode,
       tabList: {
         selectedItem: 1,
         list: [
@@ -316,13 +314,22 @@ export default {
         justify-content: space-between;
         flex-wrap: nowrap;
         .btn-block {
+          position: relative;
           height: 100%;
           display:flex;
           justify-content:space-between;
           flex-wrap:nowrap;
+          .btn-img {
+            position: absolute;
+            width: 32rpx;
+            height: 32rpx;
+            top: 50%;
+            transform: translateY(-50%);
+          }
           button {
             height: 100%;
             line-height: 96rpx;
+            margin-left: 40rpx;
             font-size: 14px;
             font-weight: normal;
             color: #999;
@@ -391,7 +398,7 @@ export default {
     }
   }
   .panel-list {
-    padding-top: 370rpx;
+    padding-top: 280rpx;
     z-index: -1;
   }
 }

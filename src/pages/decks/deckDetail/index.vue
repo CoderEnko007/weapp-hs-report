@@ -113,7 +113,6 @@ const defaultDetail = {
   statistic: '',
   faction_win_rate: ''
 }
-const dataArr = []
 
 export default {
   components: {
@@ -203,6 +202,10 @@ export default {
       this.showArchetype = false
     },
     async genDeckData() {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
       wx.showNavigationBarLoading();
       let params = {}
       if (this.recordID) {
@@ -213,6 +216,7 @@ export default {
       params.mode = this.deckMode
       const res = await getDeckDetail(params, this.trending, this.collected)
       if (!res) {
+        wx.hideLoading()
         wx.showModal({
           title: '提示',
           content: '抱歉，暂未收录该卡组',
@@ -269,6 +273,7 @@ export default {
           item.win_rate = parseFloat(item.win_rate).toFixed(1)
           return item
         })
+        wx.hideLoading()
         wx.hideNavigationBarLoading()
         wx.stopPullDownRefresh();
       }
@@ -361,8 +366,6 @@ export default {
     },
   },
   async mounted() {
-    console.log('deckDetail mounted', dataArr)
-    Object.assign(this.$data, this.$options.data())
     this.toast = getComponentByTag(this, '_toast')
     this.recordID = this.$root.$mp.query.id
     this.deckID = this.$root.$mp.query.deckID
@@ -373,26 +376,6 @@ export default {
     await Promise.all([
       this.genDeckData()
     ])
-    dataArr.push({...this.$data})
-  },
-  onShow() {
-    this.resetPageData()
-    console.log('deckDetail onShow', dataArr)
-    const dataNum = dataArr.length
-    if (!dataNum) return
-    Object.assign(this.$data, dataArr[dataNum-1])
-  },
-  onHide() {
-    this.resetPageData()
-  },
-  onUnload() {
-    console.log('deckDetail onUnload', dataArr)
-    this.toast.clearZanToast()
-    // this.resetPageData()
-    dataArr.pop()
-    const dataNum = dataArr.length
-    if (!dataNum) return
-    Object.assign(this.$data, dataArr[dataNum-1])
   },
   onPullDownRefresh() {
     // 下拉刷新要把json字符串转换为对象，否则getDeckData时操作对象会报错

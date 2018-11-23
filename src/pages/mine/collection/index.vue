@@ -69,6 +69,10 @@ export default {
       }
     },
     genUserCollection() {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
       wx.showNavigationBarLoading();
       this.$store.dispatch('getCollectedDecks', this.userInfo.id).then(res => {
         this.deckList = res.list.filter(val => {
@@ -76,10 +80,12 @@ export default {
         })
         console.log(this.deckList)
         this.formatDeckList()
+        wx.hideLoading()
         wx.hideNavigationBarLoading()
         wx.stopPullDownRefresh();
       }).catch(err => {
         console.log(err)
+        wx.hideLoading()
         wx.hideNavigationBarLoading()
         wx.stopPullDownRefresh();
       })

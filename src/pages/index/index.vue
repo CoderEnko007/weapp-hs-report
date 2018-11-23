@@ -36,6 +36,7 @@
   </div>
 </template>
 <script>
+import utils from '@/utils'
 import { mapGetters } from 'vuex'
 import {getRankData, getArchetypeList, getBanners} from "@/api/dbapi";
 import {formatNowTime, ShadeColor} from "@/utils";
@@ -65,11 +66,7 @@ export default {
       },
       selectedMode: 'standard',
       report_date: '',
-      rankMode: [
-        {mode: 'standard', icon: '/static/icons-v2/standard.png', active_icon: '/static/icons-v2/standard_active.png', text: '标准'},
-        {mode: 'wild', icon: '/static/icons-v2/wild.png', active_icon: '/static/icons-v2/wild_active.png', text: '狂野'},
-        {mode: 'arena', icon: '/static/icons-v2/arena.png', active_icon: '/static/icons-v2/arena_active.png', text: '竞技场'}
-      ],
+      rankMode: utils.gameMode,
       tierList: [
         {name: 'Tier 1', cname: '第1梯队', icon: '/static/icons-v2/tierlist-t1.png', list: []},
         {name: 'Tier 2', cname: '第2梯队', icon: '/static/icons-v2/tierlist-t2.png', list: []},

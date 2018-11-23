@@ -9,16 +9,16 @@
       </block>
     </div>
     <div class="tab-container">
-      <!--<swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">-->
-        <!--<swiper-item>-->
-          <!--<SingleCards></SingleCards>-->
-        <!--</swiper-item>-->
-        <!--<swiper-item>-->
-          <!--<ArenaCards></ArenaCards>-->
-        <!--</swiper-item>-->
-      <!--</swiper>-->
-      <div :hidden="activeIndex != 0"><SingleCards></SingleCards></div>
-      <div :hidden="activeIndex != 1"><ArenaCards></ArenaCards></div>
+      <swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">
+        <swiper-item>
+          <SingleCards></SingleCards>
+        </swiper-item>
+        <swiper-item>
+          <ArenaCards></ArenaCards>
+        </swiper-item>
+      </swiper>
+      <!--<div :hidden="activeIndex != 0"><SingleCards></SingleCards></div>-->
+      <!--<div :hidden="activeIndex != 1"><ArenaCards></ArenaCards></div>-->
     </div>
   </div>
 </template>
@@ -39,8 +39,8 @@ export default {
         {id: 'single_card', text: '单卡查询'},
         {id: 'arena_card', text: '竞技场数据'}
       ],
-      activeIndex: 1,
-      currentTab: 1,
+      activeIndex: 0,
+      currentTab: 0,
     }
   },
   computed: {

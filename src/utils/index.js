@@ -149,6 +149,17 @@ const race = {
   'MECHANICAL': {name: '机械'}
 }
 
+const gameMode = [
+  {mode: 'standard', icon: '/static/icons-v2/standard.png', active_icon: '/static/icons-v2/standard_active.png', text: '标准'},
+  {mode: 'wild', icon: '/static/icons-v2/wild.png', active_icon: '/static/icons-v2/wild_active.png', text: '狂野'},
+  {mode: 'arena', icon: '/static/icons-v2/arena.png', active_icon: '/static/icons-v2/arena_active.png', text: '竞技场'}
+]
+
+const rankMode = [
+  {mode: 'Standard', icon: '/static/icons-v2/standard.png', active_icon: '/static/icons-v2/standard_active.png', text: '标准'},
+  {mode: 'Wild', icon: '/static/icons-v2/wild.png', active_icon: '/static/icons-v2/wild_active.png', text: '狂野'},
+]
+
 const factionColors = ['#ff7d0a', '#abd473', '#69ccf0', '#f58cba', '#ccc', '#fff569', '#0070de', '#9482c9', '#c79c6e']
 
 export default {
@@ -167,5 +178,7 @@ export default {
   factionColors,
   image: {
     dustImage
-  }
+  },
+  gameMode,
+  rankMode
 }

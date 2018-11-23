@@ -71,9 +71,6 @@ export default {
   // onPullDownRefresh() {
   //   this.$store.dispatch('getDecksName')
   // },
-  onShow() {
-    console.log('decks onShow')
-  },
   onShareAppMessage(res) {
     return {
       title: '炉石传说情报站',

@@ -1,10 +1,10 @@
 <template>
-  <div class="cards-list" :style="{width: colNum===1?300+'rpx':'100%'}">
+  <div class="cards-list" :style="{width: colNum===1?300+'rpx':'100%', display: colNum===1?'block':'flex'}">
     <div :class="['card-tile', {'menu-item-empty': !card.name}]"
          v-for="(card, index) in formatData"
          :key="index"
          @click="cardClick(card)"
-         :style="{width: colNum===1?'100%':'47%', 'margin-top': wideSpace?20+'rpx':5+'rpx'}">
+         :style="{width: colNum===1?'100%':'47%', 'margin-top': colNum===1?20+'rpx':5+'rpx'}">
       <div :class="['card-gem', {
         'rarity-common': card.rarity==='FREE'||card.rarity==='COMMON',
         'rarity-rare': card.rarity==='RARE',
@@ -35,7 +35,7 @@ import {genTileImageURL} from "@/utils";
 
 export default {
   name: 'DeckCards',
-  props: ['cards', 'colNum', 'wideSpace'],
+  props: ['cards', 'colNum'],
   data() {
     return {
       formatData: null
@@ -54,20 +54,21 @@ export default {
   },
   watch: {
     cards: function(val) {
-      console.log(val)
-      if (typeof(val) === 'string') {
-        this.formatData = JSON.parse(val)
-      } else {
-        this.formatData = val
-      }
-      for (let card of this.formatData) {
-        card['img'] = this.genTileImage(card.card_hsid)
-        if (card.rarity === 'LEGENDARY') {
-          card['count'] = '★'
+      if(this.cards) {
+        if (typeof val === 'string') {
+          this.formatData = JSON.parse(val)
+        } else {
+          this.formatData = val
         }
-      }
-      if (this.formatData.length % 2) {
-        this.formatData.push({})
+        for (let card of this.formatData) {
+          card['img'] = this.genTileImage(card.card_hsid)
+          if (card.rarity === 'LEGENDARY') {
+            card['count'] = '★'
+          }
+        }
+        if (this.formatData.length % 2 && this.colNum !== 1) {
+          this.formatData.push({})
+        }
       }
     }
   }

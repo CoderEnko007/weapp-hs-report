@@ -24,7 +24,7 @@
       <scroll-view scroll-y='true'
                    @scrolltolower='scrollToBottom'
                    @scrolltoupper="scrollToTop"
-                   :style="{height: winHeight-252+'px'}">
+                   :style="{height: winHeight-navHeight-194+'px'}">
         <div class="table">
           <div class="table-tr content" v-for="(item, index) in genTableData" :key="index" @click="handleItemClick(item)">
             <div class="table-td col-1st">
@@ -41,6 +41,8 @@
             </div>
           </div>
         </div>
+        <ZanLoadmore v-if="loading" v-bind="{ loading: true }" />
+        <ZanLoadmore v-else v-bind="{ nomore: true }" />
       </scroll-view>
     </div>
   </div>
@@ -51,6 +53,7 @@ import { mapGetters } from 'vuex'
 import HeroesPanel from '@/components/HeroesPanel'
 import DeckTable from '@/components/DeckTable'
 import {getWinRateData} from "@/api/dbapi";
+import ZanLoadmore from '@/components/loadmore'
 
 export default {
   name: 'ArchetypeList',
@@ -58,6 +61,7 @@ export default {
   components: {
     HeroesPanel,
     DeckTable,
+    ZanLoadmore
   },
   data() {
     return {
@@ -72,11 +76,13 @@ export default {
         {id: 'popularity', name: '热度'},
         {id: 'winrate', name: '胜率'},
       ],
+      loading: true,
     }
   },
   computed: {
     ...mapGetters([
       'decksName',
+      'navHeight',
       'winWidth',
       'winHeight'
     ]),
@@ -142,9 +148,11 @@ export default {
         temp.deckName = '其他'
         this.selectedFaction.data.splice(otherDeckIndex, 1)
         this.selectedFaction.data.push(temp)
+        this.loading = false
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
       }).catch(err => {
+        this.loading = false
         console.log(err)
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()

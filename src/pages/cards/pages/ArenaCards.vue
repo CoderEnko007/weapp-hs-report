@@ -2,7 +2,7 @@
   <div class="arnea-cards-container">
     <div class="filter">
       <div class="search-bar">
-        <SearchBar @handleConfirm="handleSearch" placeholder="请输入卡牌名称、规则或者属性"></SearchBar>
+        <SearchBar @handleConfirm="handleSearch" placeholder="请输入卡牌名称"></SearchBar>
       </div>
       <div class="panel-faction">
         <HeroesPanel :dataList="factionIcons" :selected="selectedFaction.id" @itemClick="handleIconsClick"></HeroesPanel>
@@ -38,13 +38,13 @@
                    :style="{height: winHeight-navHeight-239+'px'}"
                    @scrolltolower="scrollToBottom">
         <div class="cards">
-          <DeckCards class="cards-img" :cards="cardsList" :colNum="1" :wideSpace="true" @cardClick="handleCardClick"></DeckCards>
+          <DeckCards :cards="cardsList" :colNum="1" @cardClick="handleCardClick"></DeckCards>
           <div class="data">
             <div class="data-block" v-for="(item, index) in cardsList" :key="index">
               <!--<span>{{item.times_played}}</span>-->
               <span>{{item.deck_pop}}%</span>
-              <span>{{item.deck_winrate}}%</span>
-              <span>{{item.played_winrate}}%</span>
+              <span class="color-green" :class="{'color-red': item.deck_winrate<50}">{{item.deck_winrate}}%</span>
+              <span class="color-green" :class="{'color-red': item.played_winrate<50}">{{item.played_winrate}}%</span>
             </div>
           </div>
         </div>
@@ -153,6 +153,9 @@ export default {
         this.cardsList = this.cardsList.map(val => {
           val.card_hsid = val.hsId
           val.cname = val.name
+          val.deck_pop = parseFloat(val.deck_pop).toFixed(2)
+          val.deck_winrate = parseFloat(val.deck_winrate).toFixed(1)
+          val.played_winrate = parseFloat(val.played_winrate).toFixed(1)
           return val
         })
         if (this.cardsList.length >= res.meta.total_count) {
@@ -272,7 +275,7 @@ export default {
   }
 }
 .cards-list {
-  padding: 194px 21rpx 0;
+  padding: 390rpx 21rpx 0;
   .scroll-list {
     display: flex;
     flex-wrap: nowrap;
@@ -301,7 +304,7 @@ export default {
             text-align: center;
             font-size: 14px;
             font-weight: bold;
-            color: #333333;
+            /*color: #333333;*/
           }
         }
       }

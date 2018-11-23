@@ -166,7 +166,6 @@ const defaultBWGame = {
   game_count: '',
   image: ''
 }
-const dataArr = []
 
 export default {
   components: {
@@ -238,6 +237,10 @@ export default {
       return name
     },
     async genArchetypeDetail() {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
       wx.showNavigationBarLoading();
       let params={}
       if (this.archetypeId) {
@@ -245,12 +248,14 @@ export default {
       } else if (this.archetypeName) {
         params = {name: this.archetypeName}
       } else {
+        wx.hideLoading()
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
         return
       }
       const res = await getArchetypeDetail(params)
       if (!res) {
+        wx.hideLoading()
         wx.showModal({
           title: '提示',
           content: '抱歉，暂无该卡组详情',
@@ -300,6 +305,7 @@ export default {
         this.worstMatchup.faction = worstMatchupFaction
         this.worstMatchup.show = true
 
+        wx.hideLoading()
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
       }
@@ -311,6 +317,11 @@ export default {
           this.factionIcons.push({id: key, name: utils.faction[key].name, image: utils.faction[key].image})
         }
       }
+    },
+    handleCardClick(item) {
+      wx.navigateTo({
+        url: `/pages/cards/cardDetail/main?id=${item.dbfId}`
+      })
     },
     genTableData(tableData) {
       let array = []
@@ -328,11 +339,6 @@ export default {
         array.push(formatData)
       }
       this.selectedFaction.data = array
-    },
-    handleCardClick(item) {
-      wx.navigateTo({
-        url: `/pages/cards/cardDetail/main?id=${item.dbfId}`
-      })
     },
     handleIconsClick(item) {
       this.selectedFaction = {id: item.id, name: item.name, data: []}
@@ -365,8 +371,6 @@ export default {
     }
   },
   async mounted() {
-    console.log('archetypeDetail mounted', dataArr)
-    Object.assign(this.$data, this.$options.data())
     this.archetypeId = this.$root.$mp.query.id
     this.archetypeName = this.$root.$mp.query.name
     this.decksName = this.$store.state.cards.decksName
@@ -374,27 +378,6 @@ export default {
       this.genFactionIcons(),
       this.genArchetypeDetail()
     ])
-    dataArr.push({...this.$data})
-  },
-  onShow() {
-    this.resetPageData()
-    console.log('archetypeDetail onShow', dataArr)
-    const dataNum = dataArr.length
-    console.log('onReady 1111', dataArr[dataNum-1])
-    if (!dataNum) return
-    Object.assign(this.$data, dataArr[dataNum-1])
-  },
-  onHide() {
-    this.resetPageData()
-  },
-  onUnload() {
-    console.log('onUnload', dataArr)
-    // this.resetPageData()
-    dataArr.pop()
-    const dataNum = dataArr.length
-    console.log('onUnload pop',  dataArr[dataNum-1])
-    if (!dataNum) return
-    Object.assign(this.$data, dataArr[dataNum-1])
   },
   onShareAppMessage(res) {
     return {

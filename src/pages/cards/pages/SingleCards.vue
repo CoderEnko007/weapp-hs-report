@@ -296,6 +296,8 @@
       width: 100%;
       font-size: 12px;
       box-shadow: 0 3px 2px -3px #000;
+      padding:0 30rpx;
+      box-sizing:border-box;
       li {
         width: 25%;
         height: 60rpx;
@@ -305,6 +307,12 @@
           display: inline-block;
           height: 60rpx;
           line-height: 60rpx;
+        }
+        span {
+          width: 100%;
+          overflow:hidden;
+          text-overflow:ellipsis;
+          white-space:nowrap;
         }
       }
       .active_item {

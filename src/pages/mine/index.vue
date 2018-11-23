@@ -24,7 +24,10 @@
       <span class="iconfont">&#xe600;</span>
     </div>
     <div class="code">
-      <h1>打赏作者</h1>
+      <div>
+        <h1 class="text">打赏作者</h1>
+        <div class="capsule" @click="handleCopyBtn"><span>支付宝推广红包</span></div>
+      </div>
       <img :src="codeImg" mode="aspectFill" @click="handleClickCodeImg">
     </div>
   </div>
@@ -44,7 +47,9 @@ export default {
     return {
       deckList: [],
       logo: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9QyXTPpyOMVypO.png',
-      codeImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9oGSrxprEojAfB.jpg'
+      codeImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9oGSrxprEojAfB.jpg',
+      myAudio: null,
+      audioSrc: 'http://47.98.187.217/media/sound/VO_AT_021_PLAY_01.wav'
     }
   },
   computed: {
@@ -114,7 +119,35 @@ export default {
       wx.previewImage({
         urls: [this.codeImg]
       })
+    },
+    handleCopyBtn() {
+      wx.setClipboardData({
+        data: '558391916',
+        success: function (res) {
+          wx.showToast({
+            title: '打开支付宝，首页搜索栏中直接粘贴，即可领取每日红包',
+            icon: 'none',
+            duration: 2500,
+          })
+        }
+      })
+      // this.myAudio.play()
     }
+  },
+  mounted() {
+    this.myAudio = wx.createInnerAudioContext()
+    this.myAudio.src = this.audioSrc
+    this.myAudio.onPlay(() => {
+      console.log('开始播放')
+    })
+    this.myAudio.onEnded(() => {
+      console.log('播放结束')
+    })
+    this.myAudio.onError(res => {
+      console.log(res.errMsg)
+      console.log(res.errCode)
+      console.log(res)
+    })
   },
   onShow() {
     // console.log('onShow', this.$store.state.cards.collectedDecks)
@@ -240,6 +273,7 @@ export default {
   margin: 0 30rpx;
   box-sizing: border-box;
   h1 {
+    display:inline-block;
     margin-top: 38rpx;
     margin-bottom: 24rpx;
     font-size: 15px;
@@ -249,6 +283,20 @@ export default {
     display: block;
     width: 220px;
     margin: 0 auto;
+  }
+  .capsule {
+    float: right;
+    right: 0;
+    height: 40rpx;
+    width: 200rpx;
+    padding:0 15rpx;
+    font-size: 12px;
+    border-radius: 20rpx;
+    box-sizing: border-box;
+    border: 1rpx solid red;
+    text-align: center;
+    margin-top:40rpx;
+    color: red;
   }
 }
 </style>
