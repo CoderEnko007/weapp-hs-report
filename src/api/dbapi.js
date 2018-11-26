@@ -364,6 +364,7 @@ export function setUserCollection(data) {
       delete data.deckDetail.write_perm
     }
     data.deckDetail.user_id = data.query.user_id
+    data.deckDetail.dust_cost = data.deckDetail.dust_cost.toString()
     record.set(data.deckDetail).save().then(res => {
       resolve(res.data)
     }, err => {

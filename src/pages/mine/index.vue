@@ -288,6 +288,7 @@ export default {
     float: right;
     right: 0;
     height: 40rpx;
+    line-height: 40rpx;
     width: 200rpx;
     padding:0 15rpx;
     font-size: 12px;
