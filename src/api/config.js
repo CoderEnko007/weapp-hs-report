@@ -3,14 +3,16 @@ const standDecksTableID = 53174
 const wildDecksTableID = 55625
 const tierTableID = 49232
 const archetypeTableID = 56176
-const rankTableID = 49198
+const rankTableID = 59996
 const seriesTableID = 51271
-const cardsTableID = 51267
+const cardsTableID = 58900
 const arenaCardsTableID = 57106
 const deckNameTableID = 52136
 const trendingTableID = 53120
 const decksCollectionTableID = 55506
 const bannerTableID = 54392
+const noticeTableID = 58439
+const aboutTableID = 59552
 
 const tableID = {
   winrateTableID,
@@ -25,6 +27,8 @@ const tableID = {
   deckNameTableID,
   trendingTableID,
   decksCollectionTableID,
-  bannerTableID
+  bannerTableID,
+  noticeTableID,
+  aboutTableID
 }
 export default tableID

@@ -56,7 +56,7 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        include: [resolve('src'), resolve('test')],
+        include: [resolve('src'), resolve('test'), /mpvue-wxparse/],
         exclude: [resolve('src/libs')],
         use: [
           'babel-loader',

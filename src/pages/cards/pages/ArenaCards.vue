@@ -41,10 +41,10 @@
           <DeckCards :cards="cardsList" :colNum="1" @cardClick="handleCardClick"></DeckCards>
           <div class="data">
             <div class="data-block" v-for="(item, index) in cardsList" :key="index">
-              <!--<span>{{item.times_played}}</span>-->
               <span>{{item.deck_pop}}%</span>
               <span class="color-green" :class="{'color-red': item.deck_winrate<50}">{{item.deck_winrate}}%</span>
-              <span class="color-green" :class="{'color-red': item.played_winrate<50}">{{item.played_winrate}}%</span>
+              <!--<span class="color-green" :class="{'color-red': item.played_winrate<50}">{{item.played_winrate}}%</span>-->
+              <span>{{item.times_played}}</span>
             </div>
           </div>
         </div>
@@ -106,9 +106,10 @@ export default {
       filter: Object.assign({}, defaultFilter),
       listOrder: [
         // {id: 'times_played', name: '打出次数'},
-        {id: 'deck_pop', name: '抓取率'},
+        {id: 'deck_pop', name: '出现率'},
         {id: 'deck_winrate', name: '卡组胜率'},
-        {id: 'played_winrate', name: '打出胜率'}
+        // {id: 'played_winrate', name: '打出胜率'}
+        {id: 'times_played', name: '打出次数'},
       ],
       normalOrder: '/static/icons-v2/rank-normal.png',
       upOrder: '/static/icons-v2/rank-up.png',
@@ -196,7 +197,6 @@ export default {
       this.genCardsList(true)
     },
     scrollToBottom() {
-      console.log('scrollToBottom', this.more, this.page)
       if (!this.more) return false
       this.page += 1
       this.genCardsList(false)

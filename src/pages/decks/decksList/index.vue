@@ -7,6 +7,12 @@
       <!--</div>-->
       <div class="headline">
         <span class="title">职业套牌</span>
+        <div class="time-filter">
+          <picker mode="selector" :value="tabList.selectedItem" :range="timePickerList" @change="handleHeadTabClick">
+            <span class='selector-item'>{{tabList.list[tabList.selectedItem].text}}</span>
+            <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
+          </picker>
+        </div>
         <!--<div class="btn-group">-->
           <!--<div class="btn-block"-->
                <!--v-for="(item, index) in deckMode"-->
@@ -99,12 +105,12 @@ export default {
       filterIcon: '/static/icons-v2/filter-active.png',
       deckMode: utils.rankMode,
       tabList: {
-        selectedItem: 1,
+        selectedItem: 0,
         list: [
-          {id: 1, text: '最新补丁', last_30_days: false},
-          {id: 2, text: '近30天', last_30_days: true}
+          {text: '当前赛季卡组', last_30_days: false},
+          {text: '最近30天卡组', last_30_days: true}
         ]
-      }
+      },
     }
   },
   computed: {
@@ -122,7 +128,12 @@ export default {
       } else {
         return defaultOrder
       }
-    }
+    },
+    timePickerList() {
+      return this.tabList.list.map(item => {
+        return item.text
+      })
+    },
   },
   methods: {
     genDeckList(init) {
@@ -150,7 +161,6 @@ export default {
         }
       }
       getDeckList(this.decksFilter, 12, this.page, this.decksFilter.order).then(res => {
-        console.log(res)
         if (init) {
           this.deckList = utils.translateDeckName(res.objects, this.$store.state.cards.decksName)
           wx.stopPullDownRefresh();
@@ -241,13 +251,19 @@ export default {
       this.decksFilter.archetype = this.deckPickerList[this.selectedDeckIndex].id
       this.genDeckList(true)
     },
-    handleHeadTabClick(item) {
+    // handleHeadTabClick(item) {
+    //   this.deckList = []
+    //   this.decksFilter.last_30_days = item.last_30_days
+    //   this.tabList.selectedItem = item.id
+    //   // this.genPickerList()
+    //   this.genDeckList(true)
+    // },
+    handleHeadTabClick(e) {
       this.deckList = []
-      this.decksFilter.last_30_days = item.last_30_days
-      this.tabList.selectedItem = item.id
-      // this.genPickerList()
+      this.tabList.selectedItem = e.mp.detail.value
+      this.decksFilter.last_30_days = this.tabList.list[this.tabList.selectedItem].last_30_days
       this.genDeckList(true)
-    }
+    },
   },
   mounted() {
     if (this.$root.$mp.query.name) {
@@ -304,6 +320,17 @@ export default {
     z-index: 1;
     .headline {
       margin: 0 30rpx;
+      .time-filter {
+        display: inline-block;
+        height: 24rpx;
+        line-height: 24rpx;
+        margin-left:8px;
+        font-size: 19rpx;
+        color: #999;
+        border: 1rpx solid #ddd;
+        border-radius: 12px;
+        padding: 3rpx 10rpx;
+      }
       .btn-group {
         position: absolute;
         height: 100%;

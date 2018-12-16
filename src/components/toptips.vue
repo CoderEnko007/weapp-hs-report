@@ -16,7 +16,6 @@
       },
       methods: {
         showZanTopTips (content = '', options = {}) {
-          console.log(this)
           let zanTopTips = this.zanTopTips || {}
           // 如果已经有一个计时器在了，就清理掉先
           if (zanTopTips.timer) {

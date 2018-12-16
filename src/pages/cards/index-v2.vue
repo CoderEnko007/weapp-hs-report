@@ -11,10 +11,10 @@
     <div class="tab-container">
       <swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">
         <swiper-item>
-          <SingleCards></SingleCards>
+          <ArenaCards></ArenaCards>
         </swiper-item>
         <swiper-item>
-          <ArenaCards></ArenaCards>
+          <SingleCards></SingleCards>
         </swiper-item>
       </swiper>
       <!--<div :hidden="activeIndex != 0"><SingleCards></SingleCards></div>-->
@@ -36,8 +36,8 @@ export default {
   data() {
     return {
       tabbar: [
+        {id: 'arena_card', text: '竞技场数据'},
         {id: 'single_card', text: '单卡查询'},
-        {id: 'arena_card', text: '竞技场数据'}
       ],
       activeIndex: 0,
       currentTab: 0,

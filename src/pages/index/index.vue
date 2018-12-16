@@ -2,24 +2,33 @@
   <div class="container">
     <NavBar></NavBar>
     <div class="swiper">
+      <div class="zan-panel" v-show="noticeDisplay">
+        <NoticeBar v-on:ref="setRef" v-bind="noticeText" @close="handleCloseNoticeBar" :componentId="'noticeText'"/>
+      </div>
       <Swiper :banners="banners" :date="report_date" @swiperClick="swiperClick" v-if="banners"></Swiper>
     </div>
     <div class="rank-panel">
       <div class="headline">
-        <span class="title">职业胜率</span>
+        <span class="title">职业排名</span>
+        <div class="mode-filter">
+          <picker mode="selector" :value="modeFilter.selectedItem" :range="modePickerList" @change="handleModeChange">
+            <span class='selector-item'>{{modeFilter.list[modeFilter.selectedItem].text}}</span>
+            <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
+          </picker>
+        </div>
         <div class="btn-group">
           <div class="btn-block"
                v-for="(item, index) in rankMode"
                :key="index"
                @click="modeBtnClick(item)">
-            <img class="btn-img" :src="selectedMode===item.mode?item.active_icon:item.icon" mode="aspectFit">
-            <button class="c-button" :class="selectedMode===item.mode?'btn-active':''">{{item.text}}</button>
+            <img class="btn-img" :src="selectedGameType===item.mode?item.active_icon:item.icon" mode="aspectFit">
+            <button class="c-button" :class="selectedGameType===item.mode?'btn-active':''">{{item.text}}</button>
             <div class="separator" v-if="index !== 2">|</div>
           </div>
         </div>
       </div>
       <div class="content">
-        <RankBoard :list="winrate[selectedMode]"></RankBoard>
+        <RankBoard :list="rankData[selectedGameType]" :mode="modeFilter.list[modeFilter.selectedItem].value"></RankBoard>
       </div>
     </div>
     <div class="tier-panel">
@@ -38,34 +47,41 @@
 <script>
 import utils from '@/utils'
 import { mapGetters } from 'vuex'
-import {getRankData, getArchetypeList, getBanners} from "@/api/dbapi";
+import {getRankData, getArchetypeList, getBanners, getNotice} from "@/api/dbapi";
 import {formatNowTime, ShadeColor} from "@/utils";
-import mpvueEcharts from 'mpvue-echarts'
 import TierList from '@/components/TierList'
 import Swiper from '@/components/Swiper'
 import NavBar from '@/components/NavBar'
 import RankBoard from '@/components/RankBoard'
-
-// let chart = null
+import NoticeBar from '@/components/noticebar'
 
 export default {
   components: {
     Swiper,
-    mpvueEcharts,
     TierList,
     NavBar,
-    RankBoard
+    RankBoard,
+    NoticeBar
   },
   data () {
     return {
       banners: [],
-      winrate: {
+      origRankList: [],
+      rankData: {
         'standard': [],
         'wild': [],
         'arena': []
       },
-      selectedMode: 'standard',
+      modeFilter: {
+        selectedItem: 0,
+        list: [
+          {text: '按胜率', value: 'win_rate'},
+          {text: '按热度', value: 'popularity'}
+        ]
+      },
+      selectedGameType: 'standard',
       report_date: '',
+
       rankMode: utils.gameMode,
       tierList: [
         {name: 'Tier 1', cname: '第1梯队', icon: '/static/icons-v2/tierlist-t1.png', list: []},
@@ -74,21 +90,63 @@ export default {
         {name: 'Tier 4', cname: '第4梯队', icon: '/static/icons-v2/tierlist-t4.png', list: []},
       ],
       refreshFlag: 0,
+      noticeText: {
+        text: '',
+        animationData: []
+      },
+      noticeDisplay: false,
     }
   },
   computed: {
     ...mapGetters([
       'navHeight'
     ]),
+    modePickerList() {
+      return this.modeFilter.list.map(item => {
+        return item.text
+      })
+    },
   },
   methods: {
+    ...NoticeBar.methods,
+    setRef(payload) {
+      console.log(payload)
+      setTimeout(() => {
+        let that = this
+        this.initZanNoticeBarScroll(that, 'noticeText')
+      }, 1500)
+    },
     compareFunction(key) {
       return function(obj1, obj2) {
-        return obj1[key]-obj2[key]
+        let formatKey = key.replace('-', '')
+        if (key.indexOf('-') !== -1) {
+          return obj2[formatKey]-obj1[formatKey]
+        } else {
+          return obj1[formatKey]-obj2[formatKey]
+        }
       }
     },
-    initWinrateArray() {
-      this.winrate = {
+    sortRankData(data) {
+      for (let index in this.rankData) {
+        if (this.rankData.hasOwnProperty(index)) {
+          this.rankData[index] = data.filter(item => {
+            return item.game_type.toLowerCase() === index.toLowerCase()
+          })
+          if (this.modeFilter.list[this.modeFilter.selectedItem].value === 'win_rate') {
+            this.rankData[index].sort(this.compareFunction('-win_rate'))
+          } else if (this.modeFilter.list[this.modeFilter.selectedItem].value === 'popularity'){
+            this.rankData[index].sort(this.compareFunction('-popularity'))
+          }
+          this.rankData[index].map(val => {
+            val.win_rate = parseFloat(val.win_rate).toFixed(1)
+            val.popularity = parseFloat(val.popularity).toFixed(1)
+          })
+          this.rankData[index].push({})
+        }
+      }
+    },
+    initRankDataArray() {
+      this.rankData = {
         'standard': [],
         'wild': [],
         'arena': []
@@ -102,25 +160,19 @@ export default {
       })
     },
     modeBtnClick(item) {
-      this.selectedMode = item.mode
+      this.selectedGameType = item.mode
+    },
+    handleModeChange(e) {
+      this.modeFilter.selectedItem = e.mp.detail.value
+      this.sortRankData(this.origRankList)
     },
     genRankData() {
       let date = formatNowTime(new Date())
       getRankData(date, null, 27).then(res => {
-        this.initWinrateArray()
+        this.initRankDataArray()
         this.report_date = res.date
-        for (let index in this.winrate) {
-          if (this.winrate.hasOwnProperty(index)) {
-            this.winrate[index] = res.list.filter(item => {
-              return item.mode.toLowerCase() === index.toLowerCase()
-            })
-            this.winrate[index].sort(this.compareFunction('rank_no'))
-            this.winrate[index].map(val => {
-              val.winrate = parseFloat(val.winrate.replace('%', '')).toFixed(1)
-            })
-            this.winrate[index].push({})
-          }
-        }
+        this.origRankList = res.list
+        this.sortRankData(this.origRankList)
         this.stopPullDown(true)
       }).catch(err => {
         this.stopPullDown(false)
@@ -149,35 +201,51 @@ export default {
         console.log(err)
       })
     },
+    genNotice() {
+      getNotice().then(res => {
+        this.noticeText.text = res.objects[0].content
+        this.noticeDisplay = res.objects[0].display
+      }).catch(err => {
+        console.log(err)
+      })
+    },
     handleTierClick(item) {
       wx.navigateTo({
         url: `/pages/decks/archetypeDetail/main?name=${item.archetype_name}`
       })
     },
+    handleCloseNoticeBar() {
+      this.noticeDisplay = false
+    },
     stopPullDown(success) {
-      // if (success) {
-      //   this.refreshFlag += 1;
-      //   if (this.refreshFlag >= 3) {
-      //     wx.stopPullDownRefresh();
-      //     wx.hideNavigationBarLoading()
-      //   }
-      // } else {
-      //   wx.stopPullDownRefresh();
-      //   wx.hideNavigationBarLoading()
-      // }
+      if (success) {
+        this.refreshFlag += 1;
+        if (this.refreshFlag >= 2) {
+          wx.stopPullDownRefresh();
+          wx.hideNavigationBarLoading()
+        }
+      } else {
+        wx.stopPullDownRefresh();
+        wx.hideNavigationBarLoading()
+      }
     }
   },
   mounted() {
     this.Login()
     this.genBanners()
+    this.genNotice()
     this.genRankData()
     this.genArchetypeList()
   },
-  // onPullDownRefresh() {
-  //   this.genBanners()
-  //   this.genRankData()
-  //   this.genArchetypeList()
-  // },
+  onShow() {
+    console.log('onShow')
+    // this.setRef(null)
+  },
+  onPullDownRefresh() {
+    // this.genBanners()
+    this.genRankData()
+    this.genArchetypeList()
+  },
   onShareAppMessage(res) {
     return {
       title: '炉石传说情报站',
@@ -189,10 +257,33 @@ export default {
 <style scoped lang="scss">
 @import '../../style/color';
 .container {
+  .swiper {
+    .zan-panel {
+      position:fixed;
+      width:100%;
+      margin-top: 0;
+      z-index:2;
+      background: rgba(0,0,0,.3);
+      &:after {
+        border: none;
+      }
+    }
+  }
   .rank-panel {
     padding: 0 15px;
     .headline {
       height: 96rpx;
+      .mode-filter {
+        display: inline-block;
+        height: 24rpx;
+        line-height: 24rpx;
+        margin-left:8px;
+        font-size: 19rpx;
+        color: #999;
+        border: 1rpx solid #ddd;
+        border-radius: 12px;
+        padding: 3rpx 10rpx;
+      }
       .btn-group {
         position: absolute;
         height: 100%;

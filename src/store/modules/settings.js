@@ -27,7 +27,6 @@ const settings = {
             //导航高度
             let navHeight = res.statusBarHeight + 46;
             // let navHeight = res.statusBarHeight*2+25
-            console.log(res)
             commit('SET_NAV_HEIGHT', navHeight)
             if (res.model === 'iPhone X') {
               commit('IS_IPHONE_X')

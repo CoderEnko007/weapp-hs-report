@@ -57,6 +57,7 @@
     cost: null,
     faction: null,
     mode: null,
+    type: null,
     rarity: null,
     series: null,
   }
@@ -84,6 +85,7 @@
         filterTabBar: [
           {name: 'faction', text: '职业', items: [], selected: '职业'},
           {name: 'mode', text: '游戏模式', items: [], selected: '游戏模式'},
+          {name: 'type', text: '类型', items: [], selected: '类型'},
           {name: 'rarity', text: '稀有度', items: [], selected: '稀有度'},
           {name: 'series', text: '扩展包', items: [], selected: '扩展包'}
         ],
@@ -110,13 +112,22 @@
         this.filterTabBar[1].items = utils.mode
 
         array = []
+        for (let key in utils.type) {
+          if (utils.type.hasOwnProperty(key)) {
+            array.push({id: key, name: utils.type[key].name})
+          }
+        }
+        array.unshift({id: 'all', name: '全部类型'})
+        this.filterTabBar[2].items = array
+
+        array = []
         for (let key in utils.rarity) {
           if (utils.rarity.hasOwnProperty(key)) {
             array.push({id: key, name: utils.rarity[key].name})
           }
         }
         array.unshift({id: 'all', name: '全部稀有度'})
-        this.filterTabBar[2].items = array
+        this.filterTabBar[3].items = array
 
         for (let filter of this.filterTabBar) {
           if (filter.items.length % 2) {
@@ -140,10 +151,12 @@
         switch(filter.name) {
           case 'faction': this.filter.faction = filter.item; this.filterTabBar[0].selected=filter.item.name; break
           case 'mode': this.filter.mode = filter.item; this.filterTabBar[1].selected=filter.item.name; break
-          case 'rarity': this.filter.rarity = filter.item; this.filterTabBar[2].selected=filter.item.name; break
-          case 'series': this.filter.series = filter.item; this.filterTabBar[3].selected=filter.item.name; break
+          case 'type': this.filter.type = filter.item; this.filterTabBar[2].selected=filter.item.name; break
+          case 'rarity': this.filter.rarity = filter.item; this.filterTabBar[3].selected=filter.item.name; break
+          case 'series': this.filter.series = filter.item; this.filterTabBar[4].selected=filter.item.name; break
           default: console.log(filter.name+' not found');
         }
+        console.log('bbb', this.filter)
         this.genCardsList(true)
       },
       handleMaskClick() {
@@ -155,7 +168,7 @@
         if (array.length%2) {
           array.push({})
         }
-        this.filterTabBar[3].items = array
+        this.filterTabBar[4].items = array
       },
       handleCardClick(item) {
         // 如果过滤器菜单打开则关闭
@@ -177,6 +190,7 @@
           this.cardsList = []
         }
         wx.showNavigationBarLoading();
+        console.log('aaa', this.filter)
         getCardsList(this.filter, 21, this.page).then(res => {
           let list = res.objects.map(item => {
             let image = utils.genCardsImageURL(item.hsId)
@@ -299,7 +313,7 @@
       padding:0 30rpx;
       box-sizing:border-box;
       li {
-        width: 25%;
+        width: 20%;
         height: 60rpx;
         text-align: center;
         transition: all 0.3s;

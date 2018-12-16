@@ -1,11 +1,14 @@
 <template>
   <div class="rank-board">
     <div class="faction-block" v-for="(item, index) in list" :key="index">
-      <div class="number"><span>{{item.rank_no}}</span></div>
-      <img :src="item.name?factions[item.name].image:''">
-      <div class="faction"><span>{{item.name?factions[item.name].name:''}}</span></div>
-      <div class="winrate" :class="{'color-green': item.winrate>=50, 'color-red': item.winrate<50}">
-        <span v-if="item.winrate">{{item.winrate}}%</span>
+      <div class="number" v-if="item.faction"><span>{{index+1}}</span></div>
+      <img :src="item.faction?factions[item.faction].image:''">
+      <div class="faction"><span>{{item.faction?factions[item.faction].name:''}}</span></div>
+      <div class="data-rate" v-if="mode==='win_rate'">
+        <span :class="{'color-green': item.win_rate>=50, 'color-red': item.win_rate<50}" v-if="item.win_rate">{{item.win_rate}}%</span>
+      </div>
+      <div class="data-rate" v-if="mode==='popularity'">
+        <span v-if="item.popularity">{{item.popularity}}%</span>
       </div>
     </div>
   </div>
@@ -14,7 +17,7 @@
 import utils from '@/utils'
 export default {
   name: 'RankBoard',
-  props: ['list'],
+  props: ['list', 'mode'],
   data() {
     return {
 
@@ -24,6 +27,16 @@ export default {
     factions() {
       return utils.faction
     },
+  },
+  watch: {
+    // list(val) {
+    //   console.log(val.map(item=>{
+    //     return {
+    //       'win_rate': item.win_rate,
+    //       'popularity': item.popularity
+    //     }
+    //   }))
+    // }
   }
 }
 </script>
@@ -63,7 +76,7 @@ export default {
       line-height: 30rpx;
       margin-left: 14.5rpx;
     }
-    .winrate {
+    .data-rate {
       position: absolute;
       right: 30rpx;
       line-height: 26rpx;

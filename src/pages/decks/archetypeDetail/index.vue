@@ -32,7 +32,7 @@
         </div>
       </div>
     </div>
-    <div class="pop-deck" v-if="bestDeck.show">
+    <div class="pop-deck">
       <div class="headline">
         <span class="title">最热门套牌</span>
         <div class="more-btn" @click="gotoDecks">
@@ -40,7 +40,7 @@
           <span class="iconfont">&#xe600;</span>
         </div>
       </div>
-      <div class="deck-item" @click="handlePopDeckClick">
+      <div class="deck-item" @click="handlePopDeckClick" v-if="bestDeck.show">
         <div class="icon">
           <img :src="genFactionIcon" mode="aspectFit">
         </div>
@@ -56,10 +56,11 @@
         </div>
         <span class="iconfont">&#xe600;</span>
       </div>
+      <div class="no-data" v-else><h1>样本过少，暂无数据</h1></div>
     </div>
     <div class="bw-game-panel">
       <div class="headline"><span class="title">优劣对局</span></div>
-      <div class="board-panel">
+      <div class="board-panel" v-if="bestMatchup.show || worstMatchup.show">
         <div class="board" v-show="bestMatchup.show">
           <div class="deck-item" @click="handleBestMatchupClick">
             <div class="icon">
@@ -103,6 +104,9 @@
           </div>
         </div>
       </div>
+      <div class="board-panel" v-else>
+        <div class="no-data"><h1>样本过少，暂无数据</h1></div>
+      </div>
     </div>
     <!--<div class="separator"></div>-->
     <div class="headline"><span class="title">形态构筑</span></div>
@@ -126,6 +130,7 @@
         <DeckTable :selectedFaction="selectedFaction" :date="updateDate" :tableTitle="tableTitle" :tableData="selectedFaction.data"
                    :tableName="'对阵'+selectedFaction.name" @itemClick="handleDeckItemClick"></DeckTable>
       </div>
+      <ZanLoadmore v-bind="{ nomore: true }" />
     </div>
   </div>
 </template>
@@ -138,6 +143,7 @@ import DeckTable from '@/components/DeckTable'
 import TierList from '@/components/TierList'
 import HeroesPanel from '@/components/HeroesPanel'
 import NavBar from '@/components/NavBar'
+import ZanLoadmore from '@/components/loadmore'
 
 const defaultDetail = {
   faction: '',
@@ -173,7 +179,8 @@ export default {
     DeckTable,
     TierList,
     HeroesPanel,
-    NavBar
+    NavBar,
+    ZanLoadmore
   },
   data() {
     return {
@@ -239,7 +246,7 @@ export default {
     async genArchetypeDetail() {
       wx.showLoading({
         title: '加载中',
-        mask: true
+        mask: false
       })
       wx.showNavigationBarLoading();
       let params={}
@@ -254,6 +261,7 @@ export default {
         return
       }
       const res = await getArchetypeDetail(params)
+      console.log('aaa',res)
       if (!res) {
         wx.hideLoading()
         wx.showModal({
@@ -277,34 +285,42 @@ export default {
         this.genTableData(this.matchupDetail[this.selectedFaction.id])
 
         let bestDeckData = JSON.parse(this.archetypeDetail.pop_deck)
-        this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype)
-        this.bestDeck.deck_id = bestDeckData[0]
-        this.bestDeck.win_rate = bestDeckData[1]
-        this.bestDeck.game_count = bestDeckData[2]
-        this.bestDeck.show = true
+        console.log('bestDeckData', bestDeckData)
+        if (bestDeckData.length>0) {
+          this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype)
+          this.bestDeck.deck_id = bestDeckData[0]
+          this.bestDeck.win_rate = bestDeckData[1]
+          this.bestDeck.game_count = bestDeckData[2]
+          this.bestDeck.show = true
+        }
 
         let bestMatchupData = JSON.parse(this.archetypeDetail.best_matchup)
-        this.bestMatchup.ename = bestMatchupData[0]
-        this.bestMatchup.cname = this.getDeckCName(bestMatchupData[0])
-        this.bestMatchup.win_rate = parseFloat(bestMatchupData[1]).toFixed(2)
-        this.bestMatchup.game_count = bestMatchupData[2]
-        let bestMatchupFaction = bestMatchupData[0].split(' ')
-        bestMatchupFaction = bestMatchupFaction[bestMatchupFaction.length - 1]
-        this.bestMatchup.image = utils.faction[bestMatchupFaction].image
-        this.bestMatchup.faction = bestMatchupFaction
-        this.bestMatchup.show = true
+        if (bestMatchupData.length>0) {
+          this.bestMatchup.ename = bestMatchupData[0]
+          this.bestMatchup.cname = this.getDeckCName(bestMatchupData[0])
+          this.bestMatchup.win_rate = parseFloat(bestMatchupData[1]).toFixed(2)
+          this.bestMatchup.game_count = bestMatchupData[2]
+          let bestMatchupFaction = bestMatchupData[0].split(' ')
+          bestMatchupFaction = bestMatchupFaction[bestMatchupFaction.length - 1]
+          this.bestMatchup.image = utils.faction[bestMatchupFaction].image
+          this.bestMatchup.faction = bestMatchupFaction
+          this.bestMatchup.show = true
+        }
 
         let worstMatchupData = JSON.parse(this.archetypeDetail.worst_matchup)
-        this.worstMatchup.ename = worstMatchupData[0]
-        this.worstMatchup.cname = this.getDeckCName(worstMatchupData[0])
-        this.worstMatchup.win_rate = parseFloat(worstMatchupData[1]).toFixed(2)
-        this.worstMatchup.game_count = worstMatchupData[2]
-        let worstMatchupFaction = worstMatchupData[0].split(' ')
-        worstMatchupFaction = worstMatchupFaction[worstMatchupFaction.length - 1]
-        this.worstMatchup.image = utils.faction[worstMatchupFaction].image
-        this.worstMatchup.faction = worstMatchupFaction
-        this.worstMatchup.show = true
+        if (worstMatchupData.length>0) {
+          this.worstMatchup.ename = worstMatchupData[0]
+          this.worstMatchup.cname = this.getDeckCName(worstMatchupData[0])
+          this.worstMatchup.win_rate = parseFloat(worstMatchupData[1]).toFixed(2)
+          this.worstMatchup.game_count = worstMatchupData[2]
+          let worstMatchupFaction = worstMatchupData[0].split(' ')
+          worstMatchupFaction = worstMatchupFaction[worstMatchupFaction.length - 1]
+          this.worstMatchup.image = utils.faction[worstMatchupFaction].image
+          this.worstMatchup.faction = worstMatchupFaction
+          this.worstMatchup.show = true
+        }
 
+        console.log('hideLoading')
         wx.hideLoading()
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
@@ -380,9 +396,13 @@ export default {
     ])
   },
   onShareAppMessage(res) {
+    // return {
+    //   title: this.archetypeName,
+    //   path: `/pages/decks/archetypeDetail/main?id=${this.archetypeId}`
+    // }
     return {
-      title: this.archetypeName,
-      path: `/pages/decks/archetypeDetail/main?id=${this.archetypeId}`
+      title: '炉石传说情报站',
+      path: '/pages/index/main'
     }
   },
   onPullDownRefresh() {
@@ -476,7 +496,15 @@ export default {
       }
     }
   }
-  .pop-deck {
+  .pop-deck, .board-panel {
+    .no-data {
+      padding:0 30rpx;
+      font-size:13px;
+      color:#999;
+      height:80rpx;
+      text-align: center;
+      line-height:80rpx;
+    }
     .tier-desc {
       border: none;
     }

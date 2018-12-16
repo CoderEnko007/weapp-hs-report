@@ -65,7 +65,7 @@
         <button @click="copyDeckCode">复制神秘代码</button>
       </div>
       <div class="ads" v-if="adsOpenFlag">
-        <ad unit-id="adunit-5507cac6947d0ea4"></ad>
+        <ad unit-id="adunit-d6bb528c4e28a808"></ad>
       </div>
       <div class="separator" v-else></div>
       <div class="winrate-block m-30">
@@ -204,7 +204,7 @@ export default {
     async genDeckData() {
       wx.showLoading({
         title: '加载中',
-        mask: true
+        mask: false
       })
       wx.showNavigationBarLoading();
       let params = {}
@@ -383,17 +383,17 @@ export default {
     this.genDeckData()
   },
   onShareAppMessage(res) {
-    if (res.from === 'button') {
-      return {
-        title: this.genDeckName,
-        path: `/pages/decks/deckDetail/main?id=${this.recordID}`
-      }
-    } else {
+    // if (res.from === 'button') {
+    //   return {
+    //     title: this.genDeckName,
+    //     path: `/pages/decks/deckDetail/main?id=${this.recordID}`
+    //   }
+    // } else {
       return {
         title: '炉石传说情报站',
         path: '/pages/index/main'
       }
-    }
+    // }
   }
 }
 </script>

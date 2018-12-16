@@ -14,9 +14,7 @@
         <span class="title">数据说明</span>
       </div>
       <div class="desc">
-        <p>· 本小程序中的卡组及数据均来自HSReplay，每天早上8点更新</p>
-        <p>· HSReplay会实时更新全站数据，而爬取数据需要一定时间，因此小程序中的数据可能会与实时数据有所偏差，但是一天内的变化不会太大，大家放心食用。</p>
-        <p>· 持续更新，更多功能敬请期待。</p>
+        <p v-for="(item, index) in description" :key="index">· {{item}}</p>
       </div>
       <div class="separator"></div>
     </div>
@@ -36,6 +34,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import {getAboutDescription} from '@/api/dbapi'
 import NavBar from '@/components/NavBar'
 
 export default {
@@ -45,7 +44,8 @@ export default {
   data() {
     return {
       bannerImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gDPyMJP8arlwMXm.png',
-      email: 'yf381966217@163.com'
+      email: 'yf381966217@163.com',
+      description: [],
     }
   },
   ...mapGetters([
@@ -62,6 +62,15 @@ export default {
         }
       })
     }
+  },
+  mounted() {
+    getAboutDescription().then(res => {
+      this.description = res.objects.map(item => {
+        return item.text
+      })
+    }).catch(err => {
+      console.log(err)
+    })
   },
   onShareAppMessage(res) {
     return {

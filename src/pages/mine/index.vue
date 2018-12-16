@@ -48,7 +48,6 @@ export default {
       deckList: [],
       logo: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9QyXTPpyOMVypO.png',
       codeImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9oGSrxprEojAfB.jpg',
-      myAudio: null,
       audioSrc: 'http://47.98.187.217/media/sound/VO_AT_021_PLAY_01.wav'
     }
   },
@@ -131,28 +130,11 @@ export default {
           })
         }
       })
-      // this.myAudio.play()
     }
-  },
-  mounted() {
-    this.myAudio = wx.createInnerAudioContext()
-    this.myAudio.src = this.audioSrc
-    this.myAudio.onPlay(() => {
-      console.log('开始播放')
-    })
-    this.myAudio.onEnded(() => {
-      console.log('播放结束')
-    })
-    this.myAudio.onError(res => {
-      console.log(res.errMsg)
-      console.log(res.errCode)
-      console.log(res)
-    })
   },
   onShow() {
     // console.log('onShow', this.$store.state.cards.collectedDecks)
     // this.deckList = this.$store.state.cards.collectedDecks
-    console.log('bbb', this.userInfo)
     this.genUserCollection()
   },
   onShareAppMessage(res) {

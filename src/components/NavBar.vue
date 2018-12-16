@@ -1,9 +1,9 @@
 <template>
   <div class="nav-container" :style="{'min-height': isIphoneX?90+'px':66+'px'}">
     <div class="nav-bar" :style="{height: navHeight+'px'}">
-      <div class="nav-title" :style="{'line-height': isIphoneX?navHeight+38+'px':navHeight+18+'px'}">
+      <div class="nav-title" >
         <span class="title" v-if="navTitle">{{navTitle}}</span>
-        <span class="title"  v-else>{{defaultTitle}}</span>
+        <span class="title" v-else>{{defaultTitle}}</span>
       </div>
       <div class="btn-group" v-if="showCapsule">
         <div class="nav-capsule">
@@ -88,6 +88,8 @@ export default {
   z-index: 999;
   .nav-title {
     position: absolute;
+    /*position:relative;*/
+    height:100%;
     top: 0;
     left: 0;
     right: 0;
@@ -101,6 +103,10 @@ export default {
     white-space: nowrap;
     font-weight: 600;
     .title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 12px;
       display: inline;
     }
   }

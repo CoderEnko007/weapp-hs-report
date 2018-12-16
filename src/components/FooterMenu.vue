@@ -1,6 +1,6 @@
 <template>
   <div class="footer-menu">
-    <button open-type="share" class="share">
+    <button open-type="share" class="share" :style="{width: showCollectBtn?'240rpx':'100%'}">
       <span class="icon iconfont">&#xe63b;</span>
       <span>分享给好友</span>
     </button>

@@ -98,7 +98,7 @@ export default {
       tabList: {
         selectedItem: 0,
         list: [
-          {text: '最新补丁后卡组', last_30_days: false},
+          {text: '当前赛季卡组', last_30_days: false},
           {text: '最近30天卡组', last_30_days: true}
         ]
       },
@@ -269,7 +269,6 @@ export default {
       })
     },
     scrollToBottom() {
-      console.log('scroll to bottom', )
       if (!this.more) return false
       this.page += 1
       this.genDeckList(false)
@@ -281,12 +280,6 @@ export default {
     this.genPickerList()
     this.genDeckList(true)
   },
-  onShow() {
-    console.log('DecksList onShow')
-  },
-  onUnload() {
-    console.log('deckslist onUnload')
-  }
 }
 </script>
 <style lang="scss" scoped>

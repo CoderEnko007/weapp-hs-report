@@ -188,9 +188,6 @@ export default {
     this.genFactionIcons()
     this.genWinRateData()
   },
-  onUnload() {
-    console.log('archetypelist onUnload')
-  }
 }
 </script>
 <style lang="scss" scoped>

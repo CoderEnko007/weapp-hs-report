@@ -12,7 +12,7 @@
       <DeckList :list="deckList" @itemClick="handleDeckClick"></DeckList>
     </div>
     <div class="ads" v-if="adsOpenFlag">
-      <ad unit-id="adunit-5507cac6947d0ea4"></ad>
+      <ad unit-id="adunit-4c3a7a55067c0f6e"></ad>
     </div>
   </div>
 </template>
