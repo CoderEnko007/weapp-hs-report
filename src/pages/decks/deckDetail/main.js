@@ -5,6 +5,6 @@ Page(pageFactory(App))
 
 export default {
   config: {
-    enablePullDownRefresh: true
+    enablePullDownRefresh:false
   }
 }

@@ -190,11 +190,13 @@ export default {
     handleAudioPlay(item) {
       console.log(item)
       this.selectedAudio = item.src
-      if (this.audioPlaying) {
-        this.myAudio.stop()
+      if (this.myAudio) {
+        if (this.audioPlaying) {
+          this.myAudio.stop()
+        }
+        this.myAudio.src = encodeURI(item.src)
+        this.myAudio.play()
       }
-      this.myAudio.src = encodeURI(item.src)
-      this.myAudio.play()
     }
   },
   mounted() {
@@ -223,8 +225,10 @@ export default {
     this.initCardDetail()
   },
   onUnload() {
-    this.myAudio.stop()
-    this.myAudio.destroy()
+    if (this.myAudio) {
+      this.myAudio.stop()
+      this.myAudio.destroy()
+    }
     this.selectedAudio = ''
     this.cardId = null
     this.cardDetail = Object.assign({}, defaultCardDetail)

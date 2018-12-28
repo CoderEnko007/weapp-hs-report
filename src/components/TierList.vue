@@ -91,6 +91,7 @@ export default {
       height: 100%;
       line-height: 40px;
       .title-block {
+        padding:0 30rpx;
         font-size: 14px;
         font-weight: 700;
         color: #333;
@@ -118,6 +119,8 @@ export default {
     justify-content: space-around;
     flex-wrap: wrap;
     width: 100%;
+    padding:0 30rpx;
+    box-sizing:border-box;
     .tier-item {
       position: relative;
       width: 100%;

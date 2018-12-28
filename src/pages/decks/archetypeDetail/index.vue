@@ -248,7 +248,7 @@ export default {
         title: '加载中',
         mask: false
       })
-      wx.showNavigationBarLoading();
+      // wx.showNavigationBarLoading();
       let params={}
       if (this.archetypeId) {
         params = {recordID: this.archetypeId}
@@ -256,12 +256,11 @@ export default {
         params = {name: this.archetypeName}
       } else {
         wx.hideLoading()
-        wx.stopPullDownRefresh();
-        wx.hideNavigationBarLoading()
+        // wx.stopPullDownRefresh();
+        // wx.hideNavigationBarLoading()
         return
       }
       const res = await getArchetypeDetail(params)
-      console.log('aaa',res)
       if (!res) {
         wx.hideLoading()
         wx.showModal({
@@ -285,7 +284,6 @@ export default {
         this.genTableData(this.matchupDetail[this.selectedFaction.id])
 
         let bestDeckData = JSON.parse(this.archetypeDetail.pop_deck)
-        console.log('bestDeckData', bestDeckData)
         if (bestDeckData.length>0) {
           this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype)
           this.bestDeck.deck_id = bestDeckData[0]
@@ -319,11 +317,9 @@ export default {
           this.worstMatchup.faction = worstMatchupFaction
           this.worstMatchup.show = true
         }
-
-        console.log('hideLoading')
         wx.hideLoading()
-        wx.stopPullDownRefresh();
-        wx.hideNavigationBarLoading()
+        // wx.stopPullDownRefresh();
+        // wx.hideNavigationBarLoading()
       }
     },
     genFactionIcons() {
@@ -396,13 +392,9 @@ export default {
     ])
   },
   onShareAppMessage(res) {
-    // return {
-    //   title: this.archetypeName,
-    //   path: `/pages/decks/archetypeDetail/main?id=${this.archetypeId}`
-    // }
     return {
-      title: '炉石传说情报站',
-      path: '/pages/index/main'
+      title: this.genArchetypeName,
+      path: `/pages/decks/archetypeDetail/main?name=${this.archetypeName}`
     }
   },
   onPullDownRefresh() {

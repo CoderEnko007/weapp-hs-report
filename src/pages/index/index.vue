@@ -39,6 +39,9 @@
       <div class="tier-content">
         <div class="tier-block" v-for="(tier, index) in tierList" :key="index">
           <TierList :tierData="tier" @itemClick="handleTierClick"></TierList>
+          <div class="ads" v-if="index===0">
+            <ad unit-id="adunit-900bbac5f4c50939"></ad>
+          </div>
         </div>
       </div>
     </div>
@@ -237,10 +240,6 @@ export default {
     this.genRankData()
     this.genArchetypeList()
   },
-  onShow() {
-    console.log('onShow')
-    // this.setRef(null)
-  },
   onPullDownRefresh() {
     // this.genBanners()
     this.genRankData()
@@ -331,8 +330,9 @@ export default {
     }
   }
   .tier-panel {
-    padding: 10px 15px 0;
+    padding: 10px 0;
     .headline {
+      padding:0 30rpx;
       .headline-meta {
         height: 24rpx;
         line-height: 24rpx;

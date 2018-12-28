@@ -154,7 +154,7 @@ export default {
         this.cardsList = this.cardsList.map(val => {
           val.card_hsid = val.hsId
           val.cname = val.name
-          val.deck_pop = parseFloat(val.deck_pop).toFixed(2)
+          val.deck_pop = parseFloat(val.deck_pop).toFixed(1)
           val.deck_winrate = parseFloat(val.deck_winrate).toFixed(1)
           val.played_winrate = parseFloat(val.played_winrate).toFixed(1)
           return val

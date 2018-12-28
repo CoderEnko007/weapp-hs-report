@@ -28,7 +28,7 @@ export default {
       })
     }
   },
-  created () {
+  onLaunch () {
     require('./utils/sdk-v1.10.0')
     wx.BaaS.init(this.clientId)
     // wx.BaaS = requirePlugin('sdkPlugin')

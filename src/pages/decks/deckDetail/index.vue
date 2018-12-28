@@ -201,7 +201,7 @@ export default {
       this.deckCollected = false
       this.showArchetype = false
     },
-    async genDeckData() {
+    genDeckData() {
       wx.showLoading({
         title: '加载中',
         mask: false
@@ -214,78 +214,81 @@ export default {
         params = {deckID: this.deckID}
       }
       params.mode = this.deckMode
-      const res = await getDeckDetail(params, this.trending, this.collected)
-      if (!res) {
-        wx.hideLoading()
-        wx.showModal({
-          title: '提示',
-          content: '抱歉，暂未收录该卡组',
-          showCancel: false,
-          success (res) {
-            wx.navigateBack()
-          }
-        })
-      } else {
-        this.checkDeckCollected()
-        this.deckDetail = res
-        this.getArchetype()
-        this.bannerImg = utils.faction[this.deckDetail['faction']].bgImage1
-        this.costChartData.yAxis = JSON.parse(this.deckDetail.statistic)
-        let costMax = Math.max.apply(null, this.costChartData.yAxis)
-        this.costChartData.max = 5-costMax%10>0?costMax+5-costMax%10:costMax+10-costMax%10
-        this.costChartData = JSON.stringify(this.costChartData)
+      // const res = await getDeckDetail(params, this.trending, this.collected)
+      getDeckDetail(params, this.trending, this.collected).then(res => {
+        if (!res) {
+          wx.hideLoading()
+          wx.showModal({
+            title: '提示',
+            content: '抱歉，暂未收录该卡组',
+            showCancel: false,
+            success (res) {
+              wx.navigateBack()
+            }
+          })
+        } else {
+          this.checkDeckCollected()
+          this.deckDetail = res
+          this.getArchetype()
+          this.bannerImg = utils.faction[this.deckDetail['faction']].bgImage1
+          this.costChartData.yAxis = JSON.parse(this.deckDetail.statistic)
+          let costMax = Math.max.apply(null, this.costChartData.yAxis)
+          this.costChartData.max = 5-costMax%10>0?costMax+5-costMax%10:costMax+10-costMax%10
+          this.costChartData = JSON.stringify(this.costChartData)
 
-        // 卡牌类型数据
-        this.typeChartData = []
-        let clazz = JSON.parse(this.deckDetail.clazzCount)
-        for (let index in clazz) {
-          if (clazz.hasOwnProperty(index)) {
-            this.typeChartData.push({
-              name: index.toLowerCase(),
-              cname: utils.type[index.toUpperCase()].name,
-              value: clazz[index]
-            })
-          }
-        }
-        // 卡牌稀有度数据
-        this.rarityChartData = []
-        let rarity = JSON.parse(this.deckDetail.rarityCount)
-        let commonCards = {name: '', cname: '基础/普通', value: 0, color: utils.rarity['free'].color}
-        this.rarityColor = []
-        for (let index in rarity) {
-          if (rarity.hasOwnProperty(index)) {
-            if (index.toLowerCase() === 'free' || index.toLowerCase() === 'common') {
-              commonCards.value += rarity[index]
-            } else {
-              this.rarityChartData.push({
+          // 卡牌类型数据
+          this.typeChartData = []
+          let clazz = JSON.parse(this.deckDetail.clazzCount)
+          for (let index in clazz) {
+            if (clazz.hasOwnProperty(index)) {
+              this.typeChartData.push({
                 name: index.toLowerCase(),
-                cname: utils.rarity[index.toLowerCase()].name,
-                value: rarity[index],
-                color: utils.rarity[index.toLowerCase()].color
+                cname: utils.type[index.toUpperCase()].name,
+                value: clazz[index]
               })
             }
           }
+          // 卡牌稀有度数据
+          this.rarityChartData = []
+          let rarity = JSON.parse(this.deckDetail.rarityCount)
+          let commonCards = {name: '', cname: '基础/普通', value: 0, color: utils.rarity['free'].color}
+          this.rarityColor = []
+          for (let index in rarity) {
+            if (rarity.hasOwnProperty(index)) {
+              if (index.toLowerCase() === 'free' || index.toLowerCase() === 'common') {
+                commonCards.value += rarity[index]
+              } else {
+                this.rarityChartData.push({
+                  name: index.toLowerCase(),
+                  cname: utils.rarity[index.toLowerCase()].name,
+                  value: rarity[index],
+                  color: utils.rarity[index.toLowerCase()].color
+                })
+              }
+            }
+          }
+          this.rarityChartData.unshift(commonCards)
+          // 对阵各职业胜率数据
+          this.winrateChartData = JSON.parse(this.deckDetail.faction_win_rate)
+          this.winrateChartData = this.winrateChartData.map(item => {
+            item.win_rate = parseFloat(item.win_rate).toFixed(1)
+            return item
+          })
+          wx.hideLoading()
+          wx.hideNavigationBarLoading()
+          wx.stopPullDownRefresh();
         }
-        this.rarityChartData.unshift(commonCards)
-        // 对阵各职业胜率数据
-        this.winrateChartData = JSON.parse(this.deckDetail.faction_win_rate)
-        this.winrateChartData = this.winrateChartData.map(item => {
-          item.win_rate = parseFloat(item.win_rate).toFixed(1)
-          return item
-        })
-        wx.hideLoading()
-        wx.hideNavigationBarLoading()
-        wx.stopPullDownRefresh();
-      }
+      })
     },
-    async getArchetype() {
+    getArchetype() {
       if (this.deckDetail.deck_name) {
-        const res = await getArchetypeDetail({name: this.deckDetail.deck_name})
-        if (res) {
-          this.showArchetype = true
-        } else {
-          this.showArchetype = false
-        }
+        getArchetypeDetail({name: this.deckDetail.deck_name}).then(res => {
+          if (res) {
+            this.showArchetype = true
+          } else {
+            this.showArchetype = false
+          }
+        })
       }
     },
     handleCardClick(item) {
@@ -373,9 +376,7 @@ export default {
     this.decksName = this.$store.state.cards.decksName
     this.trending = !!this.$root.$mp.query.trending
     this.collected = !!this.$root.$mp.query.collected
-    await Promise.all([
-      this.genDeckData()
-    ])
+    this.genDeckData()
   },
   onPullDownRefresh() {
     // 下拉刷新要把json字符串转换为对象，否则getDeckData时操作对象会报错
@@ -383,17 +384,23 @@ export default {
     this.genDeckData()
   },
   onShareAppMessage(res) {
-    // if (res.from === 'button') {
-    //   return {
-    //     title: this.genDeckName,
-    //     path: `/pages/decks/deckDetail/main?id=${this.recordID}`
-    //   }
-    // } else {
+    let sharePath = ''
+    if (this.recordID) {
+      sharePath: `/pages/decks/deckDetail/main?recordID=${this.recordID}`
+    } else if (this.deckID) {
+      sharePath: `/pages/decks/deckDetail/main?deckID=${this.deckID}`
+    }
+    if (res.from === 'button') {
+      return {
+        title: this.genDeckName,
+        path: sharePath
+      }
+    } else {
       return {
         title: '炉石传说情报站',
         path: '/pages/index/main'
       }
-    // }
+    }
   }
 }
 </script>

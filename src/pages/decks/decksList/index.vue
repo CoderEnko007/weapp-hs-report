@@ -284,7 +284,7 @@ export default {
     this.genDeckList(true)
   },
   onUnload() {
-    this.tabList.selectedItem = 1
+    this.tabList.selectedItem = 0
     this.decksFilter = Object.assign({}, defaultFilter)
     this.selectedFaction = ''
     this.selectedDeckIndex = 0
