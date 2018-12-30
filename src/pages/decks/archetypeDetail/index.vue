@@ -15,7 +15,7 @@
         <div class="desc">
           <div class="desc-item" v-show="archetypeDetail.real_winrate">
             <p class="item-name">总胜率</p>
-            <p class="item-meta color-light-green" :class="{'color-red': archetypeDetail.win_rate<50}">{{archetypeDetail.real_winrate}}%</p>
+            <p class="item-meta color-light-green" :class="{'color-red': archetypeDetail.real_winrate<50}">{{archetypeDetail.real_winrate}}%</p>
           </div>
           <div class="desc-item" v-show="archetypeDetail.real_games">
             <p class="item-name">总对局数</p>

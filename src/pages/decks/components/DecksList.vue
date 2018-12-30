@@ -200,8 +200,7 @@ export default {
       this.selectedDeckIndex = 0
       this.deckPickerList = [{id: 'all', name: '全部类型'}]
       let filterDecksName = this.decksName.filter(item => {
-        if ((!item.mode && this.decksFilter.mode === defaultFilter.mode)
-          || (item.mode === this.decksFilter.mode)
+        if ((item.mode === this.decksFilter.mode)
           || item.mode==='All') {
           return true
         }

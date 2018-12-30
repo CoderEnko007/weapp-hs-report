@@ -188,8 +188,7 @@ export default {
       this.selectedDeckIndex = 0
       this.deckPickerList = [{id: 'all', name: '全部类型'}]
       let filterDecksName = this.decksName.filter(item => {
-        if ((!item.mode && this.decksFilter.mode === defaultFilter.mode)
-          || (item.mode === this.decksFilter.mode)
+        if ((item.mode === this.decksFilter.mode)
           || item.mode==='All') {
           return true
         }
@@ -266,6 +265,7 @@ export default {
     },
   },
   mounted() {
+    console.log('mounted')
     if (this.$root.$mp.query.name) {
       this.decksFilter.archetype = this.$root.$mp.query.name
     }
@@ -284,6 +284,7 @@ export default {
     this.genDeckList(true)
   },
   onUnload() {
+    console.log('onUnload')
     this.tabList.selectedItem = 0
     this.decksFilter = Object.assign({}, defaultFilter)
     this.selectedFaction = ''

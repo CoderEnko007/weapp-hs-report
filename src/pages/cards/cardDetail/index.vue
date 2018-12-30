@@ -188,7 +188,6 @@ export default {
       })
     },
     handleAudioPlay(item) {
-      console.log(item)
       this.selectedAudio = item.src
       if (this.myAudio) {
         if (this.audioPlaying) {
@@ -203,15 +202,15 @@ export default {
     this.cardId = this.$root.$mp.query.id
     this.myAudio = wx.createInnerAudioContext()
     this.myAudio.onPlay(() => {
-      console.log('start')
+      // console.log('start')
       this.audioPlaying = true
     })
     this.myAudio.onEnded(() => {
-      console.log('end')
+      // console.log('end')
       this.selectedAudio = ''
     })
     this.myAudio.onWaiting(() => {
-      console.log('waiting...')
+      // console.log('waiting...')
       this.audioPlaying = true
     })
     this.myAudio.onError(res => {
