@@ -7,12 +7,12 @@
       <!--<img :src="cardDetail.heroIcon" class="icon-img" mode="aspectFit">-->
     </div>
     <div class="detail">
-      <p class="name">{{cardDetail.name}}</p>
-      <p class="normal"><span class="f3">英文名</span>：{{cardDetail.ename}}</p>
+      <p class="name" @click="handleCopyBtn(cardDetail.name)">{{cardDetail.name}}<span class="headline-meta">点击复制</span></p>
+      <p class="normal" @click="handleCopyBtn(cardDetail.ename)"><span class="f3">英文名</span>：{{cardDetail.ename}}</p>
       <p v-show="cardDetail.series" class="normal"><span class="f4">所属系列</span>：{{cardDetail.series}}</p>
       <p v-show="cardDetail.type" class="normal"><span class="f2">类型</span>：{{cardDetail.type}}</p>
-      <p v-show="cardDetail.flavor" class="flavor">{{cardDetail.flavor}}</p>
-      <p v-show="cardDetail.eflavor" class="flavor">{{cardDetail.eflavor}}</p>
+      <p v-show="cardDetail.flavor" class="flavor" @click="handleCopyBtn(cardDetail.flavor)">{{cardDetail.flavor}}</p>
+      <p v-show="cardDetail.eflavor" class="flavor" @click="handleCopyBtn(cardDetail.eflavor)">{{cardDetail.eflavor}}</p>
     </div>
     <div class="audio-list">
       <div v-show="showEnAudio">
@@ -193,24 +193,38 @@ export default {
         if (this.audioPlaying) {
           this.myAudio.stop()
         }
+        this.myAudio.autoplay = true
         this.myAudio.src = encodeURI(item.src)
         this.myAudio.play()
       }
+    },
+    handleCopyBtn(text) {
+      wx.setClipboardData({
+        data: text,
+        success: function (res) {
+          wx.showToast({
+            title: '复制成功'
+          })
+        }
+      })
     }
   },
   mounted() {
     this.cardId = this.$root.$mp.query.id
     this.myAudio = wx.createInnerAudioContext()
     this.myAudio.onPlay(() => {
-      // console.log('start')
+      console.log('start')
       this.audioPlaying = true
     })
+    this.myAudio.onCanplay(() => {
+      console.log('Canplay')
+    })
     this.myAudio.onEnded(() => {
-      // console.log('end')
+      console.log('end')
       this.selectedAudio = ''
     })
     this.myAudio.onWaiting(() => {
-      // console.log('waiting...')
+      console.log('waiting...')
       this.audioPlaying = true
     })
     this.myAudio.onError(res => {
@@ -287,6 +301,16 @@ export default {
       font-size: 18px;
       font-weight: 700;
       height: 38px;
+      .headline-meta {
+        height: 24rpx;
+        line-height: 24rpx;
+        margin-left:8px;
+        font-size: 19rpx;
+        color: #999;
+        border: 1rpx solid #ddd;
+        border-radius: 12px;
+        padding: 3rpx 10rpx;
+      }
     }
     .normal {
       height: 25px;

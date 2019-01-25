@@ -22,7 +22,7 @@
       <div v-if="last_30_days && item.real_win_rate" class="table-td col-last" :class="{'color-green': item.real_win_rate>50, 'color-red': item.real_win_rate<50}">
         <span>{{item.real_win_rate}}%</span>
       </div>
-      <div v-else class="table-td col-last" :class="{'color-green': item.win_rate>50, 'color-red': item.win_rate<50}">
+      <div v-else class="table-td col-last" :class="{'color-green': item.win_rate>=50, 'color-red': item.win_rate<50}">
         <span>{{item.win_rate}}%</span>
       </div>
     </div>

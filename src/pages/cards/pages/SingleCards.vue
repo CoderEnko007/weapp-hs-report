@@ -156,7 +156,6 @@
           case 'series': this.filter.series = filter.item; this.filterTabBar[4].selected=filter.item.name; break
           default: console.log(filter.name+' not found');
         }
-        console.log('bbb', this.filter)
         this.genCardsList(true)
       },
       handleMaskClick() {
@@ -190,7 +189,6 @@
           this.cardsList = []
         }
         wx.showNavigationBarLoading();
-        console.log('aaa', this.filter)
         getCardsList(this.filter, 21, this.page).then(res => {
           let list = res.objects.map(item => {
             let image = utils.genCardsImageURL(item.hsId)
@@ -220,7 +218,6 @@
         })
       },
       scrollToBottom() {
-        console.log('scroll to bottom', )
         if (!this.more) return false
         this.page += 1
         this.genCardsList(false)

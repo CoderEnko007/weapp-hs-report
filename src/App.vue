@@ -26,6 +26,11 @@ export default {
       this.$store.dispatch('setWinWidthHeight').then(res => {
 
       })
+    },
+    setNotice() {
+      this.$store.dispatch('getNotice').then(res => {
+        // console.log('setNotice', res)
+      })
     }
   },
   onLaunch () {
@@ -38,6 +43,7 @@ export default {
     this.initCardSeries()
     this.setNavHeight()
     this.setWinWidthHeight()
+    this.setNotice()
   },
 }
 </script>
@@ -161,5 +167,15 @@ export default {
   text-align: center;
   font-size: 13px;
   color: #ddd;
+}
+.notice-bar {
+  position:fixed;
+  width:100%;
+  margin-top: 0;
+  z-index:2;
+  background: rgba(0,0,0,.3);
+  &:after {
+    border: none;
+  }
 }
 </style>

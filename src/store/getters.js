@@ -5,6 +5,7 @@ const getters = {
   decksName: state => state.cards.decksName,
   collectedDecks: state => state.cards.collectedDecks,
   archetypeList: state => state.cards.archetypeList,
+  noticeContent: state => state.cards.noticeContent,
   deckTabFilter: state => state.cards.deckTabFilter,
   navHeight: state => state.settings.navHeight,
   isIphoneX: state => state.settings.isIphoneX,

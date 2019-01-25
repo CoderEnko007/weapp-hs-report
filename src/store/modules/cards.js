@@ -1,4 +1,4 @@
-import {getDeckName, getSeriesData, getArchetypeList} from "@/api/dbapi";
+import {getDeckName, getSeriesData, getArchetypeList, getNotice} from "@/api/dbapi";
 import {getDeckList, getUserCollectionDecks, setUserCollection, cancelUserCollection} from "@/api/dbapi";
 
 const cards = {
@@ -8,6 +8,10 @@ const cards = {
     collectedDecks: [],
     archetypeList: [],
     activeTab: 0,
+    noticeContent: {
+      display: false,
+      content: ''
+    }
   },
   mutations: {
     SET_SERIES: (state, series) => {
@@ -34,6 +38,13 @@ const cards = {
     SET_ARCHETYPE_LIST: (state, list) => {
       state.archetypeList = list
     },
+    SET_NOTICE: (state, noticeObj) => {
+      state.noticeContent.display = noticeObj.display
+      state.noticeContent.content = noticeObj.content
+    },
+    SHOW_NOTICE_BAR: (state, display) => {
+      state.noticeContent.display = display
+    }
   },
 
   actions: {
@@ -109,6 +120,19 @@ const cards = {
           commit('SET_ARCHETYPE_LIST', res.objects)
           resolve(res.objects)
         }, err => {
+          reject(err)
+        })
+      })
+    },
+    getNotice({commit, state}) {
+      return new Promise((resolve, reject) => {
+        if (state.noticeContent.content.length>0) {
+          resolve(state.noticeContent)
+        }
+        getNotice().then(res => {
+          commit('SET_NOTICE', res.objects[0])
+          resolve(res.objects[0])
+        }).catch(err => {
           reject(err)
         })
       })

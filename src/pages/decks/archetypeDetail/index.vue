@@ -34,19 +34,45 @@
     </div>
     <div class="pop-deck">
       <div class="headline">
-        <span class="title">最热门套牌</span>
+        <span class="title">热门套牌</span>
         <div class="more-btn" @click="gotoDecks">
           <span class="name">全部相关套牌</span>
           <span class="iconfont">&#xe600;</span>
         </div>
       </div>
-      <div class="deck-item" @click="handlePopDeckClick" v-if="bestDeck.show">
+      <div class="board-panel" v-if="popDeck.show || bestDeck.show">
+        <div class="board" v-show="popDeck.show">
+          <div class="deck-item" @click="handlePopDeckClick">
+          <div class="icon">
+            <img :src="genFactionIcon" mode="aspectFit">
+          </div>
+          <div class="tier-desc">
+            <div class="desc-left">
+              <p class="name">
+                <span>{{popDeck.cname}}</span>
+                <span class="name-meta">对局最多</span>
+              </p>
+              <p class="desc-meta">对局数 {{popDeck.game_count}}</p>
+            </div>
+            <div class="desc-right">
+              <p class="name">胜率</p>
+              <p class="desc-meta" :style="{color: '#000'}">{{popDeck.win_rate}}</p>
+            </div>
+          </div>
+          <span class="iconfont">&#xe600;</span>
+        </div>
+        </div>
+        <div class="board" v-show="bestDeck.show">
+         <div class="deck-item" @click="handleBestDeckClick">
         <div class="icon">
           <img :src="genFactionIcon" mode="aspectFit">
         </div>
         <div class="tier-desc">
           <div class="desc-left">
-            <p class="name">{{bestDeck.cname}}</p>
+            <p class="name">
+              <span>{{bestDeck.cname}}</span>
+              <span class="name-meta">胜率最高</span>
+            </p>
             <p class="desc-meta">对局数 {{bestDeck.game_count}}</p>
           </div>
           <div class="desc-right">
@@ -56,7 +82,11 @@
         </div>
         <span class="iconfont">&#xe600;</span>
       </div>
-      <div class="no-data" v-else><h1>样本过少，暂无数据</h1></div>
+        </div>
+      </div>
+      <div class="board-panel" v-else>
+        <div class="no-data"><h1>样本过少，暂无数据</h1></div>
+      </div>
     </div>
     <div class="bw-game-panel">
       <div class="headline"><span class="title">优劣对局</span></div>
@@ -157,6 +187,13 @@ const defaultDetail = {
   worst_matchup: [],
   matchup: []
 }
+const defaultPopDeck = {
+  show: false,
+  deck_id: '',
+  cname: '',
+  win_rate: '',
+  game_count: ''
+}
 const defaultBestDeck = {
   show: false,
   deck_id: '',
@@ -201,6 +238,7 @@ export default {
       matchupDetail: {
         'Druid': [], 'Hunter': [], 'Mage': [], 'Paladin': [], 'Priest': [], 'Rogue': [], 'Shaman': [], 'Warlock': [], 'Warrior': [],
       },
+      popDeck: Object.assign({}, defaultPopDeck),
       bestDeck: Object.assign({}, defaultBestDeck),
       bestMatchup: Object.assign({}, defaultBWGame),
       worstMatchup: Object.assign({}, defaultBWGame)
@@ -231,6 +269,7 @@ export default {
       this.matchupDetail = {
         'Druid': [], 'Hunter': [], 'Mage': [], 'Paladin': [], 'Priest': [], 'Rogue': [], 'Shaman': [], 'Warlock': [], 'Warrior': [],
       }
+      this.popDeck = Object.assign({}, defaultPopDeck)
       this.bestDeck = Object.assign({}, defaultBestDeck)
       this.bestMatchup = Object.assign({}, defaultBWGame),
       this.worstMatchup = Object.assign({}, defaultBWGame)
@@ -283,12 +322,20 @@ export default {
         }
         this.genTableData(this.matchupDetail[this.selectedFaction.id])
 
-        let bestDeckData = JSON.parse(this.archetypeDetail.pop_deck)
-        if (bestDeckData.length>0) {
+        let popDeckData = JSON.parse(this.archetypeDetail.pop_deck)
+        if (popDeckData.length>0) {
+          this.popDeck.cname = this.getDeckCName(this.archetypeDetail.archetype)
+          this.popDeck.deck_id = popDeckData[0]
+          this.popDeck.win_rate = popDeckData[1]
+          this.popDeck.game_count = popDeckData[2]
+          this.popDeck.show = true
+        }
+        let BestDeckData = JSON.parse(this.archetypeDetail.best_deck)
+        if (BestDeckData.length>0) {
           this.bestDeck.cname = this.getDeckCName(this.archetypeDetail.archetype)
-          this.bestDeck.deck_id = bestDeckData[0]
-          this.bestDeck.win_rate = bestDeckData[1]
-          this.bestDeck.game_count = bestDeckData[2]
+          this.bestDeck.deck_id = BestDeckData[0]
+          this.bestDeck.win_rate = BestDeckData[1]
+          this.bestDeck.game_count = BestDeckData[2]
           this.bestDeck.show = true
         }
 
@@ -362,6 +409,11 @@ export default {
       })
     },
     handlePopDeckClick() {
+      wx.navigateTo({
+        url: `/pages/decks/deckDetail/main?deckID=${this.popDeck.deck_id}`
+      })
+    },
+    handleBestDeckClick() {
       wx.navigateTo({
         url: `/pages/decks/deckDetail/main?deckID=${this.bestDeck.deck_id}`
       })
@@ -501,7 +553,7 @@ export default {
       border: none;
     }
   }
-  .bw-game-panel {
+  .bw-game-panel, .pop-deck {
     .board-panel {
       margin-bottom: 10rpx;
       .board {

@@ -20,9 +20,9 @@
           <span class="iconfont">&#xe600;</span>
         </div>
         <div class="desc">
-          <div class="desc-item" v-show="deckDetail.win_rate">
+          <div class="desc-item" v-show="deckDetail.real_win_rate">
             <p class="item-name">胜率</p>
-            <p class="item-meta font-bold color-light-green" :class="{'color-red': deckDetail.win_rate<50}">{{deckDetail.win_rate}}%</p>
+            <p class="item-meta font-bold color-light-green" :class="{'color-red': deckDetail.real_win_rate<50}">{{deckDetail.real_win_rate}}%</p>
           </div>
           <div class="desc-item" v-show="deckDetail.game_count">
             <p class="item-name">对局数</p>

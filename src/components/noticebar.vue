@@ -27,6 +27,7 @@
         this.$emit('close')
       },
       initZanNoticeBarScroll (that, componentId) {
+        // console.log('initZanNoticeBarScroll')
         that.zanNoticeBarNode = that.zanNoticeBarNode || {}
         that.zanNoticeBarNode[`${componentId}`] = {
           width: undefined,
@@ -57,6 +58,7 @@
               return
             }
             currentComponent.wrapWidth = rect[0].width
+            // console.log('aaa', currentComponent)
             if (currentComponent.wrapWidth < currentComponent.width) {
               var mstime = currentComponent.width / 40 * 1000
               currentComponent.animation = wx.createAnimation({
@@ -74,6 +76,7 @@
       },
 
       scrollZanNoticeBar (that, componentId, mstime) {
+        // console.log('scrollZanNoticeBar')
         const currentComponent = that.zanNoticeBarNode[`${componentId}`]
         const aninationData = currentComponent.animation.translateX((-mstime * 40 / 1000)).step()
         setTimeout(() => {

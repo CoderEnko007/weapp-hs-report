@@ -2,7 +2,7 @@
   <div class="container">
     <NavBar></NavBar>
     <div class="swiper">
-      <div class="zan-panel" v-show="noticeDisplay">
+      <div class="notice-bar" v-show="noticeContent.display">
         <NoticeBar v-on:ref="setRef" v-bind="noticeText" @close="handleCloseNoticeBar" :componentId="'noticeText'"/>
       </div>
       <Swiper :banners="banners" :date="report_date" @swiperClick="swiperClick" v-if="banners"></Swiper>
@@ -97,18 +97,25 @@ export default {
         text: '',
         animationData: []
       },
-      noticeDisplay: false,
     }
   },
   computed: {
     ...mapGetters([
-      'navHeight'
+      'navHeight',
+      'noticeContent',
     ]),
     modePickerList() {
       return this.modeFilter.list.map(item => {
         return item.text
       })
     },
+    // 通知栏数据不能用computed属性，因为animationData每次都会被清空，可以在mounted时获取text
+    // noticeText() {
+    //   return {
+    //     text: this.noticeContent.content,
+    //     animationData: []
+    //   }
+    // }
   },
   methods: {
     ...NoticeBar.methods,
@@ -204,21 +211,13 @@ export default {
         console.log(err)
       })
     },
-    genNotice() {
-      getNotice().then(res => {
-        this.noticeText.text = res.objects[0].content
-        this.noticeDisplay = res.objects[0].display
-      }).catch(err => {
-        console.log(err)
-      })
-    },
     handleTierClick(item) {
       wx.navigateTo({
         url: `/pages/decks/archetypeDetail/main?name=${item.archetype_name}`
       })
     },
     handleCloseNoticeBar() {
-      this.noticeDisplay = false
+      this.$store.commit('SHOW_NOTICE_BAR', false)
     },
     stopPullDown(success) {
       if (success) {
@@ -231,14 +230,23 @@ export default {
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
       }
+    },
+    genNotice() {
+      if (this.noticeContent.hasOwnProperty('content') && this.noticeContent.content.length>0) {
+        this.noticeText.text = this.noticeContent.content
+      } else {
+        this.$store.dispatch('getNotice').then(res => {
+          this.noticeText.text = res.content
+        })
+      }
     }
   },
   mounted() {
     this.Login()
     this.genBanners()
-    this.genNotice()
     this.genRankData()
     this.genArchetypeList()
+    this.genNotice()
   },
   onPullDownRefresh() {
     // this.genBanners()
@@ -256,18 +264,6 @@ export default {
 <style scoped lang="scss">
 @import '../../style/color';
 .container {
-  .swiper {
-    .zan-panel {
-      position:fixed;
-      width:100%;
-      margin-top: 0;
-      z-index:2;
-      background: rgba(0,0,0,.3);
-      &:after {
-        border: none;
-      }
-    }
-  }
   .rank-panel {
     padding: 0 15px;
     .headline {

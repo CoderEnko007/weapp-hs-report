@@ -47,19 +47,19 @@ export default {
     genTierList() {
       let val = this.tierData
       let deckName = this.$store.state.cards.decksName
-        for (let index in val.list) {
-          if(val.list.hasOwnProperty(index)) {
-            let deck = deckName.filter(deck => {
-              return deck.ename === val.list[index].archetype_name
-            })[0]
-            if(deck && deck.cname) {
-              val.list[index].cname = deck.cname
-            }
-            if (val.list[index].faction) {
-              val.list[index].image = utils.faction[val.list[index].faction].image
-              val.list[index].bgImage = utils.faction[val.list[index].faction].bgImage
-            }
+      for (let index in val.list) {
+        if(val.list.hasOwnProperty(index)) {
+          let deck = deckName.filter(deck => {
+            return deck.ename === val.list[index].archetype_name
+          })[0]
+          if(deck && deck.cname) {
+            val.list[index].cname = deck.cname
           }
+          if (val.list[index].faction) {
+            val.list[index].image = utils.faction[val.list[index].faction].image
+            val.list[index].bgImage = utils.faction[val.list[index].faction].bgImage
+          }
+        }
       }
       return this.tierData.list
     },
