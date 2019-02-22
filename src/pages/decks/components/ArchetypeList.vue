@@ -2,7 +2,13 @@
   <div class="archetype-container">
     <div class="headline">
       <span class="title">职业形态</span>
-      <span class="meta">标准模式</span>
+      <div class="head-picker">
+        <picker mode="selector" :value="rangePicker.selectedItem" :range="rangePickerList" @change="handleRankRangeChange">
+          <span class='selector-item'>{{rangePicker.list[rangePicker.selectedItem].text}}</span>
+          <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
+        </picker>
+      </div>
+      <span class="right-meta">标准模式</span>
     </div>
     <div class="panel-faction">
       <HeroesPanel :dataList="factionIcons" :selected="selectedFaction.id" @itemClick="handleIconsClick"></HeroesPanel>
@@ -76,6 +82,14 @@ export default {
         {id: 'popularity', name: '热度'},
         {id: 'winrate', name: '胜率'},
       ],
+      rangePicker: {
+        selectedItem: 0,
+        list: [
+          {text: '全分段', rank_range: 'All'},
+          {text: 'R5-R1分段', rank_range: 'One_Through_Five'},
+          {text: '传说分段', rank_range: 'Legend_Only'}
+        ]
+      },
       loading: true,
     }
   },
@@ -92,6 +106,11 @@ export default {
     },
     genFactionIcon() {
       return utils.faction[this.selectedFaction.id].image
+    },
+    rangePickerList() {
+      return this.rangePicker.list.map(item => {
+        return item.text
+      })
     }
   },
   methods: {
@@ -120,7 +139,11 @@ export default {
     },
     genWinRateData() {
       wx.showNavigationBarLoading();
-      getWinRateData({faction: this.selectedFaction.id}).then(res => {
+      let params = {
+        faction: this.selectedFaction.id,
+        rankRange: this.rangePicker.list[this.rangePicker.selectedItem].rank_range
+      }
+      getWinRateData(params).then(res => {
         let otherDeckIndex = 0
         this.selectedFaction.data = []
         for (let index in res) {
@@ -182,7 +205,11 @@ export default {
           url: `/pages/decks/archetypeDetail/main?name=${item.ename}`
         })
       }
-    }
+    },
+    handleRankRangeChange(e) {
+      this.rangePicker.selectedItem = e.mp.detail.value
+      this.genWinRateData()
+    },
   },
   mounted() {
     this.genFactionIcons()
@@ -195,13 +222,6 @@ export default {
 .archetype-container {
   .headline {
     margin: 0 30rpx;
-    .meta {
-      float: right;
-      height:100%;
-      line-height:96rpx;
-      font-size:28rpx;
-      color: $palette-blue;
-    }
   }
   .panel-faction {
     margin: 0 30rpx 20rpx;

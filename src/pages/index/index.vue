@@ -34,7 +34,14 @@
     <div class="tier-panel">
       <div class="headline">
         <span class="title">职业形态排行</span>
-        <span class="headline-meta">标准模式</span>
+        <!--<span class="headline-meta">标准模式</span>-->
+        <div class="head-picker">
+          <picker mode="selector" :value="rangePicker.selectedItem" :range="rangePickerList" @change="handleRankRangeChange">
+            <span class='selector-item'>{{rangePicker.list[rangePicker.selectedItem].text}}</span>
+            <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
+          </picker>
+        </div>
+        <span class="right-meta">标准模式</span>
       </div>
       <div class="tier-content">
         <div class="tier-block" v-for="(tier, index) in tierList" :key="index">
@@ -85,6 +92,15 @@ export default {
       selectedGameType: 'standard',
       report_date: '',
 
+      rangePicker: {
+        selectedItem: 0,
+        list: [
+          {text: '全分段', rank_range: 'All'},
+          {text: 'R5-R1分段', rank_range: 'One_Through_Five'},
+          {text: '传说分段', rank_range: 'Legend_Only'}
+        ]
+      },
+
       rankMode: utils.gameMode,
       tierList: [
         {name: 'Tier 1', cname: '第1梯队', icon: '/static/icons-v2/tierlist-t1.png', list: []},
@@ -109,6 +125,11 @@ export default {
         return item.text
       })
     },
+    rangePickerList() {
+      return this.rangePicker.list.map(item => {
+        return item.text
+      })
+    }
     // 通知栏数据不能用computed属性，因为animationData每次都会被清空，可以在mounted时获取text
     // noticeText() {
     //   return {
@@ -176,6 +197,10 @@ export default {
       this.modeFilter.selectedItem = e.mp.detail.value
       this.sortRankData(this.origRankList)
     },
+    handleRankRangeChange(e) {
+      this.rangePicker.selectedItem = e.mp.detail.value
+      this.genArchetypeList()
+    },
     genRankData() {
       let date = formatNowTime(new Date())
       getRankData(date, null, 27).then(res => {
@@ -190,7 +215,8 @@ export default {
       })
     },
     genArchetypeList() {
-      this.$store.dispatch('getArchetypeList').then(res => {
+      let params = {rankRange: this.rangePicker.list[this.rangePicker.selectedItem].rank_range}
+      getArchetypeList(params).then(res => {
         for (let tier of this.tierList) {
           tier.list = res.filter(item => {
             return item.tier === tier.name

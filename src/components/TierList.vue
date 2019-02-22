@@ -1,12 +1,12 @@
 <template>
   <div class="container">
-    <div class="tier-header" @click="handleHeaderClick">
+    <div class="tier-header">
       <div class="tier-title">
         <div class="title-block">
           <img :src="tierData.icon">
           <span class="title">{{tierData.cname}}</span>
-          <span v-if="showListFlag" class="icon iconfont">&#xe602;</span>
-          <span v-else class="icon iconfont">&#xe624;</span>
+          <p v-if="showListFlag" class="icon iconfont" @click="handleHeaderClick">&#xe602;</p>
+          <p v-else class="icon iconfont" @click="handleHeaderClick">&#xe624;</p>
         </div>
       </div>
     </div>
@@ -20,8 +20,12 @@
         <div class="tier-desc">
           <div class="desc-left">
             <p class="name">{{item.cname}}</p>
-            <p class="desc-meta">对局数 {{item.game_count}}</p>
+            <p class="desc-meta" v-if="item.game_count">对局数 {{item.game_count}}</p>
+            <p class="desc-meta" v-else>{{item.archetype_name}}</p>
           </div>
+          <!--<div class="desc-left" v-else>-->
+            <!--<p class="single-name">{{item.cname}}</p>-->
+          <!--</div>-->
           <div class="desc-right">
             <p class="name">胜率</p>
             <p class="desc-meta color-green" :class="{'color-red': item.win_rate<50}">{{item.win_rate}}%</p>
@@ -100,6 +104,8 @@ export default {
         }
       }
       .icon {
+        width:40px;
+        text-align:center;
         float: right;
         font-size: 20px;
         font-weight:100;
@@ -149,13 +155,18 @@ export default {
         height: 100%;
         margin-left: 90rpx;
         border-bottom: 1rpx solid #eee;
-        padding: 27rpx 0;
         box-sizing:border-box;
         .desc-left {
-          float: left;
+          position:absolute;
+          top:50%;
+          transform:translateY(-50%);
           .name {
             height: 37rpx;
             line-height: 37rpx;
+            font-size: 13px;
+            color: #333;
+          }
+          .single-name {
             font-size: 13px;
             color: #333;
           }
@@ -168,8 +179,10 @@ export default {
           }
         }
         .desc-right {
-          float: right;
-          margin-right: 40rpx;
+          position:absolute;
+          top:50%;
+          right:40rpx;
+          transform:translateY(-50%);
           text-align: right;
           .name {
             height: 22rpx;

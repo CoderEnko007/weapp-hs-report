@@ -6,7 +6,7 @@
       <!--</div>-->
       <div class="headline">
         <span class="title">职业套牌</span>
-        <div class="time-filter">
+        <div class="head-picker">
           <picker mode="selector" :value="tabList.selectedItem" :range="timePickerList" @change="handleHeadTabClick">
             <span class='selector-item'>{{tabList.list[tabList.selectedItem].text}}</span>
             <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
@@ -295,17 +295,6 @@ export default {
       z-index: 1;
       .headline {
         margin: 0 30rpx;
-        .time-filter {
-          display: inline-block;
-          height: 24rpx;
-          line-height: 24rpx;
-          margin-left:8px;
-          font-size: 19rpx;
-          color: #999;
-          border: 1rpx solid #ddd;
-          border-radius: 12px;
-          padding: 3rpx 10rpx;
-        }
         .btn-group {
           position: absolute;
           height: 100%;

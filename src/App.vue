@@ -130,8 +130,23 @@ export default {
   font-size: 18px;
   font-weight: bold;
   color: #333;
-  .title {
-    /*margin-left: 6px;*/
+  .head-picker {
+    display: inline-block;
+    height: 24rpx;
+    line-height: 24rpx;
+    margin-left:8px;
+    font-size: 19rpx;
+    color: #999;
+    border: 1rpx solid #ddd;
+    border-radius: 12px;
+    padding: 3rpx 10rpx;
+  }
+  .right-meta {
+    float: right;
+    height:100%;
+    line-height:96rpx;
+    font-size:28rpx;
+    color: $palette-blue;
   }
   /*
   &:before {

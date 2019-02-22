@@ -191,7 +191,12 @@ export function getWinRateData(params, orderBy='games') {
     if (params.faction) {
       factionQuery.compare('faction', '=', params.faction)
     }
-    tableObj.setQuery(factionQuery).orderBy(orderBy).find().then(res => {
+    let rankRange = new wx.BaaS.Query()
+    if (params && params.rankRange) {
+      rankRange.compare('rank_range', '=', params.rankRange)
+    }
+    let query = wx.BaaS.Query.and(factionQuery, rankRange)
+    tableObj.setQuery(query).orderBy(orderBy).find().then(res => {
       resolve(res.data.objects)
     }, err => {
       reject(err)
@@ -298,9 +303,13 @@ export function getArchetypeList(params, limit=1000, page=0, orderBy='-win_rate'
     if (params && params.tier) {
       tierQuery.compare('tier', '=', params.tier)
     }
-    let query = wx.BaaS.Query.and(factionQuery, tierQuery)
+    let rankRange = new wx.BaaS.Query()
+    if (params && params.rankRange) {
+      rankRange.compare('rank_range', '=', params.rankRange)
+    }
+    let query = wx.BaaS.Query.and(factionQuery, tierQuery, rankRange)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
-      resolve(res.data)
+      resolve(res.data.objects)
     }, err => {
       reject(err)
     })
