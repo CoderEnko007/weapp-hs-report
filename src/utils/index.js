@@ -68,8 +68,10 @@ export function ShadeColor(colorMAX,colorMIN,num){
 const cardsBaseURL = 'https://art.hearthstonejson.com/v1/render/latest/zhCN/256x/'
 const cardsBaseURL512 = 'https://art.hearthstonejson.com/v1/render/latest/zhCN/512x/'
 const cardsTileURL = 'https://art.hearthstonejson.com/v1/tiles/'
+const iFanrCardsTileURL = 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/'
 const cardsOrigURL = 'https://art.hearthstonejson.com/v1/256x/'
-const dustImage = 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g2xiBmlyPDaVLks.png'
+// const dustImage = 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g2xiBmlyPDaVLks.png'
+const dustImage = '/static/icons-v2/dust.png'
 
 export function genCardsImageURL(hsId) {
   return cardsBaseURL+hsId+'.png'
@@ -83,6 +85,19 @@ export function genOrigImageURL(hsId) {
 export function genTileImageURL(hsId) {
   return cardsTileURL+hsId+'.png'
 }
+export function iFanrTileImageURL(tile) {
+  return iFanrCardsTileURL+tile
+}
+export function deckModeImg(mode) {
+  if (mode.toLowerCase() === 'standard') {
+    return '/static/icons-v2/standard_1.png'
+  } else if (mode.toLowerCase() === 'wild') {
+    return '/static/icons-v2/wild_1.png'
+  } else {
+    return ''
+  }
+}
+
 export const getComponentByTag = (parent, tag) => {
   for (let c of parent.$children) {
     if (c.$options._componentTag === tag) {
@@ -104,6 +119,20 @@ export function translateDeckName(decksList, decksName) {
     }
   }
   return decksList
+}
+
+export function getImageInfoAsync(url) {
+  return new Promise((resolve, reject) => {
+    wx.getImageInfo({
+      src: url,
+      success: res => {
+        resolve(res)
+      },
+      fail: err => {
+        reject(err)
+      }
+    })
+  })
 }
 
 const faction = {
@@ -170,6 +199,7 @@ export default {
   genCardsImageURL,
   getComponentByTag,
   translateDeckName,
+  deckModeImg,
   faction,
   mode,
   rarity,

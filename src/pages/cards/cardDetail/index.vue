@@ -2,7 +2,7 @@
   <div class="card-detail">
     <NavBar :showCapsule="true" navTitle="单卡详情"></NavBar>
     <div class="header" @click="previewCard">
-      <img :src="cardDetail.bgImg" class="bg-img" mode="aspectFiit">
+      <!--<img :src="cardDetail.bgImg" class="bg-img" mode="aspectFiit">-->
       <img :src="cardDetail.cardImg" class="card-img" mode="aspectFit">
       <!--<img :src="cardDetail.heroIcon" class="icon-img" mode="aspectFit">-->
     </div>
@@ -127,7 +127,8 @@ export default {
       getCardDetail(parseInt(this.cardId)).then(res => {
         this.cardDetail = res[0]
         this.cardDetail.bgImg = genOrigImageURL(this.cardDetail.hsId)
-        this.cardDetail.cardImg = gen512CardsImageURL(this.cardDetail.hsId)
+        // this.cardDetail.cardImg = gen512CardsImageURL(this.cardDetail.hsId)
+        this.cardDetail.cardImg = this.cardDetail.img_card_link
         this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
         for (let item of this.$store.state.cards.series) {
           if(this.cardDetail.set_id === item.id) {
@@ -184,7 +185,8 @@ export default {
     },
     previewCard() {
       wx.previewImage({
-        urls: [gen512CardsImageURL(this.cardDetail.hsId)] // 需要预览的图片http链接列表
+        // urls: [gen512CardsImageURL(this.cardDetail.hsId)] // 需要预览的图片http链接列表
+        urls: [this.cardDetail.img_card_link]
       })
     },
     handleAudioPlay(item) {

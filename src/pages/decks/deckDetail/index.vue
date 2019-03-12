@@ -39,8 +39,12 @@
         </div>
       </div>
     </div>
-    <div class="btn-group">
-      <FooterMenu showCollectBtn="true" :collected="deckCollected" @collectClick="handleCollection" ref="btnGroup"></FooterMenu>
+    <div class="btn-group" :style="{display: deckChecked?'block':'none'}">
+      <FooterMenu showExportBtn="true" showCollectBtn="true"
+                  :collected="deckCollected"
+                  @collectClick="handleCollection"
+                  @exportClick="handleExport"
+                  ref="btnGroup"></FooterMenu>
     </div>
     <div class="card-list">
       <div class="headline m-30"><span class="title">套牌组成</span></div>
@@ -67,7 +71,7 @@
       <div class="ads" v-if="adsOpenFlag">
         <ad unit-id="adunit-d6bb528c4e28a808"></ad>
       </div>
-      <div class="separator" v-else></div>
+      <div class="separator"></div>
       <div class="winrate-block m-30">
         <div class="headline"><span class="title">对阵各职业胜率</span></div>
         <WinRateBoard :list="winrateChartData"></WinRateBoard>
@@ -82,13 +86,16 @@
     </div>
     <div class="safe-panel" :style="{'height': 60+'rpx'}"></div>
     <_toast />
+    <div style="position: fixed; top: 9999999999999px; overflow: hidden">
+      <canvas :style="{width: canvasWidth+'px', height: canvasHeight+'px', 'margin-left': '30rpx'}" canvas-id="deck-pic"></canvas>
+    </div>
   </div>
 </template>
 <script>
 import utils from '@/utils'
 import { mapGetters } from 'vuex'
 import {getDeckDetail, setUserCollection, cancelUserCollection, getArchetypeDetail} from "@/api/dbapi";
-import {getComponentByTag} from "@/utils";
+import {getComponentByTag, iFanrTileImageURL, getImageInfoAsync} from "@/utils";
 import DeckCards from '@/components/DeckCards'
 import BarChart from '@/components/BarChart'
 import PieChart from '@/components/PieChart'
@@ -126,10 +133,11 @@ export default {
   },
   data() {
     return {
-      recordID : '5bc2f3c5b5aa5821082c76b8',
+      recordID : '5c7ee1b5421bd1177dc0657a',
       deckID: '',
       trending: false,
       collected: false,
+      handleCollecting: false,
       deckMode: 'Standard',
       decksName: '',
       bannerImg: null,
@@ -147,7 +155,10 @@ export default {
       winrateChartData: [],
       selectWinRate: {name: '', value: ''},
       deckCollected: false,
-      showArchetype: false
+      deckChecked: false,
+      showArchetype: false,
+      canvasHeight: 270,
+      canvasWidth: 165,
     }
   },
   computed: {
@@ -201,7 +212,7 @@ export default {
       this.deckCollected = false
       this.showArchetype = false
     },
-    genDeckData() {
+    async genDeckData() {
       wx.showLoading({
         title: '加载中',
         mask: false
@@ -214,71 +225,70 @@ export default {
         params = {deckID: this.deckID}
       }
       params.mode = this.deckMode
-      // const res = await getDeckDetail(params, this.trending, this.collected)
-      getDeckDetail(params, this.trending, this.collected).then(res => {
-        if (!res) {
-          wx.hideLoading()
-          wx.showModal({
-            title: '提示',
-            content: '抱歉，暂未收录该卡组',
-            showCancel: false,
-            success (res) {
-              wx.navigateBack()
-            }
-          })
-        } else {
-          this.checkDeckCollected()
-          this.deckDetail = res
-          this.getArchetype()
-          this.bannerImg = utils.faction[this.deckDetail['faction']].bgImage1
-          this.costChartData.yAxis = JSON.parse(this.deckDetail.statistic)
-          let costMax = Math.max.apply(null, this.costChartData.yAxis)
-          this.costChartData.max = 5-costMax%10>0?costMax+5-costMax%10:costMax+10-costMax%10
-          this.costChartData = JSON.stringify(this.costChartData)
+      const res = await getDeckDetail(params, this.trending, this.collected)
+      // getDeckDetail(params, this.trending, this.collected).then(res => {
+      if (!res) {
+        wx.hideLoading()
+        wx.showModal({
+          title: '提示',
+          content: '抱歉，暂未收录该卡组',
+          showCancel: false,
+          success (res) {
+            wx.navigateBack()
+          }
+        })
+      } else {
+        this.checkDeckCollected()
+        this.deckDetail = res
+        this.getArchetype()
+        this.bannerImg = utils.faction[this.deckDetail['faction']].bgImage1
+        this.costChartData.yAxis = JSON.parse(this.deckDetail.statistic)
+        let costMax = Math.max.apply(null, this.costChartData.yAxis)
+        this.costChartData.max = 5-costMax%10>0?costMax+5-costMax%10:costMax+10-costMax%10
+        this.costChartData = JSON.stringify(this.costChartData)
 
-          // 卡牌类型数据
-          this.typeChartData = []
-          let clazz = JSON.parse(this.deckDetail.clazzCount)
-          for (let index in clazz) {
-            if (clazz.hasOwnProperty(index)) {
-              this.typeChartData.push({
+        // 卡牌类型数据
+        this.typeChartData = []
+        let clazz = JSON.parse(this.deckDetail.clazzCount)
+        for (let index in clazz) {
+          if (clazz.hasOwnProperty(index)) {
+            this.typeChartData.push({
+              name: index.toLowerCase(),
+              cname: utils.type[index.toUpperCase()].name,
+              value: clazz[index]
+            })
+          }
+        }
+        // 卡牌稀有度数据
+        this.rarityChartData = []
+        let rarity = JSON.parse(this.deckDetail.rarityCount)
+        let commonCards = {name: '', cname: '基础/普通', value: 0, color: utils.rarity['free'].color}
+        this.rarityColor = []
+        for (let index in rarity) {
+          if (rarity.hasOwnProperty(index)) {
+            if (index.toLowerCase() === 'free' || index.toLowerCase() === 'common') {
+              commonCards.value += rarity[index]
+            } else {
+              this.rarityChartData.push({
                 name: index.toLowerCase(),
-                cname: utils.type[index.toUpperCase()].name,
-                value: clazz[index]
+                cname: utils.rarity[index.toLowerCase()].name,
+                value: rarity[index],
+                color: utils.rarity[index.toLowerCase()].color
               })
             }
           }
-          // 卡牌稀有度数据
-          this.rarityChartData = []
-          let rarity = JSON.parse(this.deckDetail.rarityCount)
-          let commonCards = {name: '', cname: '基础/普通', value: 0, color: utils.rarity['free'].color}
-          this.rarityColor = []
-          for (let index in rarity) {
-            if (rarity.hasOwnProperty(index)) {
-              if (index.toLowerCase() === 'free' || index.toLowerCase() === 'common') {
-                commonCards.value += rarity[index]
-              } else {
-                this.rarityChartData.push({
-                  name: index.toLowerCase(),
-                  cname: utils.rarity[index.toLowerCase()].name,
-                  value: rarity[index],
-                  color: utils.rarity[index.toLowerCase()].color
-                })
-              }
-            }
-          }
-          this.rarityChartData.unshift(commonCards)
-          // 对阵各职业胜率数据
-          this.winrateChartData = JSON.parse(this.deckDetail.faction_win_rate)
-          this.winrateChartData = this.winrateChartData.map(item => {
-            item.win_rate = parseFloat(item.win_rate).toFixed(1)
-            return item
-          })
-          wx.hideLoading()
-          wx.hideNavigationBarLoading()
-          wx.stopPullDownRefresh();
         }
-      })
+        this.rarityChartData.unshift(commonCards)
+        // 对阵各职业胜率数据
+        this.winrateChartData = JSON.parse(this.deckDetail.faction_win_rate)
+        this.winrateChartData = this.winrateChartData.map(item => {
+          item.win_rate = parseFloat(item.win_rate).toFixed(1)
+          return item
+        })
+        wx.hideLoading()
+        wx.hideNavigationBarLoading()
+        wx.stopPullDownRefresh();
+      }
     },
     getArchetype() {
       if (this.deckDetail.deck_name) {
@@ -317,6 +327,7 @@ export default {
       this.selectWinRate.value = bar.value
     },
     handleCollection() {
+      this.handleCollecting = true
       if (this.deckCollected) {
       //  如果已收藏则取消收藏
         let data = {
@@ -326,8 +337,10 @@ export default {
         this.$store.dispatch('cancelCollectedDeck', data).then(res => {
           this.$refs.btnGroup.deactiveCollectIcon()
           this.deckCollected = false
+          this.handleCollecting = false
         }).catch(err => {
           console.log(err)
+          this.handleCollecting = false
         })
       } else {
         if (this.userInfo.id) {
@@ -336,13 +349,16 @@ export default {
             deckDetail: this.deckDetail
           }
           this.$store.dispatch('addCollectedDeck', data).then(res => {
-            this.toast.showZanToast({
+            wx.showToast({
               title: '收藏成功',
-              image: 'https://b.yzcdn.cn/v2/image/dashboard/secured_transaction/suc_green@2x.png'
+              icon: 'success',
+              duration: 2000
             })
             this.$refs.btnGroup.activeCollectIcon()
             this.deckCollected = true
+            this.handleCollecting = false
           }).catch(err => {
+            this.handleCollecting = false
             console.log(err)
           })
         } else {
@@ -350,8 +366,16 @@ export default {
             title: '请登录',
             icon: 'fail'
           })
+          this.handleCollecting = false
         }
       }
+    },
+    handleExport() {
+      wx.showLoading({
+        title: '图片生成中',
+        mask: true
+      })
+      this.saveImageToPhotos()
     },
     checkDeckCollected() {
     //  检查当前卡组是否已收藏
@@ -361,11 +385,220 @@ export default {
         })
         this.deckCollected = res.length > 0;
       }
+      this.deckChecked = true
     },
     gotoArchetypeDetail() {
       wx.navigateTo({
         url: `/pages/decks/archetypeDetail/main?name=${this.deckDetail.deck_name}`
       })
+    },
+    saveCanvasImg() {
+      let pages = getCurrentPages();
+      if (pages[pages.length-1].route !== 'pages/decks/deckDetail/main') {
+        return
+      }
+      wx.canvasToTempFilePath({
+        canvasId: 'deck-pic',
+        success(res) {
+          wx.saveImageToPhotosAlbum({
+            filePath: res.tempFilePath,
+            success(res) {
+              wx.hideLoading()
+              wx.showToast({
+                title: '图片已保存到相簿',
+                duration: 2000
+              })
+            },
+            fail(err) {
+              wx.hideLoading()
+              wx.showToast({
+                title: '图片保存失败',
+                icon: 'none',
+                duration: 2000
+              })
+            }
+          })
+        },
+        fail(err) {
+          console.log('error', err)
+          wx.hideLoading()
+          wx.showToast({
+            title: '图片生成失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+    },
+    saveImageToPhotos () {
+      let _this = this
+      // 相册授权
+      wx.getSetting({
+        success(res) {
+          console.log('getSetting', res)
+          // 进行授权检测，未授权则进行弹层授权
+          if (!res.authSetting['scope.writePhotosAlbum']) {
+            wx.authorize({
+              scope: 'scope.writePhotosAlbum',
+              success () {
+                _this.drawDeckCanvas()
+              },
+              fail() {
+                wx.hideLoading()
+                wx.showToast({
+                  title: '请点击右上角·●·->关于炉石传说情报站->右上角·●·->设置->授权访问相册',
+                  icon: 'none',
+                  duration: 5000
+                })
+              }
+            })
+          } else {
+            // 已授权则直接进行保存图片
+            _this.drawDeckCanvas()
+          }
+        },
+        fail(res) {
+          wx.hideLoading()
+          wx.showToast({
+            title: '图片保存失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+    },
+    async drawDeckCanvas() {
+      let rarityColor = {
+        common: '#5e5e5e',
+        rare: '#1768c6',
+        epic: '#705dc7',
+        legendary: '#f5a623'
+      }
+      let formatData = {}
+      if(this.deckDetail.card_list) {
+        formatData = JSON.parse(this.deckDetail.card_list)
+        for (let card of formatData) {
+          card['img'] = iFanrTileImageURL(card.tile)
+          if (card.rarity === 'LEGENDARY') {
+            card['count'] = '★'
+          }
+        }
+      }
+      let ctx = wx.createCanvasContext('deck-pic')
+      // 每张tile高29px，间隔1px
+      let tileHeight=30
+      let headHeight = 52
+      let bRectHeight = 26
+      let cardListHeight = tileHeight*formatData.length-1
+      this.canvasHeight = cardListHeight+headHeight+bRectHeight+2
+
+      // 绘制头部图片背景
+      ctx.save()
+      ctx.setFillStyle('#2C3E50')
+      ctx.fillRect(0, 0, this.canvasWidth, headHeight-2)
+      ctx.restore()
+      ctx.drawImage(utils.faction[this.deckDetail.faction].image, 7, 7, 38, 38)
+      // 绘制头部描述
+      ctx.save()
+      ctx.font = 'normal bold 15px sans-serif';
+      ctx.textAlign = 'left'
+      ctx.setFillStyle('#fff')
+      ctx.fillText(this.genDeckName, 52, 23)
+      ctx.restore()
+      ctx.save()
+      ctx.drawImage(this.dustImage, 52, 30, 10, 14)
+      ctx.font = 'normal normal 12px sans-serif';
+      ctx.setFillStyle('#fff')
+      ctx.fillText(this.deckDetail.dust_cost, 64, 42)
+      ctx.drawImage(utils.deckModeImg(this.deckDetail.mode), this.canvasWidth-50, 30, 15, 15)
+      let mode = ''
+      if (this.deckDetail.mode.toLowerCase() === 'standard') {
+        mode = '标准'
+      } else if (this.deckDetail.mode.toLowerCase() === 'wild') {
+        mode = '狂野'
+      }
+      ctx.fillText(mode, this.canvasWidth-32, 42)
+      ctx.restore()
+
+      // 绘制卡牌主体部分
+      let grd=ctx.createLinearGradient(27,0,136,0);
+      grd.addColorStop(0, "#313109")
+      grd.addColorStop(.2, "#313131")
+      grd.addColorStop(.83, "rgba(49,49,49,00)")
+      grd.addColorStop(1, "rgba(49,49,49,00)")
+      let pages = getCurrentPages();
+      for (let index in formatData) {
+        if (formatData.hasOwnProperty(index)) {
+          // 绘制费用和稀有度
+          ctx.save()
+          ctx.beginPath()
+          let color = rarityColor.common
+          switch(formatData[index].rarity) {
+            case 'RARE': color = rarityColor.rare; break;
+            case 'EPIC': color = rarityColor.epic; break;
+            case 'LEGENDARY': color = rarityColor.legendary; break
+            default: color = rarityColor.common;
+          }
+          ctx.setFillStyle(color)
+          ctx.fillRect(0, headHeight+index*tileHeight, 27, 29)
+          // 费用
+          ctx.font = 'normal bold 14px sans-serif';
+          ctx.textAlign = 'center'
+          ctx.setFillStyle('#fff')
+          ctx.fillText(formatData[index].cost, 14, headHeight+index*tileHeight+20)
+          ctx.closePath()
+          ctx.restore()
+          // 绘制卡牌tile图片
+          let res = await getImageInfoAsync(formatData[index].img)
+          console.log(pages[pages.length-1].route)
+          if (pages[pages.length-1].route !== 'pages/decks/deckDetail/main') {
+            console.log('not canvas page')
+            return
+          }
+          console.log(res)
+          let tileRatio = res.height/29
+          if (formatData[index].count !== 1) {
+            ctx.drawImage(res.path, 30, 0, 100*tileRatio, res.height, 43, headHeight+index*tileHeight, 100, 29) //27+13,费用框占27px，间隔13px，宽度100
+          } else {
+            ctx.drawImage(res.path, 0, 0, 122*tileRatio, res.height, 43, headHeight+index*tileHeight, 122, 29)
+          }
+          // 绘制卡牌张数
+          if (formatData[index].count !== 1) {
+            ctx.save()
+            ctx.setFillStyle('#313131')
+            ctx.fillRect(143, headHeight+index*tileHeight, 22, 29)
+            ctx.font = 'normal bolder 13px sans-serif';
+            ctx.textAlign = 'center'
+            ctx.setFillStyle('#f4d442')
+            ctx.fillText(formatData[index].count, 154, headHeight+index*tileHeight+19)
+            ctx.restore()
+          }
+          // 绘制卡牌蒙版
+          ctx.fillStyle = grd
+          ctx.fillRect(27, headHeight+index*tileHeight, 136, 29)
+          // 绘制卡牌名
+          ctx.save()
+          ctx.font = 'normal bold 12px sans-serif';
+          ctx.textAlign = 'left'
+          ctx.setFillStyle('#fff')
+          ctx.fillText(formatData[index].cname, 32, headHeight+index*tileHeight+19)
+          ctx.restore()
+        }
+      }
+      // 绘制底部
+      ctx.save()
+      ctx.setFillStyle('#2C3E50')
+      ctx.fillRect(0, cardListHeight+headHeight+2, this.canvasWidth, bRectHeight)
+      ctx.font = 'normal normal 12px sans-serif';
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.setFillStyle('#fff')
+      ctx.fillText('微信小程序：炉石传说情报站', this.canvasWidth/2, cardListHeight+headHeight+bRectHeight/2+2)
+      ctx.restore()
+      ctx.draw()
+      let destWidth = 219
+      let destHeight = this.canvasHeight*219/this.canvasWidth
+      this.saveCanvasImg()
     },
   },
   async mounted() {
@@ -374,9 +607,12 @@ export default {
     this.deckID = this.$root.$mp.query.deckID
     this.deckMode = this.$root.$mp.query.mode?this.$root.$mp.query.mode:'Standard'
     this.decksName = this.$store.state.cards.decksName
+    if (this.decksName.length === 0) {
+      this.decksName = await this.$store.dispatch('getDecksName')
+    }
     this.trending = !!this.$root.$mp.query.trending
     this.collected = !!this.$root.$mp.query.collected
-    this.genDeckData()
+    await this.genDeckData()
   },
   onPullDownRefresh() {
     // 下拉刷新要把json字符串转换为对象，否则getDeckData时操作对象会报错
@@ -401,7 +637,7 @@ export default {
         path: '/pages/index/main'
       }
     }
-  }
+  },
 }
 </script>
 <style lang="scss" scoped>

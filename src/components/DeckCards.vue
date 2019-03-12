@@ -4,7 +4,7 @@
          v-for="(card, index) in formatData"
          :key="index"
          @click="cardClick(card)"
-         :style="{width: colNum===1?'100%':'47%', 'margin-top': colNum===1?20+'rpx':5+'rpx'}">
+         :style="{width: colNum===1?'100%':'47.8%', 'margin-top': colNum===1?20+'rpx':5+'rpx'}">
       <div :class="['card-gem', {
         'rarity-common': card.rarity==='FREE'||card.rarity==='COMMON',
         'rarity-rare': card.rarity==='RARE',
@@ -31,7 +31,7 @@
   </div>
 </template>
 <script>
-import {genTileImageURL} from "@/utils";
+import {genTileImageURL, iFanrTileImageURL} from "@/utils";
 
 export default {
   name: 'DeckCards',
@@ -48,6 +48,9 @@ export default {
     genTileImage(hsId) {
       return genTileImageURL(hsId)
     },
+    iFanrTileImage(tile) {
+      return iFanrTileImageURL(tile)
+    },
     cardClick(item) {
       this.$emit('cardClick', item)
     }
@@ -61,7 +64,11 @@ export default {
           this.formatData = val
         }
         for (let card of this.formatData) {
-          card['img'] = this.genTileImage(card.card_hsid)
+          if (card.tile) {
+            card['img'] = this.iFanrTileImage(card.tile)
+          } else {
+            card['img'] = this.genTileImage(card.card_hsid)
+          }
           if (card.rarity === 'LEGENDARY') {
             card['count'] = '★'
           }
@@ -85,7 +92,7 @@ export default {
   color: white;
   box-sizing: border-box;
   .card-tile {
-    width: 47%;
+    width: 47.8%;
     height: 58rpx;
     line-height: 58rpx;
     font-size: 14px;

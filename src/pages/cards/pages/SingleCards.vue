@@ -191,7 +191,8 @@
         wx.showNavigationBarLoading();
         getCardsList(this.filter, 21, this.page).then(res => {
           let list = res.objects.map(item => {
-            let image = utils.genCardsImageURL(item.hsId)
+            // let image = utils.genCardsImageURL(item.hsId)
+            let image = item.img_card_link
             return {dbfId: item.dbfId, name: item.name, image: image}
           })
           if (init) {

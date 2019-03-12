@@ -4,16 +4,17 @@
       <span class="icon iconfont">&#xe63b;</span>
       <span>分享给好友</span>
     </button>
+    <div class="separator" v-if="showExportBtn"></div>
+    <button @click="handleExportBtn">
+      <span class="icon iconfont">&#xe69c;</span>
+      <span>导出图片</span>
+    </button>
     <div class="separator" v-if="showCollectBtn"></div>
     <button class="like" v-if="showCollectBtn" @click="handleCollect">
       <span class="active icon iconfont" v-if="collected">&#xe601;</span>
       <span class="icon iconfont" v-else>&#xe603;</span>
       <span>收藏套牌</span>
     </button>
-    <!--<button @click="backToHome">-->
-      <!--<span class="icon iconfont">&#xe615;</span>-->
-      <!--<span>返回首页</span>-->
-    <!--</button>-->
   </div>
 </template>
 <script>
@@ -26,10 +27,8 @@ export default {
     }
   },
   methods: {
-    backToHome() {
-      wx.switchTab({
-        url: '/pages/index/main'
-      })
+    handleExportBtn() {
+      this.$emit('exportClick')
     },
     handleCollect() {
       this.$emit('collectClick')
