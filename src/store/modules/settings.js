@@ -4,6 +4,7 @@ const settings = {
     isIphoneX: false,
     winWidth: null,
     winHeight: null,
+    showBubble: true,
   },
   mutations: {
     SET_NAV_HEIGHT: (state, navHeight) => {
@@ -17,6 +18,9 @@ const settings = {
     },
     SET_WIN_HEIGHT: (state, val) => {
       state.winHeight = val
+    },
+    setShowBubbleFlag: (state, val) => {
+      state.showBubble = val
     }
   },
   actions: {

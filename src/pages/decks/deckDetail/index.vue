@@ -2,6 +2,9 @@
   <div class="container">
     <NavBar :showCapsule="true" navTitle="套牌详情"></NavBar>
     <div class="banner" :style="{'background-image': bannerImg?'url('+bannerImg+')':''}">
+      <div class="bubble" :style="{'display': showBubble?'block':'none'}">
+        <AddBubble></AddBubble>
+      </div>
       <div class="overview">
         <div class="deck-name">
           <div class="icon">
@@ -93,7 +96,7 @@
 </template>
 <script>
 import utils from '@/utils'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import {getDeckDetail, setUserCollection, cancelUserCollection, getArchetypeDetail} from "@/api/dbapi";
 import {getComponentByTag, iFanrTileImageURL, getImageInfoAsync} from "@/utils";
 import DeckCards from '@/components/DeckCards'
@@ -103,6 +106,7 @@ import FooterMenu from '@/components/FooterMenu'
 import ZanToast from '@/components/toast'
 import NavBar from '@/components/NavBar'
 import WinRateBoard from '@/components/WinRateBoard'
+import AddBubble from '@/components/AddBubble'
 
 const defaultDetail = {
   background_img: '',
@@ -129,6 +133,7 @@ export default {
     PieChart,
     FooterMenu,
     WinRateBoard,
+    AddBubble,
     _toast: ZanToast
   },
   data() {
@@ -164,7 +169,8 @@ export default {
   computed: {
     ...mapGetters([
       'navHeight',
-      'userInfo'
+      'userInfo',
+      'showBubble'
     ]),
     genFactionIcon() {
       if (this.deckDetail.faction) {
@@ -370,13 +376,6 @@ export default {
         }
       }
     },
-    handleExport() {
-      wx.showLoading({
-        title: '图片生成中',
-        mask: true
-      })
-      this.saveImageToPhotos()
-    },
     checkDeckCollected() {
     //  检查当前卡组是否已收藏
       if (this.userInfo.id) {
@@ -392,43 +391,12 @@ export default {
         url: `/pages/decks/archetypeDetail/main?name=${this.deckDetail.deck_name}`
       })
     },
-    saveCanvasImg() {
-      let pages = getCurrentPages();
-      if (pages[pages.length-1].route !== 'pages/decks/deckDetail/main') {
-        return
-      }
-      wx.canvasToTempFilePath({
-        canvasId: 'deck-pic',
-        success(res) {
-          wx.saveImageToPhotosAlbum({
-            filePath: res.tempFilePath,
-            success(res) {
-              wx.hideLoading()
-              wx.showToast({
-                title: '图片已保存到相簿',
-                duration: 2000
-              })
-            },
-            fail(err) {
-              wx.hideLoading()
-              wx.showToast({
-                title: '图片保存失败',
-                icon: 'none',
-                duration: 2000
-              })
-            }
-          })
-        },
-        fail(err) {
-          console.log('error', err)
-          wx.hideLoading()
-          wx.showToast({
-            title: '图片生成失败',
-            icon: 'none',
-            duration: 2000
-          })
-        }
+    handleExport() {
+      wx.showLoading({
+        title: '图片生成中',
+        mask: true
       })
+      this.saveImageToPhotos()
     },
     saveImageToPhotos () {
       let _this = this
@@ -491,6 +459,8 @@ export default {
       let bRectHeight = 26
       let cardListHeight = tileHeight*formatData.length-1
       this.canvasHeight = cardListHeight+headHeight+bRectHeight+2
+      ctx.setFillStyle('#000')
+      ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight)
 
       // 绘制头部图片背景
       ctx.save()
@@ -596,12 +566,57 @@ export default {
       ctx.fillText('微信小程序：炉石传说情报站', this.canvasWidth/2, cardListHeight+headHeight+bRectHeight/2+2)
       ctx.restore()
       ctx.draw()
+
+      this.saveCanvasImg()
+    },
+    saveCanvasImg() {
+      let pages = getCurrentPages();
+      if (pages[pages.length-1].route !== 'pages/decks/deckDetail/main') {
+        return
+      }
       let destWidth = 219
       let destHeight = this.canvasHeight*219/this.canvasWidth
-      this.saveCanvasImg()
+      wx.canvasToTempFilePath({
+        canvasId: 'deck-pic',
+        destWidth: destWidth,
+        destHeight: destHeight,
+        quality: 1,
+        success(res) {
+          wx.saveImageToPhotosAlbum({
+            filePath: res.tempFilePath,
+            success(res) {
+              wx.hideLoading()
+              wx.showToast({
+                title: '图片已保存到相簿',
+                duration: 2000
+              })
+            },
+            fail(err) {
+              wx.hideLoading()
+              wx.showToast({
+                title: '图片保存失败',
+                icon: 'none',
+                duration: 2000
+              })
+            }
+          })
+        },
+        fail(err) {
+          console.log('error', err)
+          wx.hideLoading()
+          wx.showToast({
+            title: '图片生成失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
     },
   },
   async mounted() {
+    setTimeout(() => {
+      this.$store.commit('setShowBubbleFlag', false)
+    }, 4000)
     this.toast = getComponentByTag(this, '_toast')
     this.recordID = this.$root.$mp.query.id
     this.deckID = this.$root.$mp.query.deckID
@@ -647,10 +662,16 @@ export default {
   width: 100%;
   overflow: hidden;
   .banner {
+    position: relative;
     width: 100%;
     height: 400rpx;
     overflow: hidden;
     background-size: 100%;
+    .bubble {
+      position: absolute;
+      right:5px;
+      top:10px;
+    }
     .overview {
       position: relative;
       width: 100%;

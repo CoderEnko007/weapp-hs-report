@@ -11,6 +11,7 @@ const getters = {
   isIphoneX: state => state.settings.isIphoneX,
   winWidth: state => state.settings.winWidth,
   winHeight: state => state.settings.winHeight,
+  showBubble: state => state.settings.showBubble,
 }
 
 export default getters
