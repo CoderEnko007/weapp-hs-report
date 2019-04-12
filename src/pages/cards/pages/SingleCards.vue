@@ -35,7 +35,7 @@
       </div>
     </div>
     <div v-show="selectedFilterTabItem!==null" :class="{mask: true, gray_bgc: selectedFilterTabItem!==null}" @click="handleMaskClick"></div>
-    <div class="cards_list" :style="{height:600+'px'}">
+    <div class="cards_list">
       <CardList :list="cardsList"
                 @cardClick="handleCardClick"
                 @scrollToBottom="scrollToBottom"
@@ -45,6 +45,8 @@
   </div>
 </template>
 <script>
+  import { mapGetters } from 'vuex'
+  import { getCardPicture } from "@/utils";
   import utils from '@/utils'
   import SearchBar from '@/components/SearchBar'
   import FilterMenu from '@/components/FilterMenu'
@@ -68,6 +70,13 @@
       SearchBar,
       FilterMenu,
       CardList,
+    },
+    computed: {
+      ...mapGetters([
+        'fbiVersion',
+        'fbiKey',
+        'fbiFlag'
+      ]),
     },
     data() {
       return {
@@ -182,6 +191,9 @@
           url: `/pages/cards/cardDetail/main?id=${item.dbfId}`
         })
       },
+      genCardImage(hsId) {
+        return getCardPicture(this, hsId, false, this.fbiFlag, this.fbiVersion, this.fbiKey)
+      },
       genCardsList(init) {
         if (init) {
           this.page = 0
@@ -192,7 +204,8 @@
         getCardsList(this.filter, 21, this.page).then(res => {
           let list = res.objects.map(item => {
             // let image = utils.genCardsImageURL(item.hsId)
-            let image = item.img_card_link
+            // let image = item.img_card_link
+            let image = this.genCardImage(item.hsId)
             return {dbfId: item.dbfId, name: item.name, image: image}
           })
           if (init) {
@@ -247,6 +260,9 @@
   }
 </script>
 <style lang="scss" scoped>
+  .single-card-container {
+    background-color: #fff;
+  }
   .filter {
     position: fixed;
     width: 100%;
@@ -333,7 +349,7 @@
     }
   }
   .cards_list {
-    position: relative;
+    position: fixed;
     width: 100%;
     height: 100%;
     padding-top: 121px;

@@ -33,7 +33,7 @@
     </div>
     <div class="tier-panel">
       <div class="headline">
-        <span class="title">职业形态排行</span>
+        <span class="title">标准模式强度排行</span>
         <!--<span class="headline-meta">标准模式</span>-->
         <div class="head-picker">
           <picker mode="selector" :value="rangePicker.selectedItem" :range="rangePickerList" @change="handleRankRangeChange">
@@ -41,7 +41,10 @@
             <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
           </picker>
         </div>
-        <span class="right-meta">标准模式</span>
+        <div class="head-btn" @click="handleExport">
+          <span class="icon iconfont">&#xe69c;&nbsp</span>
+          <span>导出日报</span>
+        </div>
       </div>
       <div class="tier-content">
         <div class="tier-block" v-for="(tier, index) in tierList" :key="index">
@@ -52,10 +55,14 @@
         </div>
       </div>
     </div>
+    <div style="position: fixed; top: 9999999999999px; overflow: hidden">
+      <canvas :style="{width: canvasWidth+'px', height: canvasHeight+'px'}" canvas-id="dailyReport"></canvas>
+    </div>
   </div>
 </template>
 <script>
 import utils from '@/utils'
+import {gradientColor} from '@/utils'
 import { mapGetters } from 'vuex'
 import {getRankData, getArchetypeList, getBanners, getNotice} from "@/api/dbapi";
 import {formatNowTime, ShadeColor} from "@/utils";
@@ -113,6 +120,8 @@ export default {
         text: '',
         animationData: []
       },
+      canvasWidth: 375,
+      canvasHeight: 200
     }
   },
   computed: {
@@ -265,7 +274,232 @@ export default {
           this.noticeText.text = res.content
         })
       }
-    }
+    },
+    handleExport() {
+      console.log('handleExport')
+      wx.showLoading({
+        title: '日报生成中',
+        mask: true
+      })
+      this.saveImageToPhotos()
+    },
+    saveImageToPhotos () {
+      let _this = this
+      // 相册授权
+      wx.getSetting({
+        success(res) {
+          // 进行授权检测，未授权则进行弹层授权
+          if (!res.authSetting['scope.writePhotosAlbum']) {
+            wx.authorize({
+              scope: 'scope.writePhotosAlbum',
+              success () {
+                _this.drawRankCanvas()
+              },
+              fail() {
+                wx.hideLoading()
+                wx.showToast({
+                  title: '请点击右上角·●·->关于炉石传说情报站->右上角·●·->设置->授权访问相册',
+                  icon: 'none',
+                  duration: 5000
+                })
+              }
+            })
+          } else {
+            // 已授权则直接进行保存图片
+            console.log('PhotosAlbum已授权')
+            _this.drawRankCanvas()
+          }
+        },
+        fail(res) {
+          wx.hideLoading()
+          wx.showToast({
+            title: '图片保存失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+    },
+    drawRankCanvas() {
+      let ctx = wx.createCanvasContext('dailyReport')
+      let canvasMargin = 0
+      this.canvasWidth = 300+canvasMargin
+      this.canvasHeight = 720
+      let headHeight = 120
+      ctx.save()
+      ctx.setFillStyle('#fff')
+      ctx.fillRect(0, 0, this.canvasWidth, headHeight)
+      ctx.restore()
+      ctx.save()
+      ctx.font = 'normal bold 12px sans-serif';
+      ctx.setFillStyle('#433e88')
+      ctx.textAlign = 'center'
+      ctx.fillText('微信小程序：炉石传说情报站', this.canvasWidth/2, 20)
+      ctx.setFillStyle('#000')
+      ctx.font = 'normal bold 16px sans-serif';
+      ctx.fillText('卡组强度排行', this.canvasWidth/2, 45)
+      ctx.restore()
+      let rankRange = this.rangePicker.list[this.rangePicker.selectedItem].text
+      ctx.font = 'normal normal 12px sans-serif';
+      ctx.textAlign = 'left'
+      ctx.fillText('分段：', canvasMargin+30, 70)
+      ctx.save()
+      ctx.font = 'normal bold 13px sans-serif';
+      ctx.setFillStyle('red')
+      ctx.fillText(rankRange, canvasMargin+65, 70)
+      ctx.restore()
+      ctx.save()
+      ctx.font = 'normal normal 12px sans-serif';
+      ctx.setFillStyle('#000')
+      ctx.textAlign = 'right'
+      let date = new Date()
+      ctx.fillText('时间：'+utils.formatNowTime(date), this.canvasWidth-canvasMargin-30, 70)
+      ctx.restore()
+
+      ctx.textAlign = 'center'
+      ctx.font = 'normal normal 13px sans-serif';
+      let colWidth = (this.canvasWidth-canvasMargin*2)/4
+      ctx.fillText('强 度', colWidth/2+canvasMargin, 95)
+      ctx.fillText('卡 组', colWidth+colWidth/2+canvasMargin, 95)
+      ctx.fillText('胜 率', colWidth*2+colWidth/2+canvasMargin, 95)
+      ctx.fillText('热 度', colWidth*3+colWidth/2+canvasMargin, 95)
+
+      let rankPower = [
+        {name: '第1梯队', height:0, num: 0},
+        {name: '第2梯队', height:0, num: 0},
+        {name: '第3梯队', height:0, num: 0},
+        {name: '第4梯队', height:0, num: 0},
+      ]
+      let factionColor = {'Druid': '#f79647', 'Hunter': '#9bbb56', 'Mage': '#b8dee9', 'Paladin': '#e6b8b8',
+                          'Priest': '#e5e5e5', 'Rogue': '#ffff01', 'Shaman': '#538dd6', 'Warlock': '#cdc0da', 'Warrior': '#c5bd98'}
+      let listHeight = 0
+      let itemHeight = 25
+      let winrateGColor = gradientColor('#239c15', '#297607', this.tierList[0].list.length+this.tierList[1].list.length)
+      let winrateRColor = gradientColor('#889400', '#ff5630', this.tierList[2].list.length+this.tierList[3].list.length)
+      let winrateColor = [...winrateGColor, ...winrateRColor]
+      let itemNums = 0
+      for (let tierIndex in this.tierList) {
+        if (this.tierList.hasOwnProperty(tierIndex)) {
+          rankPower[tierIndex].height=this.tierList[tierIndex].list.length*itemHeight+1 // 每个梯队后面加1px的分割线
+          rankPower[tierIndex].num = this.tierList[tierIndex].list.length
+          let prevTierHeight = 0
+          if (tierIndex > 0) {
+            prevTierHeight =  listHeight
+          }
+          listHeight += rankPower[tierIndex].height
+          ctx.save()
+          ctx.setFillStyle('#fbf3e8')
+          ctx.fillRect(canvasMargin, headHeight+prevTierHeight-17, colWidth, rankPower[tierIndex].height)
+          ctx.restore()
+          ctx.save()
+          ctx.font = 'normal bold 12px sans-serif'
+          ctx.setFillStyle('#34383b')
+          ctx.fillText(rankPower[tierIndex].name, colWidth/2+canvasMargin, headHeight+prevTierHeight)
+          ctx.restore()
+          let list = this.tierList[tierIndex].list
+          for (let itemIndex in list) {
+            if (list.hasOwnProperty(itemIndex)) {
+              ctx.save()
+              ctx.setFillStyle(factionColor[list[itemIndex].faction])
+              ctx.fillRect(canvasMargin+colWidth, headHeight+prevTierHeight+itemIndex*itemHeight-17, colWidth, itemHeight)
+              ctx.setFillStyle('#000')
+              ctx.font = 'normal normal 12px sans-serif'
+              ctx.fillText(list[itemIndex].cname, colWidth/2+canvasMargin+colWidth, headHeight+prevTierHeight+itemIndex*itemHeight)
+              ctx.restore()
+              ctx.save()
+              if (itemNums%2 === 0) {
+                ctx.setFillStyle('#fff')
+              } else {
+                ctx.setFillStyle('#faf8f9')
+              }
+              ctx.fillRect(canvasMargin+2*colWidth, headHeight+prevTierHeight+itemIndex*itemHeight-17, 2*colWidth, itemHeight)
+              ctx.setFillStyle('#faf8f9')
+              ctx.restore()
+              ctx.save()
+              ctx.font = 'normal bold 12px sans-serif'
+              ctx.setFillStyle(winrateColor[itemNums++])
+              ctx.fillText(list[itemIndex].win_rate+'%', colWidth/2+canvasMargin+colWidth*2, headHeight+prevTierHeight+itemIndex*itemHeight)
+              ctx.restore()
+              if (list[itemIndex].popularity1) {
+                ctx.fillText(list[itemIndex].popularity1.toFixed(1)+'%', colWidth/2+canvasMargin+colWidth*3, headHeight+prevTierHeight+itemIndex*itemHeight)
+              } else {
+                ctx.fillText('暂无', colWidth/2+canvasMargin+colWidth*3, headHeight+prevTierHeight+itemIndex*itemHeight)
+              }
+            }
+          }
+          ctx.save()
+          ctx.setStrokeStyle('#ccc')
+          ctx.moveTo(canvasMargin, headHeight+prevTierHeight-17)
+          ctx.lineTo(this.canvasWidth-canvasMargin, headHeight+prevTierHeight-17)
+          ctx.stroke()
+          ctx.restore()
+        }
+      }
+      ctx.setStrokeStyle('#ccc')
+      ctx.moveTo(canvasMargin, headHeight+listHeight-17)
+      ctx.lineTo(this.canvasWidth-canvasMargin, headHeight+listHeight-17)
+      ctx.stroke()
+      ctx.save()
+      ctx.setFillStyle('#fff')
+      ctx.fillRect(0, headHeight+listHeight-17, this.canvasWidth, 30)
+      ctx.setFillStyle('#433e88')
+      ctx.font = 'normal bold 12px sans-serif';
+      ctx.textAlign = 'right'
+      ctx.fillText('数据源：HSReplay', this.canvasWidth-canvasMargin-10, headHeight+listHeight)
+      ctx.restore()
+      this.canvasHeight = headHeight+listHeight+10
+
+      let _this = this
+      ctx.draw(false, function(e) {
+        setTimeout(function() {
+          _this.saveCanvasImg()
+        }, 1000)
+      })
+    },
+    saveCanvasImg() {
+      let pages = getCurrentPages();
+      if (pages[pages.length-1].route !== 'pages/index/main') {
+        return
+      }
+      let destWidth = 400
+      let destHeight = this.canvasHeight*400/this.canvasWidth
+      wx.canvasToTempFilePath({
+        canvasId: 'dailyReport',
+        destWidth: this.canvasWidth*3,
+        destHeight: this.canvasHeight*3,
+        fileType: 'jpg',
+        quality: 1,
+        success(res) {
+          wx.saveImageToPhotosAlbum({
+            filePath: res.tempFilePath,
+            success(res) {
+              wx.hideLoading()
+              wx.showToast({
+                title: '图片已保存到相簿',
+                duration: 2000
+              })
+            },
+            fail(err) {
+              wx.hideLoading()
+              wx.showToast({
+                title: '图片保存失败',
+                icon: 'none',
+                duration: 2000
+              })
+            }
+          })
+        },
+        fail(err) {
+          console.log('error', err)
+          wx.hideLoading()
+          wx.showToast({
+            title: '图片生成失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+    },
   },
   mounted() {
     this.Login()
@@ -367,5 +601,14 @@ export default {
       }
     }
   }
+}
+.head-btn {
+  position:absolute;
+  top:50%;
+  right: 55rpx;
+  transform:translateY(-50%);
+  line-height:30px;
+  font-size: 12px;
+  color: $palette-blue;
 }
 </style>

@@ -107,7 +107,7 @@ export default {
       barChart.setOption(this.option)
       let _this = this
       barChart.on('click', function (params) {
-        _this.$emit('barClick', params)
+          _this.$emit('barClick', params)
       });
       return barChart
     },

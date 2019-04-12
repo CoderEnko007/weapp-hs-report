@@ -2,16 +2,18 @@
   <scroll-view scroll-y='true'
                @scrolltolower='scrollToBottom'
                @scrolltoupper="scrollToTop"
-               :style="{height: winHeight-222+'px'}">
+               :style="{height: winHeight-177+'px'}">
     <div class="card-list">
       <div class="card" v-for="(item, index) in list" :key="index" @click="handleClick(item)">
         <img :src="item.image" mode="aspectFit">
         <p>{{item.name}}</p>
       </div>
     </div>
-    <ZanLoadmore v-if="loading" v-bind="{ loading: true }" />
-    <ZanLoadmore v-else-if="nodata" v-bind="{ nodata: true }" />
-    <ZanLoadmore v-else v-bind="{ nomore: true }" />
+    <div class="load-panel" style="margin-top:-20px; margin-bottom:5vh;">
+      <ZanLoadmore v-if="loading" v-bind="{ loading: true }" />
+      <ZanLoadmore v-else-if="nodata" v-bind="{ nodata: true }" />
+      <ZanLoadmore v-else v-bind="{ nomore: true }" />
+    </div>
   </scroll-view>
 </template>
 <script>

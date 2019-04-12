@@ -53,6 +53,7 @@
   </div>
 </template>
 <script>
+import { getCardPicture } from "@/utils";
 import { mapGetters } from 'vuex'
 import utils from '@/utils'
 import {genOrigImageURL, genCardsImageURL, gen512CardsImageURL} from '@/utils'
@@ -102,7 +103,10 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'navHeight'
+      'navHeight',
+      'fbiVersion',
+      'fbiKey',
+      'fbiFlag'
     ]),
     getEnAudio() {
       if (this.cardDetail.audios) {
@@ -120,6 +124,9 @@ export default {
     },
   },
   methods: {
+    genCardImage(hsId) {
+      return getCardPicture(this, hsId, false, this.fbiFlag, this.fbiVersion, this.fbiKey)
+    },
     initCardDetail() {
       this.showEnAudio = false
       this.showZhAudio = false
@@ -128,8 +135,9 @@ export default {
         this.cardDetail = res[0]
         this.cardDetail.bgImg = genOrigImageURL(this.cardDetail.hsId)
         // this.cardDetail.cardImg = gen512CardsImageURL(this.cardDetail.hsId)
-        this.cardDetail.cardImg = this.cardDetail.img_card_link
-        this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
+        // this.cardDetail.cardImg = this.cardDetail.img_card_link
+        this.cardDetail.cardImg = this.genCardImage(this.cardDetail.hsId)
+          this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
         for (let item of this.$store.state.cards.series) {
           if(this.cardDetail.set_id === item.id) {
             this.cardDetail.series = item.name

@@ -58,6 +58,8 @@ export default {
           })[0]
           if(deck && deck.cname) {
             val.list[index].cname = deck.cname
+          } else {
+            val.list[index].cname = deck.archetype_name
           }
           if (val.list[index].faction) {
             val.list[index].image = utils.faction[val.list[index].faction].image

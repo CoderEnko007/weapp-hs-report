@@ -106,7 +106,7 @@ export default {
         position: absolute;
         width: 53rpx;
         height: 4rpx;
-        bottom: 11rpx;
+        bottom: 16rpx;
         left: 50%;
         transform: translateX(-50%);
         background-color: $palette-blue;

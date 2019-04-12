@@ -5,9 +5,9 @@
       <span>分享给好友</span>
     </button>
     <div class="separator" v-if="showExportBtn"></div>
-    <button @click="handleExportBtn">
+    <button v-if="showExportBtn" @click="handleExportBtn">
       <span class="icon iconfont">&#xe69c;</span>
-      <span>导出图片</span>
+      <span>导出套牌</span>
     </button>
     <div class="separator" v-if="showCollectBtn"></div>
     <button class="like" v-if="showCollectBtn" @click="handleCollect">
@@ -20,7 +20,7 @@
 <script>
 export default {
   name: 'FooterMenu',
-  props: ['showCollectBtn', 'collected'],
+  props: ['showCollectBtn', 'showExportBtn', 'collected'],
   data() {
     return {
 

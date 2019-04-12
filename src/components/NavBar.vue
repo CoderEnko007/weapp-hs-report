@@ -53,17 +53,26 @@ export default {
       //     deckID: beforePage.options.deckID
       //   })
       // }
-      // console.log(beforePage)
+      console.log(beforePage)
       let _this = this
-      wx.navigateBack({
-        success: function() {
-          _this.$emit('navBack')
-          if (beforePage.route === 'pages/decks/archetypeDetail/main'
-            || beforePage.route === 'pages/decks/deckDetail/main') {
-            // beforePage.onReady()
+      if (beforePage === undefined) {
+        wx.switchTab({
+          url: '/pages/index/main',
+          success: function() {
+            _this.$emit('navBackHome')
           }
-        }
-      })
+        })
+      } else {
+        wx.navigateBack({
+          success: function() {
+            _this.$emit('navBack')
+            if (beforePage.route === 'pages/decks/archetypeDetail/main'
+              || beforePage.route === 'pages/decks/deckDetail/main') {
+              // beforePage.onReady()
+            }
+          }
+        })
+      }
     },
     handleHome() {
       let _this = this

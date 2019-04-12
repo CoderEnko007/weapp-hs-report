@@ -27,6 +27,11 @@ export default {
 
       })
     },
+    initSystemSetting() {
+      this.$store.dispatch('setSystemSetting').then(res => {
+
+      })
+    },
     setNotice() {
       this.$store.dispatch('getNotice').then(res => {
         // console.log('setNotice', res)
@@ -39,6 +44,7 @@ export default {
     // wx.BaaS = requirePlugin('sdkPlugin')
     // wx.BaaS.wxExtend(wx.login, wx.getUserInfo, wx.requestPayment)
     // wx.BaaS.init(this.clientId)
+    this.initSystemSetting()
     this.initDecksName()
     this.initCardSeries()
     this.setNavHeight()

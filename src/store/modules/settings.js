@@ -1,3 +1,5 @@
+import { getSetting } from "../../api/dbapi";
+
 const settings = {
   state: {
     navHeight: null,
@@ -5,6 +7,9 @@ const settings = {
     winWidth: null,
     winHeight: null,
     showBubble: true,
+    fbiVersion: null,
+    fbiKey: null,
+    fbiFlag: true
   },
   mutations: {
     SET_NAV_HEIGHT: (state, navHeight) => {
@@ -19,9 +24,19 @@ const settings = {
     SET_WIN_HEIGHT: (state, val) => {
       state.winHeight = val
     },
+    SET_FBI_VERSION: (state, val) => {
+      state.fbiVersion = val
+    },
+    SET_FBI_KEY: (state, val) => {
+      state.fbiKey = val
+    },
+    SET_FBI_FLAG: (state, val) => {
+      state.fbiFlag = val
+    },
     setShowBubbleFlag: (state, val) => {
       state.showBubble = val
-    }
+    },
+
   },
   actions: {
     setNavHeight({commit, state}) {
@@ -54,6 +69,19 @@ const settings = {
             console.log(err)
             reject(err)
           }
+        })
+      })
+    },
+    setSystemSetting({commit, state}) {
+      return new Promise((resolve, reject) => {
+        getSetting().then(res => {
+          commit('SET_FBI_VERSION', res.objects[0].fbi_version)
+          commit('SET_FBI_KEY', res.objects[0].fbi_key)
+          commit('SET_FBI_FLAG', res.objects[0].fbi_card_switch)
+          resolve(res.objects)
+        }).catch(err => {
+          console.log(err)
+          reject(err)
         })
       })
     }

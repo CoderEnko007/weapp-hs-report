@@ -64,11 +64,13 @@ export default {
           this.formatData = val
         }
         for (let card of this.formatData) {
-          if (card.tile) {
-            card['img'] = this.iFanrTileImage(card.tile)
-          } else {
-            card['img'] = this.genTileImage(card.card_hsid)
-          }
+          // 太费流量啦！！CDN HTTPS REQUEST又双叕超量了！！
+          // if (card.tile) {
+          //   card['img'] = this.iFanrTileImage(card.tile)
+          // } else {
+          //   card['img'] = this.genTileImage(card.card_hsid)
+          // }
+          card['img'] = this.genTileImage(card.card_hsid)
           if (card.rarity === 'LEGENDARY') {
             card['count'] = '★'
           }

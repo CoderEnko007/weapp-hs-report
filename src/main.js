@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import App from './App'
 import store from '@/store'
+import md5 from 'js-md5';
 
+Vue.prototype.$md5 = md5;
 Vue.prototype.$store = store
 Vue.config.productionTip = false
 App.mpType = 'app'

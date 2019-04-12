@@ -32,11 +32,11 @@ export default {
     return {
       deckList: [],
       report_date: '',
-      decksName: []
     }
   },
   computed: {
     ...mapGetters([
+      'decksName',
       'navHeight'
     ]),
     updateDate() {
@@ -87,8 +87,7 @@ export default {
       })
     }
   },
-  mounted() {
-    this.decksName = this.$store.state.cards.decksName
+  async mounted() {
     this.genTrendingList()
   },
   onPullDownRefresh() {
@@ -97,7 +96,7 @@ export default {
   onShareAppMessage(res) {
     return {
       title: '炉石传说情报站',
-      path: '/pages/index/main'
+      path: '/pages/trending/main'
     }
   }
 }

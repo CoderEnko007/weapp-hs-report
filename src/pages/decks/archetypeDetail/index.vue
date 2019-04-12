@@ -225,7 +225,6 @@ export default {
       archetypeName: '',
       archetypeDetail: Object.assign({}, defaultDetail),
       bannerImg: null,
-      decksName: [],
       factionIcons: [],
       updateDate: null,
       selectedFaction: {id: 'Druid', name: '德鲁伊', data: []},
@@ -246,6 +245,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'decksName',
       'navHeight',
       'archetypeList',
     ]),
@@ -437,7 +437,7 @@ export default {
   async mounted() {
     this.archetypeId = this.$root.$mp.query.id
     this.archetypeName = this.$root.$mp.query.name
-    this.decksName = this.$store.state.cards.decksName
+    // this.decksName = this.$store.state.cards.decksName
     await Promise.all([
       this.genFactionIcons(),
       this.genArchetypeDetail()

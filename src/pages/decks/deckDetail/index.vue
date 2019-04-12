@@ -142,9 +142,7 @@ export default {
       deckID: '',
       trending: false,
       collected: false,
-      handleCollecting: false,
       deckMode: 'Standard',
-      decksName: '',
       bannerImg: null,
       deckDetail: Object.assign({}, defaultDetail),
       dustImage: utils.image.dustImage,
@@ -168,6 +166,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'decksName',
       'navHeight',
       'userInfo',
       'showBubble'
@@ -333,7 +332,10 @@ export default {
       this.selectWinRate.value = bar.value
     },
     handleCollection() {
-      this.handleCollecting = true
+      wx.showLoading({
+        title: '请稍等',
+        mask: true
+      })
       if (this.deckCollected) {
       //  如果已收藏则取消收藏
         let data = {
@@ -341,12 +343,12 @@ export default {
             user_id: this.userInfo.id
         }
         this.$store.dispatch('cancelCollectedDeck', data).then(res => {
+          wx.hideLoading()
           this.$refs.btnGroup.deactiveCollectIcon()
           this.deckCollected = false
-          this.handleCollecting = false
         }).catch(err => {
+          wx.hideLoading()
           console.log(err)
-          this.handleCollecting = false
         })
       } else {
         if (this.userInfo.id) {
@@ -355,6 +357,7 @@ export default {
             deckDetail: this.deckDetail
           }
           this.$store.dispatch('addCollectedDeck', data).then(res => {
+            wx.hideLoading()
             wx.showToast({
               title: '收藏成功',
               icon: 'success',
@@ -362,9 +365,8 @@ export default {
             })
             this.$refs.btnGroup.activeCollectIcon()
             this.deckCollected = true
-            this.handleCollecting = false
           }).catch(err => {
-            this.handleCollecting = false
+            wx.hideLoading()
             console.log(err)
           })
         } else {
@@ -372,7 +374,6 @@ export default {
             title: '请登录',
             icon: 'fail'
           })
-          this.handleCollecting = false
         }
       }
     },
@@ -422,6 +423,7 @@ export default {
             })
           } else {
             // 已授权则直接进行保存图片
+            console.log('PhotosAlbum已授权')
             _this.drawDeckCanvas()
           }
         },
@@ -436,6 +438,7 @@ export default {
       })
     },
     async drawDeckCanvas() {
+      console.log('drawDeckCanvas')
       let rarityColor = {
         common: '#5e5e5e',
         rare: '#1768c6',
@@ -461,7 +464,6 @@ export default {
       this.canvasHeight = cardListHeight+headHeight+bRectHeight+2
       ctx.setFillStyle('#000')
       ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight)
-
       // 绘制头部图片背景
       ctx.save()
       ctx.setFillStyle('#2C3E50')
@@ -480,15 +482,17 @@ export default {
       ctx.font = 'normal normal 12px sans-serif';
       ctx.setFillStyle('#fff')
       ctx.fillText(this.deckDetail.dust_cost, 64, 42)
-      ctx.drawImage(utils.deckModeImg(this.deckDetail.mode), this.canvasWidth-50, 30, 15, 15)
+      let deckMode = this.deckDetail.mode?this.deckDetail.mode:'Standard'
+      ctx.drawImage(utils.deckModeImg(deckMode), this.canvasWidth-50, 30, 15, 15)
       let mode = ''
-      if (this.deckDetail.mode.toLowerCase() === 'standard') {
-        mode = '标准'
-      } else if (this.deckDetail.mode.toLowerCase() === 'wild') {
+      if (deckMode.toLowerCase() === 'wild') {
         mode = '狂野'
+      } else {
+        mode = '标准'
       }
       ctx.fillText(mode, this.canvasWidth-32, 42)
       ctx.restore()
+      console.log('头部绘制完成')
 
       // 绘制卡牌主体部分
       let grd=ctx.createLinearGradient(27,0,136,0);
@@ -520,12 +524,10 @@ export default {
           ctx.restore()
           // 绘制卡牌tile图片
           let res = await getImageInfoAsync(formatData[index].img)
-          console.log(pages[pages.length-1].route)
           if (pages[pages.length-1].route !== 'pages/decks/deckDetail/main') {
             console.log('not canvas page')
             return
           }
-          console.log(res)
           let tileRatio = res.height/29
           if (formatData[index].count !== 1) {
             ctx.drawImage(res.path, 30, 0, 100*tileRatio, res.height, 43, headHeight+index*tileHeight, 100, 29) //27+13,费用框占27px，间隔13px，宽度100
@@ -565,9 +567,15 @@ export default {
       ctx.setFillStyle('#fff')
       ctx.fillText('微信小程序：炉石传说情报站', this.canvasWidth/2, cardListHeight+headHeight+bRectHeight/2+2)
       ctx.restore()
-      ctx.draw()
 
-      this.saveCanvasImg()
+      let _this = this
+      ctx.draw(false, function(e) {
+        console.log(e)
+        setTimeout(function() {
+          _this.saveCanvasImg()
+        }, 1000)
+      })
+
     },
     saveCanvasImg() {
       let pages = getCurrentPages();
@@ -578,8 +586,8 @@ export default {
       let destHeight = this.canvasHeight*219/this.canvasWidth
       wx.canvasToTempFilePath({
         canvasId: 'deck-pic',
-        destWidth: destWidth,
-        destHeight: destHeight,
+        destWidth: this.canvasWidth*2,
+        destHeight: this.canvasHeight*2,
         quality: 1,
         success(res) {
           wx.saveImageToPhotosAlbum({
@@ -621,10 +629,10 @@ export default {
     this.recordID = this.$root.$mp.query.id
     this.deckID = this.$root.$mp.query.deckID
     this.deckMode = this.$root.$mp.query.mode?this.$root.$mp.query.mode:'Standard'
-    this.decksName = this.$store.state.cards.decksName
-    if (this.decksName.length === 0) {
-      this.decksName = await this.$store.dispatch('getDecksName')
-    }
+    // this.decksName = this.$store.state.cards.decksName
+    // if (this.decksName.length === 0) {
+    //   this.decksName = await this.$store.dispatch('getDecksName')
+    // }
     this.trending = !!this.$root.$mp.query.trending
     this.collected = !!this.$root.$mp.query.collected
     await this.genDeckData()

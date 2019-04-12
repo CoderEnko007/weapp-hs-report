@@ -58,7 +58,7 @@ export function getSeriesData(mode, limit=20, orderBy='-order') {
   })
 }
 
-export function getCardsList(params, limit=20, page=0, orderBy='cost') {
+export function getCardsList(params, limit=20, page=0, orderBy='-set_id') {
   //search, mode, cost, cardClass, rarity, type, mechanics, setId, race, ename, page=1, limit=20, orderBy='cost'
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.cardsTableID)
@@ -130,7 +130,7 @@ export function getCardsList(params, limit=20, page=0, orderBy='cost') {
       searchQuery = wx.BaaS.Query.or(nameQuery, otherQuery)
     }
     let query = wx.BaaS.Query.and(removeHeroQuery, costQuery, factionQuery, modeQuery, typeQuery, rarityQuery, seriesQuery, searchQuery)
-    tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+    tableObj.setQuery(query).orderBy(['-set_id', 'cost']).limit(limit).offset(page*limit).find().then(res => {
       resolve(res.data)
     }, err => {
       reject(err)
@@ -431,6 +431,17 @@ export function getAboutDescription() {
     let query = new wx.BaaS.Query()
     query.compare('display', '=', true)
     tableObj.setQuery(query).orderBy('order').find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getSetting() {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.settingTableID)
+    tableObj.find().then(res => {
       resolve(res.data)
     }, err => {
       reject(err)

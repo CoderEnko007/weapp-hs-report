@@ -34,7 +34,7 @@
 /*.zan-loadmore {*/
   /*z-index: -999;*/
 /*}*/
-.loadmore {
-  height: 40px;
-}
+/*.loadmore {*/
+  /*height: 40px;*/
+/*}*/
 </style>
