@@ -1,7 +1,7 @@
 <template>
   <div class="zan-noticebar">
     <div class="icon-left"><i class="iconfont">&#xe605;</i></div>
-    <div class="notice-text" :id="componentId + '__content-wrap'">
+    <div class="notice-text" :id="componentId + '__content-wrap'" @click="onBarClick">
       <div :animation="animationData" :id="componentId + '__content'" style="position: absolute; white-space: nowrap;">
         {{ text }}
       </div>
@@ -25,6 +25,9 @@
     methods: {
       handleClose() {
         this.$emit('close')
+      },
+      onBarClick() {
+        this.$emit('barClick')
       },
       initZanNoticeBarScroll (that, componentId) {
         // console.log('initZanNoticeBarScroll')

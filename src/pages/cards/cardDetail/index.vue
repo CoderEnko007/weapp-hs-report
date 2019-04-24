@@ -137,7 +137,7 @@ export default {
         // this.cardDetail.cardImg = gen512CardsImageURL(this.cardDetail.hsId)
         // this.cardDetail.cardImg = this.cardDetail.img_card_link
         this.cardDetail.cardImg = this.genCardImage(this.cardDetail.hsId)
-          this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
+        this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
         for (let item of this.$store.state.cards.series) {
           if(this.cardDetail.set_id === item.id) {
             this.cardDetail.series = item.name
@@ -194,7 +194,7 @@ export default {
     previewCard() {
       wx.previewImage({
         // urls: [gen512CardsImageURL(this.cardDetail.hsId)] // 需要预览的图片http链接列表
-        urls: [this.cardDetail.img_card_link]
+        urls: [this.cardDetail.cardImg]
       })
     },
     handleAudioPlay(item) {

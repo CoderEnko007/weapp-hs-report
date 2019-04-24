@@ -3,7 +3,7 @@
     <NavBar></NavBar>
     <div class="swiper">
       <div class="notice-bar" v-show="noticeContent.display">
-        <NoticeBar v-on:ref="setRef" v-bind="noticeText" @close="handleCloseNoticeBar" :componentId="'noticeText'"/>
+        <NoticeBar v-on:ref="setRef" v-bind="noticeText" @close="handleCloseNoticeBar" @barClick="handleNoticeClick" :componentId="'noticeText'"/>
       </div>
       <Swiper :banners="banners" :date="report_date" @swiperClick="swiperClick" v-if="banners"></Swiper>
     </div>
@@ -253,6 +253,14 @@ export default {
     },
     handleCloseNoticeBar() {
       this.$store.commit('SHOW_NOTICE_BAR', false)
+    },
+    handleNoticeClick() {
+      wx.showModal({
+        content: this.noticeText.text,
+        showCancel: false,
+        confirmText: '朕知道了',
+        confirmColor: '#433e88',
+      })
     },
     stopPullDown(success) {
       if (success) {

@@ -124,9 +124,26 @@ export default {
         }
       }
     },
+    swapItems(arr, index) {
+      arr.push(arr[index]);
+      arr.splice(index,1);
+      return arr;
+    },
     sortTableData() {
       if (this.orderBy) {
         this.selectedFaction.data.sort(this.compareFunction(this.orderBy))
+        let dataList = this.selectedFaction.data
+        let otherIndex = null
+        for (let index in dataList) {
+          if (dataList.hasOwnProperty(index)) {
+            if (dataList[index].ename === 'Other') {
+              otherIndex = index
+            }
+          }
+        }
+        if (otherIndex) {
+          this.swapItems(this.selectedFaction.data, otherIndex)
+        }
       }
     },
     genFactionIcons() {
@@ -144,7 +161,7 @@ export default {
         rankRange: this.rangePicker.list[this.rangePicker.selectedItem].rank_range
       }
       getWinRateData(params).then(res => {
-        let otherDeckIndex = 0
+        let otherDeckIndex = null
         this.selectedFaction.data = []
         for (let index in res) {
           if (res.hasOwnProperty(index)) {
@@ -167,10 +184,12 @@ export default {
           }
         }
         // 默认排序下将'其他'放到最后
-        let temp = this.selectedFaction.data[otherDeckIndex]
-        temp.deckName = '其他'
-        this.selectedFaction.data.splice(otherDeckIndex, 1)
-        this.selectedFaction.data.push(temp)
+        if (otherDeckIndex) {
+          let temp = this.selectedFaction.data[otherDeckIndex]
+          temp.deckName = '其他'
+          this.selectedFaction.data.splice(otherDeckIndex, 1)
+          this.selectedFaction.data.push(temp)
+        }
         this.loading = false
         wx.stopPullDownRefresh();
         wx.hideNavigationBarLoading()
