@@ -35,7 +35,7 @@ import {genTileImageURL, iFanrTileImageURL} from "@/utils";
 
 export default {
   name: 'DeckCards',
-  props: ['cards', 'colNum'],
+  props: ['cards', 'colNum', 'ifanrTile'],
   data() {
     return {
       formatData: null
@@ -70,7 +70,12 @@ export default {
           // } else {
           //   card['img'] = this.genTileImage(card.card_hsid)
           // }
-          card['img'] = this.genTileImage(card.card_hsid)
+          if (this.ifanrTile) {
+            card['img'] = card.img_tile_link
+          } else {
+            card['img'] = this.genTileImage(card.card_hsid)
+          }
+
           if (card.rarity === 'LEGENDARY') {
             card['count'] = '★'
           }

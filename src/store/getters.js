@@ -14,7 +14,8 @@ const getters = {
   showBubble: state => state.settings.showBubble,
   fbiVersion: state => state.settings.fbiVersion,
   fbiKey: state => state.settings.fbiKey,
-  fbiFlag: state => state.settings.fbiFlag
+  fbiFlag: state => state.settings.fbiFlag,
+  arenaTableID: state => state.settings.arenaTableID
 }
 
 export default getters

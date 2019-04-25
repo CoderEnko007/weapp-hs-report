@@ -1,26 +1,24 @@
 <template>
   <div class="card-container">
     <NavBar></NavBar>
-    <!--<div class="panel-tab">-->
-      <!--<block v-for="(item,index) in tabbar" :key="index">-->
-        <!--<div :id="index" :class="{'tab-item': true, 'tab-item-active': activeIndex==index}" @click="tabBarClick">-->
-          <!--{{item.text}}-->
-        <!--</div>-->
-      <!--</block>-->
-    <!--</div>-->
-    <!--<div class="tab-container">-->
-      <!--<swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">-->
-        <!--<swiper-item>-->
-          <!--<SingleCards></SingleCards>-->
-        <!--</swiper-item>-->
-        <!--<swiper-item>-->
-          <!--<ArenaCards></ArenaCards>-->
-        <!--</swiper-item>-->
-      <!--</swiper>-->
-      <!--<div :hidden="activeIndex != 0"><SingleCards></SingleCards></div>-->
-      <!--<div :hidden="activeIndex != 1"><ArenaCards></ArenaCards></div>-->
-    <!--</div>-->
-    <SingleCards></SingleCards>
+    <div class="panel-tab">
+      <block v-for="(item,index) in tabbar" :key="index">
+        <div :id="index" :class="{'tab-item': true, 'tab-item-active': activeIndex==index}" @click="tabBarClick">
+          {{item.text}}
+        </div>
+      </block>
+    </div>
+    <div class="tab-container">
+      <swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">
+        <swiper-item>
+          <SingleCards></SingleCards>
+        </swiper-item>
+        <swiper-item>
+          <ArenaCards></ArenaCards>
+        </swiper-item>
+      </swiper>
+    </div>
+    <!--<SingleCards></SingleCards>-->
   </div>
 </template>
 <script>

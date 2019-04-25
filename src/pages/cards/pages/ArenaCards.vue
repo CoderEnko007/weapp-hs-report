@@ -38,7 +38,7 @@
                    :style="{height: winHeight-navHeight-239+'px'}"
                    @scrolltolower="scrollToBottom">
         <div class="cards">
-          <DeckCards :cards="cardsList" :colNum="1" @cardClick="handleCardClick"></DeckCards>
+          <DeckCards :cards="cardsList" ifanrTile='true' :colNum="1" @cardClick="handleCardClick"></DeckCards>
           <div class="data">
             <div class="data-block" v-for="(item, index) in cardsList" :key="index">
               <span>{{item.deck_pop}}%</span>
@@ -105,7 +105,6 @@ export default {
       selectedFaction: '',
       filter: Object.assign({}, defaultFilter),
       listOrder: [
-        // {id: 'times_played', name: '打出次数'},
         {id: 'deck_pop', name: '出现率'},
         {id: 'deck_winrate', name: '卡组胜率'},
         // {id: 'played_winrate', name: '打出胜率'}
@@ -127,7 +126,8 @@ export default {
       'navHeight',
       'isIphoneX',
       'winWidth',
-      'winHeight'
+      'winHeight',
+      'arenaTableID'
     ])
   },
   methods: {
@@ -145,7 +145,7 @@ export default {
         this.more = true
         this.cardsList = []
       }
-      getArenaCards(this.filter, 20, this.page, this.filter.order).then(res => {
+      getArenaCards(this.filter, this.arenaTableID, 20, this.page, this.filter.order).then(res => {
         if (init) {
           this.cardsList = res.objects
         } else {

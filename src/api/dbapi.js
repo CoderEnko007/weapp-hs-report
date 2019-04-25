@@ -138,9 +138,9 @@ export function getCardsList(params, limit=20, page=0, orderBy='-set_id') {
   })
 }
 
-export function getArenaCards(params, limit=20, page=0, orderBy='-times_played') {
+export function getArenaCards(params, tableid=tableID.arenaCardsTableID, limit=20, page=0, orderBy='-times_played') {
   return new Promise((resolve, reject) => {
-    let tableObj = new wx.BaaS.TableObject(tableID.arenaCardsTableID)
+    let tableObj = new wx.BaaS.TableObject(tableid)
     let costQuery = new wx.BaaS.Query()
     if (params && params.cost!==null) {
       if (params.cost<7) {
@@ -162,11 +162,21 @@ export function getArenaCards(params, limit=20, page=0, orderBy='-times_played')
       otherQuery.contains('text', params.search)
       searchQuery = wx.BaaS.Query.or(nameQuery, otherQuery)
     }
-    let query = wx.BaaS.Query.and(costQuery, classificationQuery, searchQuery)
-    tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
-      resolve(res.data)
-    }, err => {
-      reject(err)
+    tableObj.limit(1).orderBy('-updated_at').find().then(res => {
+      let latest_update_date = new Date(res.data.objects[0].updated_at*1000)
+      let year = latest_update_date.getFullYear()
+      let month = latest_update_date.getMonth()
+      let day = latest_update_date.getDate()
+      let queryDate = (new Date(year, month, day).getTime())/1000
+
+      let dateQuery = new wx.BaaS.Query()
+      dateQuery.compare('updated_at', '>=', queryDate)
+      let query = wx.BaaS.Query.and(costQuery, classificationQuery, searchQuery, dateQuery)
+      tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+        resolve(res.data)
+      }, err => {
+        reject(err)
+      })
     })
   })
 }
@@ -441,6 +451,17 @@ export function getAboutDescription() {
 export function getSetting() {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.settingTableID)
+    tableObj.find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getArenaConfig() {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.arenaConfigTableID)
     tableObj.find().then(res => {
       resolve(res.data)
     }, err => {

@@ -1,4 +1,4 @@
-import { getSetting } from "../../api/dbapi";
+import { getSetting, getArenaConfig } from "../../api/dbapi";
 
 const settings = {
   state: {
@@ -9,7 +9,8 @@ const settings = {
     showBubble: true,
     fbiVersion: null,
     fbiKey: null,
-    fbiFlag: true
+    fbiFlag: true,
+    arenaTableID: null,
   },
   mutations: {
     SET_NAV_HEIGHT: (state, navHeight) => {
@@ -36,7 +37,9 @@ const settings = {
     setShowBubbleFlag: (state, val) => {
       state.showBubble = val
     },
-
+    SET_ARENA_TABLEID: (state, val) => {
+      state.arenaTableID = val
+    }
   },
   actions: {
     setNavHeight({commit, state}) {
@@ -78,13 +81,14 @@ const settings = {
           commit('SET_FBI_VERSION', res.objects[0].fbi_version)
           commit('SET_FBI_KEY', res.objects[0].fbi_key)
           commit('SET_FBI_FLAG', res.objects[0].fbi_card_switch)
+          commit('SET_ARENA_TABLEID', res.objects[0].arena_table_id)
           resolve(res.objects)
         }).catch(err => {
           console.log(err)
           reject(err)
         })
       })
-    }
+    },
   }
 }
 

@@ -414,10 +414,24 @@ export default {
               },
               fail() {
                 wx.hideLoading()
-                wx.showToast({
-                  title: '请点击右上角·●·->关于炉石传说情报站->右上角·●·->设置->授权访问相册',
-                  icon: 'none',
-                  duration: 5000
+                wx.showModal({
+                  title: '提示',
+                  content: '您未打开相册使用权限，是否去设置打开？',
+                  success (res) {
+                    wx.showModal({
+                      title: '提示',
+                      content: '您未打开相册使用权限，是否去设置打开？',
+                      success (res) {
+                        if (res.confirm) {
+                          wx.openSetting({
+                            success(res) {
+                              console.log(res.authSetting)
+                            }
+                          })
+                        }
+                      }
+                    })
+                  }
                 })
               }
             })
