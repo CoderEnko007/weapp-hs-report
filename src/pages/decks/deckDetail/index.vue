@@ -415,22 +415,16 @@ export default {
               fail() {
                 wx.hideLoading()
                 wx.showModal({
-                  title: '提示',
-                  content: '您未打开相册使用权限，是否去设置打开？',
+                  content: '您尚未打开相册使用权限，是否去设置打开？',
+                  confirmColor: '#433e88',
                   success (res) {
-                    wx.showModal({
-                      title: '提示',
-                      content: '您未打开相册使用权限，是否去设置打开？',
-                      success (res) {
-                        if (res.confirm) {
-                          wx.openSetting({
-                            success(res) {
-                              console.log(res.authSetting)
-                            }
-                          })
+                    if (res.confirm) {
+                      wx.openSetting({
+                        success(res) {
+                          console.log(res.authSetting)
                         }
-                      }
-                    })
+                      })
+                    }
                   }
                 })
               }

@@ -7,6 +7,13 @@ export default {
     }
   },
   methods: {
+    Login() {
+      this.$store.dispatch('Login').then(res => {
+        console.log('success', res)
+      }).catch(err => {
+        console.log('fail', err)
+      })
+    },
     initDecksName() {
       this.$store.dispatch('getDecksName').then(res => {
         // console.log('decksname', res)
@@ -39,17 +46,19 @@ export default {
     }
   },
   onLaunch () {
-    require('./utils/sdk-v1.10.0')
-    wx.BaaS.init(this.clientId)
-    // wx.BaaS = requirePlugin('sdkPlugin')
-    // wx.BaaS.wxExtend(wx.login, wx.getUserInfo, wx.requestPayment)
+    // require('./utils/sdk-v1.10.0')
     // wx.BaaS.init(this.clientId)
+    wx.BaaS = requirePlugin('sdkPlugin')
+    wx.BaaS.wxExtend(wx.login, wx.getUserInfo, wx.requestPayment)
+    wx.BaaS.init(this.clientId)
+
     this.initSystemSetting()
     this.initDecksName()
     this.initCardSeries()
     this.setNavHeight()
     this.setWinWidthHeight()
     this.setNotice()
+    this.Login()
   },
 }
 </script>

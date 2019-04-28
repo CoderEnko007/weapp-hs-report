@@ -12,6 +12,7 @@ const getters = {
   winWidth: state => state.settings.winWidth,
   winHeight: state => state.settings.winHeight,
   showBubble: state => state.settings.showBubble,
+  adsOpenFlag: state => state.settings.adsOpenFlag,
   fbiVersion: state => state.settings.fbiVersion,
   fbiKey: state => state.settings.fbiKey,
   fbiFlag: state => state.settings.fbiFlag,

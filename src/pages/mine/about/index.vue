@@ -30,27 +30,47 @@
       <span class="desc">{{email}}</span>
     </div>
   </div>
+  <div class="block">
+    <div class="headline">
+      <span class="title">用爱发电</span>
+    </div>
+    <div class="videoAd" @click="handleVideoClick">
+      <span class="text">点击此处播放激励视频(6～15秒)</span>
+      <span class="iconfont play">&#xe697;</span>
+    </div>
+  </div>
+  <div class="ads" v-if="adsOpenFlag">
+    <ad unit-id="adunit-4c3a7a55067c0f6e"></ad>
+  </div>
 </div>
 </template>
 <script>
+import utils from '@/utils'
 import { mapGetters } from 'vuex'
-import {getAboutDescription} from '@/api/dbapi'
+import {getAboutDescription, addCustomerSetting, getCustomerSetting, updateCustomerSetting} from '@/api/dbapi'
 import NavBar from '@/components/NavBar'
 
 export default {
   components: {
     NavBar
   },
+  computed: {
+    ...mapGetters([
+      'userInfo',
+      'navHeight'
+    ]),
+    adsOpenFlag() {
+      return utils.adsOpenFlag
+    },
+  },
   data() {
     return {
+      videoAd: null,
       bannerImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gDPyMJP8arlwMXm.png',
       email: 'yf381966217@163.com',
       description: [],
     }
   },
-  ...mapGetters([
-    'navHeight',
-  ]),
   methods: {
     handleCopyBtn() {
       wx.setClipboardData({
@@ -61,6 +81,28 @@ export default {
           })
         }
       })
+    },
+    async handleVideoClick() {
+      let videoAdUseable = true //wx.canIUse('createRewardedVideoAd')
+      console.log(videoAdUseable)
+      if (videoAdUseable) {
+        if (this.videoAd) {
+          this.videoAd.show().catch(() => {
+            // 失败重试
+            this.videoAd.load()
+              .then(() => videoAd.show())
+              .catch(err => {
+                console.log('激励视频 广告显示失败')
+              })
+          })
+        }
+      } else {
+        wx.showToast({
+          title: '微信版本过低，无法播放激励视频',
+          icon: 'none',
+          duration: 2500
+        })
+      }
     }
   },
   mounted() {
@@ -72,17 +114,61 @@ export default {
       console.log(err)
     })
   },
+  onLoad() {
+    if (wx.createRewardedVideoAd) {
+      this.videoAd = wx.createRewardedVideoAd({
+        adUnitId: 'adunit-6c39abb54de729f4'
+      })
+      this.videoAd.onClose(async (status) => {
+        console.log('激励视频关闭', status)
+        if (status && status.isEnded || status === undefined) {
+          let res = await getCustomerSetting(this.userInfo.id)
+          console.log(res)
+          let temp = ''
+          if (res.meta.total_count > 0) {
+            let ad_click_num = res.objects[0].ad_click_num + 1
+            temp = await updateCustomerSetting({
+              ad_click_num: ad_click_num,
+            }, res.objects[0].id)
+          } else {
+            temp = await addCustomerSetting({}, this.userInfo.id)
+          }
+          console.log(temp)
+          let now = new Date()
+          try {
+            wx.setStorageSync('ads_video_date', new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()/1000)
+          } catch (e) {
+            console.log(e)
+          }
+          wx.showToast({
+            title: '感谢！',
+            icon: 'none',
+            duration: 2500
+          })
+        } else {
+          wx.showToast({
+            title: '没有完整播放视频哦，喵。。。',
+            icon: 'none',
+            duration: 2500
+          })
+        }
+      })
+      this.videoAd.onError((res) => {
+        console.log('激励视频错误', res)
+      })
+      console.log(this.videoAd)
+    }
+  },
   onShareAppMessage(res) {
     return {
       title: '炉石传说情报站',
-      path: '/pages/index/main'
+      path: '/pages/mine/about/main'
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 @import '../../../style/color';
-
 .container {
   .banner {
     position: relative;
@@ -151,7 +237,7 @@ export default {
       color: #666666;
       line-height: 40px;
     }
-    .email {
+    .email, .videoAd {
       height: 120rpx;
       box-sizing:border-box;
       border-bottom:1rpx solid #eee;
@@ -183,6 +269,37 @@ export default {
         margin-top:40rpx;
         color: #999999;
       }
+    }
+  }
+  .block {
+    margin: 30rpx;
+    box-sizing: border-box;
+    border-radius: 24rpx;
+    border: 1rpx solid #f8f8fc;
+    .videoAd {
+      height: 120 rpx;
+      box-sizing: border-box;
+      border-bottom: 1 rpx solid #eee;
+      .text {
+        line-height: 120 rpx;
+        font-size: 15px;
+        color: #333333;
+      }
+      .play {
+        font-size:20px;
+        line-height:21px;
+        vertical-align:middle;
+        display:inline-block;
+        margin-left: 5px;
+      }
+    }
+  }
+  .feedback {
+    margin: 5px 5px 10px;
+    font-size: 12px;
+    color: $palette-light-blue;
+    p {
+      text-align:center;
     }
   }
 }

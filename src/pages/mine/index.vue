@@ -15,26 +15,35 @@
         <img :src="logo" mode="aspectFill">
       </div>
     </div>
-    <div class="panel" @click="handleAboutClick">
-      <span class="text">关于小程序</span>
-      <span class="iconfont">&#xe600;</span>
-    </div>
     <div class="panel" @click="handleCollectionClick">
       <span class="text">我的收藏</span>
-      <span class="iconfont">&#xe600;</span>
+      <span class="iconfont arrowIcon">&#xe600;</span>
+    </div>
+    <div class="panel" @click="handleAboutClick">
+      <span class="text">关于小程序</span>
+      <span class="iconfont arrowIcon">&#xe600;</span>
+    </div>
+    <div class="panel" @click="handleVideoClick">
+      <span class="iconfont playIcon">&#xe697;</span>
+      <span class="text" style="margin-left:5px;">点击播放激励视频给作者加鸡腿（6～15秒）</span>
     </div>
     <div class="code">
-      <div>
-        <h1 class="text">打赏作者</h1>
-        <div class="capsule" @click="handleCopyBtn"><span>支付宝推广红包</span></div>
+      <h1 class="text">赞赏作者</h1>
+      <div class="capsule" @click="handleCopyBtn"><span>支付宝推广红包</span></div>
+      <div class="content" @click="handleClickCodeImg">
+        <p>「炉石传说情报站」小程序由个人独立开发，源于兴趣，旨在免费为大家提供及时的卡组数据。</p>
+        <p>您的赞赏和每一次广告点击获得的收入将用于支付昂贵的服务器费用，结余部分就当各位请我吃辣条了，嘿嘿。</p>
+        <p style="font-weight: bold">点击此处打开赞赏码，长按扫描即可</p>
       </div>
-      <img :src="codeImg" mode="aspectFill" @click="handleClickCodeImg">
+    </div>
+    <div class="feedback">
+      <button open-type="feedback">问题反馈 | 意见建议</button>
     </div>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import {getDeckList, getUserCollectionDecks} from "@/api/dbapi";
+import {getDeckList, getUserCollectionDecks, addCustomerSetting, getCustomerSetting, updateCustomerSetting} from "@/api/dbapi";
 import DecksBoard from '@/components/DecksBoard';
 import NavBar from '@/components/NavBar'
 
@@ -45,10 +54,11 @@ export default {
   },
   data() {
     return {
+      videoAd: null,
+      showVideoAdBtn: true,
       deckList: [],
       logo: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9QyXTPpyOMVypO.png',
       codeImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g9oGSrxprEojAfB.jpg',
-      audioSrc: 'http://47.98.187.217/media/sound/VO_AT_021_PLAY_01.wav'
     }
   },
   computed: {
@@ -124,11 +134,76 @@ export default {
         data: '558391916',
         success: function (res) {
           wx.showToast({
-            title: '打开支付宝，首页搜索栏中直接粘贴，即可领取每日红包',
+            title: '打开支付宝，首页搜索栏中直接粘贴，即可领取每日红包，金额随机',
             icon: 'none',
             duration: 2500,
           })
         }
+      })
+    },
+    async handleVideoClick() {
+      let videoAdUseable = true//wx.canIUse('createRewardedVideoAd')
+      if (videoAdUseable) {
+        if (this.videoAd) {
+          this.videoAd.show().catch(() => {
+            // 失败重试
+            this.videoAd.load()
+              .then(() => videoAd.show())
+              .catch(err => {
+                console.log('激励视频 广告显示失败', err)
+              })
+          })
+        }
+      } else {
+        wx.showToast({
+          title: '微信版本过低，无法播放激励视频',
+          icon: 'none',
+          duration: 2500
+        })
+      }
+    }
+  },
+  onLoad() {
+    if (wx.createRewardedVideoAd) {
+      this.videoAd = wx.createRewardedVideoAd({
+        adUnitId: 'adunit-e8e54c4290dbf4ad'
+      })
+      this.videoAd.onClose(async (status) => {
+        console.log('激励视频关闭', status)
+        if (status && status.isEnded || status === undefined) {
+          let res = await getCustomerSetting(this.userInfo.id)
+          console.log(res)
+          let temp = ''
+          if (res.meta.total_count > 0) {
+            let ad_click_num = res.objects[0].ad_click_num + 1
+            temp = await updateCustomerSetting({
+              ad_click_num: ad_click_num,
+            }, res.objects[0].id)
+          } else {
+            temp = await addCustomerSetting({}, this.userInfo.id)
+          }
+          console.log(temp)
+          let now = new Date()
+          try {
+            wx.setStorageSync('ads_video_date', new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()/1000)
+          } catch (e) {
+            console.log(e)
+          }
+          wx.showToast({
+            title: '感谢！',
+            icon: 'none',
+            duration: 2500
+          })
+        } else {
+          wx.showToast({
+            title: '没有完整播放视频哦，喵。。。',
+            icon: 'none',
+            duration: 2500
+          })
+        }
+      })
+      this.videoAd.onError((res) => {
+        console.log('激励视频错误', res)
       })
     }
   },
@@ -149,6 +224,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+@import '../../style/color';
 .banner {
   position: relative;
   height: 40px;
@@ -204,9 +280,16 @@ export default {
     line-height: 120rpx;
     font-size: 15px;
   }
-  .iconfont {
+  .arrowIcon {
     float: right;
     line-height:120rpx
+  }
+  .playIcon {
+    font-size: 20px;
+    line-height: 120rpx;
+    vertical-align: middle;
+    display: inline-block;
+    /*margin-left: 5px;*/
   }
 }
 .nga-block {
@@ -252,11 +335,18 @@ export default {
   }
 }
 .code {
-  margin: 0 30rpx;
+  margin: 30rpx 30rpx 0;
   box-sizing: border-box;
+  border-radius: 24rpx;
+  background: #f8f8fc;
+  padding: 30rpx;
+  p {
+    font-size: 24rpx;
+    line-height:22px;
+  }
   h1 {
     display:inline-block;
-    margin-top: 38rpx;
+    /*margin-top: 38rpx;*/
     margin-bottom: 24rpx;
     font-size: 15px;
     color: #333333;
@@ -267,19 +357,34 @@ export default {
     margin: 0 auto;
   }
   .capsule {
-    float: right;
-    right: 0;
+    display: inline-block;
+    /*float: right;*/
+    /*right: 0;*/
+    width: 200rpx;
     height: 40rpx;
     line-height: 40rpx;
-    width: 200rpx;
     padding:0 15rpx;
+    margin-left:300rpx;
     font-size: 12px;
     border-radius: 20rpx;
     box-sizing: border-box;
     border: 1rpx solid red;
     text-align: center;
-    margin-top:40rpx;
+    /*margin-top:13rpx;*/
     color: red;
+  }
+}
+.feedback {
+  margin: 5px 5px 10px;
+  button {
+    font-size: 12px;
+    color: $palette-blue-normal;
+    text-align:center;
+    background-color: transparent;
+    border: none;
+    &:after {
+      border: none;
+    }
   }
 }
 </style>

@@ -11,9 +11,9 @@
     <div class="deck-list">
       <DeckList :list="deckList" @itemClick="handleDeckClick"></DeckList>
     </div>
-    <div class="ads" v-if="adsOpenFlag">
-      <ad unit-id="adunit-4c3a7a55067c0f6e"></ad>
-    </div>
+    <!--<div class="ads" v-if="adsOpenFlag">-->
+      <!--<ad unit-id="adunit-4c3a7a55067c0f6e"></ad>-->
+    <!--</div>-->
   </div>
 </template>
 <script>
@@ -32,6 +32,7 @@ export default {
     return {
       deckList: [],
       report_date: '',
+      interstitialAd: null,
     }
   },
   computed: {
@@ -87,8 +88,20 @@ export default {
       })
     }
   },
-  async mounted() {
+  mounted() {
     this.genTrendingList()
+    if (this.interstitialAd) {
+      this.interstitialAd.show().catch((err) => {
+        console.error(err)
+      })
+    }
+  },
+  onLoad() {
+    if (wx.createInterstitialAd) {
+      this.interstitialAd = wx.createInterstitialAd({
+        adUnitId: 'adunit-47f9875b7cdea202'
+      })
+    }
   },
   onPullDownRefresh() {
     this.genTrendingList()
@@ -98,7 +111,7 @@ export default {
       title: '炉石传说情报站',
       path: '/pages/trending/main'
     }
-  }
+  },
 }
 </script>
 <style lang="scss" scoped>

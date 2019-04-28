@@ -5,13 +5,16 @@
 		"es6": false,
 		"postcss": true,
 		"minified": false,
-		"newFeature": true
+		"newFeature": true,
+		"checkInvalidKey": true
 	},
 	"miniprogramRoot": "dist/",
 	"compileType": "miniprogram",
 	"appid": "wx68185c439fa57f83",
 	"projectname": "weapp-hs-report-v2",
-	"libVersion": "2.4.3",
+	"libVersion": "2.6.6",
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
 	"condition": {
 		"search": {
 			"current": -1,

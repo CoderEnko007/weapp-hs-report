@@ -49,7 +49,7 @@
       <div class="tier-content">
         <div class="tier-block" v-for="(tier, index) in tierList" :key="index">
           <TierList :tierData="tier" @itemClick="handleTierClick"></TierList>
-          <div class="ads" v-if="index===0">
+          <div class="ads" v-if="index===0 && adsOpenFlag">
             <ad unit-id="adunit-900bbac5f4c50939"></ad>
           </div>
         </div>
@@ -129,6 +129,9 @@ export default {
       'navHeight',
       'noticeContent',
     ]),
+    adsOpenFlag() {
+      return utils.adsOpenFlag
+    },
     modePickerList() {
       return this.modeFilter.list.map(item => {
         return item.text
@@ -191,13 +194,6 @@ export default {
         'wild': [],
         'arena': []
       }
-    },
-    Login() {
-      this.$store.dispatch('Login').then(res => {
-        console.log('success', res)
-      }).catch(err => {
-        console.log('fail', err)
-      })
     },
     modeBtnClick(item) {
       this.selectedGameType = item.mode
@@ -306,8 +302,8 @@ export default {
               fail() {
                 wx.hideLoading()
                 wx.showModal({
-                  title: '提示',
-                  content: '您未打开相册使用权限，是否去设置打开？',
+                  content: '您尚未打开相册使用权限，是否去设置打开？',
+                  confirmColor: '#433e88',
                   success (res) {
                     if (res.confirm) {
                       wx.openSetting({
@@ -518,7 +514,6 @@ export default {
     },
   },
   mounted() {
-    this.Login()
     this.genBanners()
     this.genRankData()
     this.genArchetypeList()

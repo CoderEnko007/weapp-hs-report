@@ -51,6 +51,12 @@ export default {
         iconPath: "static/icons-v2/tabicon-5b.png",
         selectedIconPath: "static/icons-v2/tabicon-5a.png"
       }]
+    },
+    plugins: {
+      sdkPlugin: {
+        version: "2.0.8",
+        provider: "wxc6b86e382a1e3294"
+      }
     }
-  }
+  },
 }

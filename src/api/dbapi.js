@@ -469,3 +469,53 @@ export function getArenaConfig() {
     })
   })
 }
+
+export function getCustomerSetting(userID) {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.customerSettingTableID)
+    let userObj = new wx.BaaS.User()
+    let query = new wx.BaaS.Query()
+    query.compare('user', '=', userObj.getWithoutData(userID))
+    tableObj.setQuery(query).expand('user').find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function addCustomerSetting(params, userID) {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.customerSettingTableID)
+    let user = new wx.BaaS.User().getWithoutData(userID)
+    let record = tableObj.create()
+    record.set('user', user)
+    for (let param in params) {
+      if (params.hasOwnProperty(param)) {
+        record.set(param, params[param])
+      }
+    }
+    record.save().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function updateCustomerSetting(params, recordID) {
+  return new Promise((resolve, reject) => {
+    let tableObj = new wx.BaaS.TableObject(tableID.customerSettingTableID)
+    let record = tableObj.getWithoutData(recordID)
+    for (let param in params) {
+      if (params.hasOwnProperty(param)) {
+        record.set(param, params[param])
+      }
+    }
+    record.update().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}

@@ -11,8 +11,15 @@ const settings = {
     fbiKey: null,
     fbiFlag: true,
     arenaTableID: null,
+    adsOpenFlag: true,
   },
   mutations: {
+    setAdsOpenFlag: (state, val) => {
+      state.adsOpenFlag = val
+    },
+    setShowBubbleFlag: (state, val) => {
+      state.showBubble = val
+    },
     SET_NAV_HEIGHT: (state, navHeight) => {
       state.navHeight = navHeight
     },
@@ -33,9 +40,6 @@ const settings = {
     },
     SET_FBI_FLAG: (state, val) => {
       state.fbiFlag = val
-    },
-    setShowBubbleFlag: (state, val) => {
-      state.showBubble = val
     },
     SET_ARENA_TABLEID: (state, val) => {
       state.arenaTableID = val
