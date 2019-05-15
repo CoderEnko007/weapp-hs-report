@@ -23,10 +23,10 @@
       <span class="text">关于小程序</span>
       <span class="iconfont arrowIcon">&#xe600;</span>
     </div>
-    <div class="panel" @click="handleVideoClick">
-      <span class="iconfont playIcon">&#xe697;</span>
-      <span class="text" style="margin-left:5px;">点击播放激励视频给作者加鸡腿（6～15秒）</span>
-    </div>
+    <!--<div class="panel" @click="handleVideoClick">-->
+      <!--<span class="iconfont playIcon">&#xe697;</span>-->
+      <!--<span class="text" style="margin-left:5px;">点击播放激励视频给作者加鸡腿（15秒）</span>-->
+    <!--</div>-->
     <div class="code">
       <h1 class="text">赞赏作者</h1>
       <div class="capsule" @click="handleCopyBtn"><span>支付宝推广红包</span></div>
@@ -204,6 +204,11 @@ export default {
       })
       this.videoAd.onError((res) => {
         console.log('激励视频错误', res)
+        wx.showToast({
+          title: '出了点小问题，无法播放激励视频',
+          icon: 'none',
+          duration: 2500
+        })
       })
     }
   },

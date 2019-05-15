@@ -35,12 +35,12 @@
       <span class="title">用爱发电</span>
     </div>
     <div class="videoAd" @click="handleVideoClick">
-      <span class="text">点击此处播放激励视频(6～15秒)</span>
+      <span class="text">点击此处播放激励视频(15秒)</span>
       <span class="iconfont play">&#xe697;</span>
     </div>
   </div>
   <div class="ads" v-if="adsOpenFlag">
-    <ad unit-id="adunit-4c3a7a55067c0f6e"></ad>
+    <ad unit-id="adunit-3df610deaf7d2cbd"></ad>
   </div>
 </div>
 </template>
@@ -69,6 +69,7 @@ export default {
       bannerImg: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gDPyMJP8arlwMXm.png',
       email: 'yf381966217@163.com',
       description: [],
+      interstitialAd: null,
     }
   },
   methods: {
@@ -155,8 +156,23 @@ export default {
       })
       this.videoAd.onError((res) => {
         console.log('激励视频错误', res)
+        wx.showToast({
+          title: '出了点小问题，无法播放激励视频',
+          icon: 'none',
+          duration: 2500
+        })
       })
       console.log(this.videoAd)
+    }
+    if (wx.createInterstitialAd) {
+      this.interstitialAd = wx.createInterstitialAd({
+        adUnitId: 'adunit-6f9a474b5991f367'
+      })
+      if (this.interstitialAd) {
+        this.interstitialAd.show().catch((err) => {
+          console.error(err)
+        })
+      }
     }
   },
   onShareAppMessage(res) {

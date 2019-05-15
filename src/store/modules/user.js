@@ -35,10 +35,10 @@ const user = {
             if (res.data.is_authorized) {
               commit('SET_USERINFO', res.data)
             }
-          })
-          resolve({
-            'logged': res.logged,
-            'result': res
+            resolve({
+              'logged': res.logged,
+              'result': res
+            })
           })
         }).catch(err => {
           reject(err)

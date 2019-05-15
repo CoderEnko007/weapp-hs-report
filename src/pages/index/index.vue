@@ -126,6 +126,8 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'winWidth',
+      'winHeight',
       'navHeight',
       'noticeContent',
     ]),
@@ -222,10 +224,12 @@ export default {
     genArchetypeList() {
       let params = {rankRange: this.rangePicker.list[this.rangePicker.selectedItem].rank_range}
       getArchetypeList(params).then(res => {
-        for (let tier of this.tierList) {
-          tier.list = res.filter(item => {
-            return item.tier === tier.name
-          })
+        for (let index in this.tierList) {
+          if (this.tierList.hasOwnProperty(index)) {
+            this.tierList[index].list = res.filter(item => {
+              return item.tier === this.tierList[index].name
+            })
+          }
         }
         this.stopPullDown(true)
       }).catch(err => {
@@ -392,6 +396,9 @@ export default {
       let itemNums = 0
       for (let tierIndex in this.tierList) {
         if (this.tierList.hasOwnProperty(tierIndex)) {
+          if (tierIndex === '__proto__') {
+            continue
+          }
           rankPower[tierIndex].height=this.tierList[tierIndex].list.length*itemHeight+1 // 每个梯队后面加1px的分割线
           rankPower[tierIndex].num = this.tierList[tierIndex].list.length
           let prevTierHeight = 0
@@ -411,6 +418,9 @@ export default {
           let list = this.tierList[tierIndex].list
           for (let itemIndex in list) {
             if (list.hasOwnProperty(itemIndex)) {
+              if (itemIndex === '__proto__') {
+                continue
+              }
               ctx.save()
               ctx.setFillStyle(factionColor[list[itemIndex].faction])
               ctx.fillRect(canvasMargin+colWidth, headHeight+prevTierHeight+itemIndex*itemHeight-17, colWidth, itemHeight)
@@ -473,12 +483,12 @@ export default {
       if (pages[pages.length-1].route !== 'pages/index/main') {
         return
       }
-      let destWidth = 400
-      let destHeight = this.canvasHeight*400/this.canvasWidth
+      let destWidth = 375 * 750 / wx.getSystemInfoSync().windowWidth
+      let destHeight = (this.canvasHeight * 375 / this.canvasWidth) * 750 / wx.getSystemInfoSync().windowWidth
       wx.canvasToTempFilePath({
         canvasId: 'dailyReport',
-        destWidth: this.canvasWidth*3,
-        destHeight: this.canvasHeight*3,
+        destWidth: destWidth,
+        destHeight: destHeight,
         fileType: 'jpg',
         quality: 1,
         success(res) {

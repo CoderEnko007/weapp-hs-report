@@ -590,12 +590,14 @@ export default {
       if (pages[pages.length-1].route !== 'pages/decks/deckDetail/main') {
         return
       }
-      let destWidth = 219
-      let destHeight = this.canvasHeight*219/this.canvasWidth
+      // let destWidth = 219
+      // let destHeight = this.canvasHeight*219/this.canvasWidth
+      let destWidth = 219 * 750 / wx.getSystemInfoSync().windowWidth
+      let destHeight = (this.canvasHeight * 219 / this.canvasWidth) * 750 / wx.getSystemInfoSync().windowWidth
       wx.canvasToTempFilePath({
         canvasId: 'deck-pic',
-        destWidth: this.canvasWidth*2,
-        destHeight: this.canvasHeight*2,
+        destWidth: destWidth,
+        destHeight: destHeight,
         quality: 1,
         success(res) {
           wx.saveImageToPhotosAlbum({

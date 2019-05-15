@@ -15,7 +15,7 @@ export function login() {
 }
 
 export function getUserInfo(data) {
-  return wx.BaaS.auth.loginWithWechat(data)
+  return wx.BaaS.auth.loginWithWechat(data.mp)
 }
 
 export function logout() {
