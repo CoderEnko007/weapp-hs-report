@@ -16,6 +16,7 @@ const getters = {
   fbiVersion: state => state.settings.fbiVersion,
   fbiKey: state => state.settings.fbiKey,
   fbiFlag: state => state.settings.fbiFlag,
+  card_resource: state => state.settings.card_resource,
   arenaTableID: state => state.settings.arenaTableID
 }
 

@@ -11,6 +11,7 @@ const settings = {
     fbiKey: null,
     fbiFlag: true,
     arenaTableID: null,
+    card_resource: null,
     adsOpenFlag: true,
   },
   mutations: {
@@ -40,6 +41,9 @@ const settings = {
     },
     SET_FBI_FLAG: (state, val) => {
       state.fbiFlag = val
+    },
+    SET_CARD_RESOURCE: (state, val) => {
+      state.card_resource = val
     },
     SET_ARENA_TABLEID: (state, val) => {
       state.arenaTableID = val
@@ -85,6 +89,7 @@ const settings = {
           commit('SET_FBI_VERSION', res.objects[0].fbi_version)
           commit('SET_FBI_KEY', res.objects[0].fbi_key)
           commit('SET_FBI_FLAG', res.objects[0].fbi_card_switch)
+          commit('SET_CARD_RESOURCE', res.objects[0].card_resource)
           commit('SET_ARENA_TABLEID', res.objects[0].arena_table_id)
           resolve(res.objects)
         }).catch(err => {

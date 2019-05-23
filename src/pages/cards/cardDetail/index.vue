@@ -136,7 +136,13 @@ export default {
         this.cardDetail.bgImg = genOrigImageURL(this.cardDetail.hsId)
         // this.cardDetail.cardImg = gen512CardsImageURL(this.cardDetail.hsId)
         // this.cardDetail.cardImg = this.cardDetail.img_card_link
-        this.cardDetail.cardImg = this.genCardImage(this.cardDetail.hsId)
+        if (this.card_resource === 'fbi') {
+          this.cardDetail.cardImg = this.genCardImage(this.cardDetail.hsId)
+        } else if (this.card_resource === 'hsreplay') {
+          this.cardDetail.cardImg = utils.genCardsImageURL(this.cardDetail.hsId)
+        } else {
+          this.cardDetail.cardImg = utils.genCardsImageURL(this.cardDetail.hsId)
+        }
         this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
         for (let item of this.$store.state.cards.series) {
           if(this.cardDetail.set_id === item.id) {

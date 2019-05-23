@@ -75,7 +75,8 @@
       ...mapGetters([
         'fbiVersion',
         'fbiKey',
-        'fbiFlag'
+        'fbiFlag',
+        'card_resource'
       ]),
     },
     data() {
@@ -205,7 +206,14 @@
           let list = res.objects.map(item => {
             // let image = utils.genCardsImageURL(item.hsId)
             // let image = item.img_card_link
-            let image = this.genCardImage(item.hsId)
+            let image = ''
+            if (this.card_resource === 'fbi') {
+              image = this.genCardImage(item.hsId)
+            } else if (this.card_resource === 'hsreplay') {
+              image = utils.genCardsImageURL(item.hsId)
+            } else {
+              image = utils.genCardsImageURL(item.hsId)
+            }
             return {dbfId: item.dbfId, name: item.name, image: image}
           })
           if (init) {
