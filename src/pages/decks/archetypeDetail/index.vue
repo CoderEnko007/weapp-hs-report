@@ -84,6 +84,9 @@
       </div>
         </div>
       </div>
+      <div class="board-panel" v-else-if="!detailLoaded">
+        <div class="loading"><h1>加载中</h1></div>
+      </div>
       <div class="board-panel" v-else>
         <div class="no-data"><h1>样本过少，暂无数据</h1></div>
       </div>
@@ -133,6 +136,9 @@
             <span class="iconfont">&#xe600;</span>
           </div>
         </div>
+      </div>
+      <div class="board-panel" v-else-if="!detailLoaded">
+        <div class="loading"><h1>加载中</h1></div>
       </div>
       <div class="board-panel" v-else>
         <div class="no-data"><h1>样本过少，暂无数据</h1></div>
@@ -249,6 +255,9 @@ export default {
       'navHeight',
       'archetypeList',
     ]),
+    detailLoaded(){
+      return this.archetypeDetail.update_time !== undefined
+    },
     genArchetypeName() {
       return this.getDeckCName(this.archetypeDetail.archetype)
     },
@@ -541,7 +550,7 @@ export default {
     }
   }
   .pop-deck, .board-panel {
-    .no-data {
+    .no-data, .loading {
       padding:0 30rpx;
       font-size:13px;
       color:#999;

@@ -23,7 +23,7 @@
           <span class="card-fade-countbox" :style="{background: 'linear-gradient(65deg,#313109,#313131 calc(100% - 96px),rgba(49,49,49,0) calc(100% - 26px),rgba(49,49,49,0));'}"></span>
         </div>
         <span class="card-name">{{card.cname}}</span>
-        <div class="card-countbox" v-show="card.count && card.count!==1">
+        <div class="card-countbox" v-show="card.count && card.count!==1" style="width: 22px;">
           <span class="card-count">{{card.count}}</span>
         </div>
       </div>

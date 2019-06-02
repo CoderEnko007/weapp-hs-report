@@ -53,7 +53,7 @@ export default {
       //     deckID: beforePage.options.deckID
       //   })
       // }
-      console.log(beforePage)
+      // console.log(beforePage)
       let _this = this
       if (beforePage === undefined) {
         wx.switchTab({

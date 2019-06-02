@@ -2,9 +2,8 @@
   <div class="card-detail">
     <NavBar :showCapsule="true" navTitle="单卡详情"></NavBar>
     <div class="header" @click="previewCard">
-      <!--<img :src="cardDetail.bgImg" class="bg-img" mode="aspectFiit">-->
-      <img :src="cardDetail.cardImg" class="card-img" mode="aspectFit">
-      <!--<img :src="cardDetail.heroIcon" class="icon-img" mode="aspectFit">-->
+      <img :src="cardDetail.cardImg" class="card-img" mode="aspectFit" @load="imageLoad">
+      <LoadingCard :showFlag="!imageLoaded"></LoadingCard>
     </div>
     <div class="detail">
       <p class="name" @click="handleCopyBtn(cardDetail.name)">{{cardDetail.name}}<span class="headline-meta">点击复制</span></p>
@@ -18,27 +17,21 @@
       <div v-show="showEnAudio">
         <div class="title">英文音效</div>
         <div class="en-audio">
-          <!--<div class="audio-type-block" v-for="(item, index) in getEnAudio" :key="index" v-show="item.src">-->
             <div class="audio-item" v-for="(item, index) in getEnAudio" :key="index" @click="handleAudioPlay(item)">
-              <!--<img src="/static/icons-v2/audio-3.png">-->
               <div class="play-img" :class="{'audio-play': selectedAudio === item.src}"></div>
               <span v-if="index>0">{{item.cname}}</span>
               <span v-else>{{item.cname}}</span>
             </div>
-          <!--</div>-->
         </div>
       </div>
       <div v-show="showZhAudio">
         <div class="title">中文音效</div>
         <div class="zh-audio">
-          <!--<div class="audio-type-block" v-for="(item, index) in getZhAudio" :key="index" v-show="item.src">-->
             <div class="audio-item" v-for="(item, index) in getZhAudio" :key="index" @click="handleAudioPlay(item)">
-              <!--<img src="/static/icons-v2/audio-3.png">-->
               <div class="play-img" :class="{'audio-play': selectedAudio === item.src}"></div>
               <span v-if="index>0">{{item.cname}}</span>
               <span v-else>{{item.cname}}</span>
             </div>
-          <!--</div>-->
         </div>
       </div>
     </div>
@@ -49,7 +42,6 @@
     <div class="footer">
       <FooterMenu></FooterMenu>
     </div>
-    <!--<floatBtnGroup></floatBtnGroup>-->
   </div>
 </template>
 <script>
@@ -61,6 +53,7 @@ import {getCardDetail} from "@/api/dbapi";
 import FooterMenu from '@/components/FooterMenu'
 import floatBtnGroup from '@/components/floatBtnGroup'
 import NavBar from '@/components/NavBar'
+import LoadingCard from '@/components/LoadingCard'
 
 const heroes = {
   Druid: {name: '德鲁伊', image: '/static/heroIcons/druid.png'},
@@ -88,7 +81,8 @@ export default {
   components: {
     FooterMenu,
     floatBtnGroup,
-    NavBar
+    NavBar,
+    LoadingCard
   },
   data() {
     return {
@@ -99,6 +93,7 @@ export default {
       showZhAudio: false,
       selectedAudio: '',
       audioPlaying: false,
+      imageLoaded: false
     }
   },
   computed: {
@@ -106,7 +101,8 @@ export default {
       'navHeight',
       'fbiVersion',
       'fbiKey',
-      'fbiFlag'
+      'fbiFlag',
+      'card_resource'
     ]),
     getEnAudio() {
       if (this.cardDetail.audios) {
@@ -124,6 +120,10 @@ export default {
     },
   },
   methods: {
+    imageLoad(e) {
+      console.log(e.mp.detail)
+      this.imageLoaded = true
+    },
     genCardImage(hsId) {
       return getCardPicture(this, hsId, false, this.fbiFlag, this.fbiVersion, this.fbiKey)
     },
@@ -198,10 +198,12 @@ export default {
       })
     },
     previewCard() {
-      wx.previewImage({
-        // urls: [gen512CardsImageURL(this.cardDetail.hsId)] // 需要预览的图片http链接列表
-        urls: [this.cardDetail.cardImg]
-      })
+      if (this.cardDetail.cardImg) {
+        wx.previewImage({
+          // urls: [gen512CardsImageURL(this.cardDetail.hsId)] // 需要预览的图片http链接列表
+          urls: [this.cardDetail.cardImg]
+        })
+      }
     },
     handleAudioPlay(item) {
       this.selectedAudio = item.src
@@ -226,6 +228,7 @@ export default {
     }
   },
   mounted() {
+    this.imageLoaded = false
     this.cardId = this.$root.$mp.query.id
     this.myAudio = wx.createInnerAudioContext()
     this.myAudio.onPlay(() => {

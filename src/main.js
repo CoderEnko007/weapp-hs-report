@@ -54,7 +54,7 @@ export default {
     },
     plugins: {
       sdkPlugin: {
-        version: "2.0.8",
+        version: "2.0.9",
         provider: "wxc6b86e382a1e3294"
       }
     }
