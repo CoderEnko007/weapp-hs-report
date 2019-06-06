@@ -42,11 +42,7 @@ export default {
     height:1px;
     border-left-color:transparent;
     border-right-color:transparent;
-    -webkit-border-radius:50px;
-    -moz-border-radius:50px;
     border-radius:50px;
-    -webkit-animation:spin 1.5s infinite;
-    -moz-animation:spin 1.5s infinite;
     animation:spin 1.5s infinite;
   }
 

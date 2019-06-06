@@ -158,15 +158,16 @@ export default {
         if (this.cardDetail.race) {
           this.cardDetail.type += '-'+utils.race[this.cardDetail.race].name
         }
+
         this.cardDetail.audios = [
-          {type: 'en', ename: 'audio_play_en', cname: '出场', src: JSON.parse(this.cardDetail.audio_play_en)},
-          {type: 'en', ename: 'audio_attack_en', cname: '攻击', src: JSON.parse(this.cardDetail.audio_attack_en)},
-          {type: 'en', ename: 'audio_trigger_en', cname: '触发', src: JSON.parse(this.cardDetail.audio_trigger_en)},
-          {type: 'en', ename: 'audio_death_en', cname: '阵亡', src: JSON.parse(this.cardDetail.audio_death_en)},
-          {type: 'zh', ename: 'audio_play_zh', cname: '出场', src: JSON.parse(this.cardDetail.audio_play_zh)},
-          {type: 'zh', ename: 'audio_attack_zh', cname: '攻击', src: JSON.parse(this.cardDetail.audio_attack_zh)},
-          {type: 'zh', ename: 'audio_trigger_zh', cname: '触发', src: JSON.parse(this.cardDetail.audio_trigger_zh)},
-          {type: 'zh', ename: 'audio_death_zh', cname: '阵亡', src: JSON.parse(this.cardDetail.audio_death_zh)},
+          {type: 'en', ename: 'audio_play_en', cname: '出场', src: this.cardDetail.audio_play_en!==""?JSON.parse(this.cardDetail.audio_play_en):""},
+          {type: 'en', ename: 'audio_attack_en', cname: '攻击', src: this.cardDetail.audio_attack_en!==""?JSON.parse(this.cardDetail.audio_attack_en):""},
+          {type: 'en', ename: 'audio_trigger_en', cname: '触发', src: this.cardDetail.audio_trigger_en!==""?JSON.parse(this.cardDetail.audio_trigger_en):""},
+          {type: 'en', ename: 'audio_death_en', cname: '阵亡', src: this.cardDetail.audio_death_en!==""?JSON.parse(this.cardDetail.audio_death_en):""},
+          {type: 'zh', ename: 'audio_play_zh', cname: '出场', src: this.cardDetail.audio_play_zh!==""?JSON.parse(this.cardDetail.audio_play_zh):""},
+          {type: 'zh', ename: 'audio_attack_zh', cname: '攻击', src: this.cardDetail.audio_attack_zh!==""?JSON.parse(this.cardDetail.audio_attack_zh):""},
+          {type: 'zh', ename: 'audio_trigger_zh', cname: '触发', src: this.cardDetail.audio_trigger_zh!==""?JSON.parse(this.cardDetail.audio_trigger_zh):""},
+          {type: 'zh', ename: 'audio_death_zh', cname: '阵亡', src: this.cardDetail.audio_death_zh!==""?JSON.parse(this.cardDetail.audio_death_zh):""},
         ]
         let audiosList = []
         for (let item of this.cardDetail.audios) {

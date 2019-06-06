@@ -23,15 +23,12 @@
             <p class="desc-meta" v-if="item.game_count">对局数 {{item.game_count}}</p>
             <p class="desc-meta" v-else>{{item.archetype_name}}</p>
           </div>
-          <!--<div class="desc-left" v-else>-->
-            <!--<p class="single-name">{{item.cname}}</p>-->
-          <!--</div>-->
           <div class="desc-right">
             <p class="name">胜率</p>
             <p class="desc-meta color-green" :class="{'color-red': item.win_rate<50}">{{item.win_rate}}%</p>
           </div>
+          <span class="iconfont">&#xe600;</span>
         </div>
-        <span class="iconfont">&#xe600;</span>
       </div>
     </div>
   </div>
@@ -127,7 +124,7 @@ export default {
     justify-content: space-around;
     flex-wrap: wrap;
     width: 100%;
-    padding:0 30rpx;
+    /*padding:0 30rpx;*/
     box-sizing:border-box;
     .tier-item {
       position: relative;
@@ -136,6 +133,7 @@ export default {
       line-height: 60px;
       font-size: 14px;
       background: #fff;
+      padding:0 30rpx;
       &:active  {
         background: #eee;
       }

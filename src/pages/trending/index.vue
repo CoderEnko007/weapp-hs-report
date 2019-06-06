@@ -11,9 +11,9 @@
     <div class="deck-list">
       <DeckList :list="deckList" @itemClick="handleDeckClick"></DeckList>
     </div>
-    <!--<div class="ads" v-if="adsOpenFlag">-->
-      <!--<ad unit-id="adunit-4c3a7a55067c0f6e"></ad>-->
-    <!--</div>-->
+    <div class="ads" v-if="adsOpenFlag">
+      <ad unit-id="adunit-4c3a7a55067c0f6e"></ad>
+    </div>
   </div>
 </template>
 <script>
@@ -52,19 +52,17 @@ export default {
   },
   methods: {
     formatDeckList() {
-      for (let index in this.deckList) {
-        if (this.deckList.hasOwnProperty(index)) {
-          this.deckList[index].image = utils.faction[this.deckList[index].faction].image
-          let temp = this.decksName.filter(item => {
-            return item.ename === this.deckList[index].deck_name
-          })
-          if (temp[0] && temp[0].cname) {
-            this.deckList[index].cname = temp[0].cname
-          } else {
-            this.deckList[index].cname = this.deckList[index].deck_name
-          }
-          this.deckList[index].win_rate = this.deckList[index].win_rate.toFixed(1)
+      for (let item of this.deckList) {
+        item.image = utils.faction[item.faction].image
+        let temp = this.decksName.filter(val => {
+          return val.ename === item.deck_name
+        })
+        if (temp[0] && temp[0].cname) {
+          item.cname = temp[0].cname
+        } else {
+          item.cname = item.deck_name
         }
+        item.win_rate = item.win_rate.toFixed(1)
       }
     },
     genTrendingList() {
@@ -82,7 +80,6 @@ export default {
       })
     },
     handleDeckClick(item) {
-      console.log(item)
       wx.navigateTo({
         url: `/pages/decks/deckDetail/main?id=${item.id}&trending=1`
       })
@@ -154,7 +151,6 @@ export default {
 }
 .deck-list {
   width: 100%;
-  padding: 0 30rpx;
   box-sizing:border-box;
   overflow: hidden;
   z-index: -1;

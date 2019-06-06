@@ -410,11 +410,12 @@ export function cancelUserCollection(data) {
   })
 }
 
-export function getBanners(limit=5, orderBy='index') {
+export function getBanners(limit=10, orderBy='index') {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.bannerTableID)
     let query = new wx.BaaS.Query()
     query.isNotNull('name')
+    query.compare('show', '=', true)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).find().then(res => {
       resolve(res.data)
     }, err => {

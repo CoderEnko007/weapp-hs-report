@@ -52,6 +52,8 @@ export default {
     line-height: 60px;
     font-size: 14px;
     background: #fff;
+    padding: 0 30rpx;
+    box-sizing: border-box;
     &:active  {
       background: #eee;
     }
@@ -73,10 +75,11 @@ export default {
       height: 100%;
       margin-left: 90rpx;
       border-bottom: 1rpx solid #eee;
-      padding: 27rpx 0;
       box-sizing:border-box;
       .desc-left {
-        float: left;
+        position:absolute;
+        top:50%;
+        transform:translateY(-50%);
         .name {
           height: 37rpx;
           line-height: 37rpx;
@@ -121,8 +124,10 @@ export default {
         }
       }
       .desc-right {
-        float: right;
-        margin-right: 40rpx;
+        position:absolute;
+        top:50%;
+        transform:translateY(-50%);
+        right:40rpx;
         text-align: right;
         .name {
           height: 22rpx;
