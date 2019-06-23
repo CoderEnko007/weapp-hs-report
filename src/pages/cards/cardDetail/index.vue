@@ -35,6 +35,14 @@
         </div>
       </div>
     </div>
+    <div class="entourage-block" v-if="genEntourage">
+      <div class="headline"><span class="title">衍生卡</span></div>
+      <div class="card-list">
+        <div class="card" v-for="(item, index) in genEntourage" :key="index" @click="handleEntourageClick(item.hsId)">
+          <img :src="item.image" mode="aspectFit">
+        </div>
+      </div>
+    </div>
     <div class="ads">
       <ad unit-id="adunit-038fb5d0b45f4699"></ad>
     </div>
@@ -87,6 +95,7 @@ export default {
   data() {
     return {
       cardId: null,
+      cardHsId: null,
       cardDetail: Object.assign({}, defaultCardDetail),
       myAudio: null,
       showEnAudio: false,
@@ -118,10 +127,35 @@ export default {
         })
       }
     },
+    genEntourage() {
+      if (this.cardDetail.entourage) {
+        let formatData = this.cardDetail.entourage.map(v => {
+          let hsId = v.replace(/\'/g, '').replace(/"/g, '').replace('[', '').replace(']', '').trim()
+          let cardImg = ''
+          if (this.card_resource === 'fbi') {
+            cardImg = this.genCardImage(hsId)
+          } else if (this.card_resource === 'hsreplay') {
+            cardImg = utils.genCardsImageURL(hsId)
+          } else {
+            cardImg = utils.genCardsImageURL(hsId)
+          }
+          return {
+            hsId: hsId,
+            image: cardImg
+          }
+        })
+        let emptyNum = formatData.length % 3
+        if(emptyNum) {
+          for (let i=0; i<(3-emptyNum); i++) {
+            formatData.push({})
+          }
+        }
+        return formatData
+      }
+    }
   },
   methods: {
     imageLoad(e) {
-      console.log(e.mp.detail)
       this.imageLoaded = true
     },
     genCardImage(hsId) {
@@ -131,7 +165,7 @@ export default {
       this.showEnAudio = false
       this.showZhAudio = false
       wx.showNavigationBarLoading();
-      getCardDetail(parseInt(this.cardId)).then(res => {
+      getCardDetail({dbfId: parseInt(this.cardId), hsId: this.cardHsId}).then(res => {
         this.cardDetail = res[0]
         this.cardDetail.bgImg = genOrigImageURL(this.cardDetail.hsId)
         // this.cardDetail.cardImg = gen512CardsImageURL(this.cardDetail.hsId)
@@ -143,7 +177,7 @@ export default {
         } else {
           this.cardDetail.cardImg = utils.genCardsImageURL(this.cardDetail.hsId)
         }
-        this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
+        // this.cardDetail.heroIcon = heroes[this.cardDetail.cardClass].image
         for (let item of this.$store.state.cards.series) {
           if(this.cardDetail.set_id === item.id) {
             this.cardDetail.series = item.name
@@ -154,7 +188,11 @@ export default {
             }
           }
         }
-        this.cardDetail.type = heroes[this.cardDetail.cardClass].name+'-'+utils.type[this.cardDetail.type].name
+        if (heroes[this.cardDetail.cardClass]) {
+          this.cardDetail.type = heroes[this.cardDetail.cardClass].name+'-'+utils.type[this.cardDetail.type].name
+        } else {
+          this.cardDetail.type = utils.type[this.cardDetail.type].name
+        }
         if (this.cardDetail.race) {
           this.cardDetail.type += '-'+utils.race[this.cardDetail.race].name
         }
@@ -226,11 +264,19 @@ export default {
           })
         }
       })
+    },
+    handleEntourageClick(hsId) {
+      if (hsId) {
+        wx.navigateTo({
+          url: `/pages/cards/cardDetail/main?hsId=${hsId}`
+        })
+      }
     }
   },
   mounted() {
     this.imageLoaded = false
     this.cardId = this.$root.$mp.query.id
+    this.cardHsId = this.$root.$mp.query.hsId
     this.myAudio = wx.createInnerAudioContext()
     this.myAudio.onPlay(() => {
       console.log('start')
@@ -264,13 +310,14 @@ export default {
     }
     this.selectedAudio = ''
     this.cardId = null
+    this.cardHsId = null
     this.cardDetail = Object.assign({}, defaultCardDetail)
   },
   onShareAppMessage(res) {
     if (res.from === 'button') {
       return {
         title: this.cardDetail.name,
-        path: `/pages/cards/cardDetail/main?id=${this.cardId}`
+        path: `/pages/cards/cardDetail/main?id=${this.cardDetail.dbfId}`
       }
     } else {
       return {
@@ -396,6 +443,30 @@ export default {
       }
     }
   }
+  .card-list {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    box-sizing: border-box;
+    padding: 18rpx 18rpx 0;
+    overflow: hidden;
+    .card {
+      width: 30%;
+      height: 260rpx;
+      padding: 0 0 8rpx;
+      margin-bottom: 35rpx;
+      text-align: center;
+      font-size: 12px;
+      img {
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        transform:scale(1.3);
+      }
+    }
+  }
   .footer {
     position: fixed;
     bottom: 0;
@@ -406,6 +477,9 @@ export default {
   background-repeat:no-repeat;
   background-size:contain;
   animation:audioPlay 2s linear infinite;
+}
+.headline {
+  margin: 0 30rpx;
 }
 @keyframes audioPlay {
   0% {background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NTc3MiwgMjAxNC8wMS8xMy0xOTo0NDowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjM0NEQ3RDg1NUQzQTExRTU4NkE2ODlDNENFMTkyNjMzIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjM0NEQ3RDg2NUQzQTExRTU4NkE2ODlDNENFMTkyNjMzIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MzQ0RDdEODM1RDNBMTFFNTg2QTY4OUM0Q0UxOTI2MzMiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MzQ0RDdEODQ1RDNBMTFFNTg2QTY4OUM0Q0UxOTI2MzMiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7APQCsAAAAW0lEQVR42mL8//8/g5mdKwO9ARPDAIFRi0ctHrV41OLhZzHTQFhcD8Rt9LYYZGkDEKfS22JGWscxCw7xBijNSW+LYZYzDVSq/jdagIxaPGrxqMWjFg+4xQABBgABTAhrvxCDdAAAAABJRU5ErkJggg==);}

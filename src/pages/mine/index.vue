@@ -19,6 +19,10 @@
       <span class="text">我的收藏</span>
       <span class="iconfont arrowIcon">&#xe600;</span>
     </div>
+    <div class="panel" @click="handleHSVisionClick">
+      <span class="text">数据可视化</span>
+      <span class="iconfont arrowIcon">&#xe600;</span>
+    </div>
     <div class="panel" @click="handleAboutClick">
       <span class="text">关于小程序</span>
       <span class="iconfont arrowIcon">&#xe600;</span>
@@ -32,7 +36,7 @@
       <div class="capsule" @click="handleCopyBtn"><span>支付宝推广红包</span></div>
       <div class="content" @click="handleClickCodeImg">
         <p>「炉石传说情报站」小程序由个人独立开发，源于兴趣，旨在免费为大家提供及时的卡组数据。</p>
-        <p>您的赞赏和每一次广告点击获得的收入将用于支付昂贵的服务器费用，结余部分就当各位请我吃辣条了，嘿嘿。</p>
+        <p>您的每一次广告点击获得的收入将用于支付昂贵的服务器费用，这对我来说很重要。</p>
         <p style="font-weight: bold">点击此处打开赞赏码，长按扫描即可</p>
       </div>
     </div>
@@ -123,6 +127,16 @@ export default {
           icon: 'none'
         })
       }
+    },
+    handleHSVisionClick() {
+      wx.navigateToMiniProgram({
+        appId: 'wx010ca9734f850748',
+        path: `/pages/index/main`,
+        success(res) {
+          // 打开成功
+          console.log(res)
+        }
+      })
     },
     handleClickCodeImg() {
       wx.previewImage({

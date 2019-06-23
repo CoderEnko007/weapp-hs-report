@@ -284,6 +284,7 @@ export default {
       this.worstMatchup = Object.assign({}, defaultBWGame)
     },
     getDeckCName(name) {
+      console.log(name, this.decksName)
       for (let item of this.decksName) {
         if (item.ename === name) {
           return item.cname
@@ -349,13 +350,14 @@ export default {
         }
 
         let bestMatchupData = JSON.parse(this.archetypeDetail.best_matchup)
+        console.log(bestMatchupData)
         if (bestMatchupData.length>0) {
           this.bestMatchup.ename = bestMatchupData[0]
           this.bestMatchup.cname = this.getDeckCName(bestMatchupData[0])
           this.bestMatchup.win_rate = parseFloat(bestMatchupData[1]).toFixed(2)
           this.bestMatchup.game_count = bestMatchupData[2]
           let bestMatchupFaction = bestMatchupData[0].split(' ')
-          bestMatchupFaction = bestMatchupFaction[bestMatchupFaction.length - 1]
+          bestMatchupFaction = bestMatchupData[0]==='Handlock'?'Warlock':bestMatchupFaction[bestMatchupFaction.length - 1]
           this.bestMatchup.image = utils.faction[bestMatchupFaction].image
           this.bestMatchup.faction = bestMatchupFaction
           this.bestMatchup.show = true
@@ -368,7 +370,7 @@ export default {
           this.worstMatchup.win_rate = parseFloat(worstMatchupData[1]).toFixed(2)
           this.worstMatchup.game_count = worstMatchupData[2]
           let worstMatchupFaction = worstMatchupData[0].split(' ')
-          worstMatchupFaction = worstMatchupFaction[worstMatchupFaction.length - 1]
+          worstMatchupFaction = bestMatchupData[0]==='Handlock'?'Warlock':worstMatchupFaction[worstMatchupFaction.length - 1]
           this.worstMatchup.image = utils.faction[worstMatchupFaction].image
           this.worstMatchup.faction = worstMatchupFaction
           this.worstMatchup.show = true

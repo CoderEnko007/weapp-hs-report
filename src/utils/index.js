@@ -246,6 +246,25 @@ function colorToHex(rgb){
   }
 }
 
+function deepCopy(o) {
+  if (o instanceof Array) {
+    let n = [];
+    for (let i = 0; i < o.length; ++i) {
+      n[i] = deepCopy(o[i]);
+    }
+    return n;
+
+  } else if (o instanceof Object) {
+    let n = {}
+    for (let i in o) {
+      n[i] = deepCopy(o[i]);
+    }
+    return n;
+  } else {
+    return o;
+  }
+}
+
 const faction = {
   'Druid': { name: '德鲁伊', shortName: '德', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFc20lKfIhjC.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1hX3sefMPt98jtBI.png', image: '/static/heroIcons/druid.png', image1: '/static/heroIcons/druid-1.jpg', image2: '/static/heroIcons/druid-2.jpg', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jbHYTxXEHZT.png' },
   'Hunter': { name: '猎人', shortName: '猎', bgImage: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1gCFaFgjRrvyMTUs.jpg', bgImage1: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1hX3sehq2jqVVx4M.png', image: '/static/heroIcons/hunter.png', image1: '/static/heroIcons/hunter-1.jpg', image2: '/static/heroIcons/hunter-2.jpg', deckIcon: 'https://cloud-minapp-18282.cloud.ifanrusercontent.com/1g1O4jHdZrCYiZiB.png' },
@@ -312,6 +331,7 @@ export default {
   translateDeckName,
   deckModeImg,
   getCardPicture,
+  deepCopy,
   faction,
   mode,
   rarity,

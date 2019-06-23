@@ -2,7 +2,7 @@
   <div class="single-card-container">
     <div class="filter">
       <div class="search-bar">
-        <SearchBar @handleConfirm="handleSearch" placeholder="请输入卡牌名称、规则或者属性"></SearchBar>
+        <SearchBar :search.sync="filter.search" @handleConfirm="handleSearch" placeholder="请输入卡牌名称、规则或者属性"></SearchBar>
       </div>
       <div class="cost_filter">
         <ul class="cards_cost">
@@ -78,9 +78,18 @@
         'fbiFlag',
         'card_resource'
       ]),
+      obtainSeriesList() {
+        let array = this.$store.state.cards.series
+        array.unshift({id: 'all', name: '全部扩展包', mode: 'all'})
+        if (array.length%2) {
+          array.push({})
+        }
+        this.filterTabBar[4].items = array
+      },
     },
     data() {
       return {
+        test: '',
         filter: Object.assign({}, defaultFilter),
         costList: [
           {cost: 0, icon: '/static/mana/0.png'},
@@ -152,8 +161,7 @@
         this.filter.cost = this.filter.cost === item?null:item
         this.genCardsList(true)
       },
-      handleSearch(value) {
-        this.filter.search = value.trim()
+      handleSearch() {
         this.genCardsList(true)
       },
       handleFilterMenuClick(filter) {
@@ -170,14 +178,6 @@
       },
       handleMaskClick() {
         this.selectedFilterTabItem = null
-      },
-      obtainSeriesList() {
-        let array = this.$store.state.cards.series
-        array.unshift({id: 'all', name: '全部扩展包', mode: 'all'})
-        if (array.length%2) {
-          array.push({})
-        }
-        this.filterTabBar[4].items = array
       },
       handleCardClick(item) {
         // 如果过滤器菜单打开则关闭
@@ -247,7 +247,7 @@
     },
     mounted() {
       this.genFilterMenuItems()
-      this.obtainSeriesList()
+      // this.obtainSeriesList()
       this.genCardsList(true)
     },
     // onReachBottom() {

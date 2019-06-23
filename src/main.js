@@ -57,6 +57,9 @@ export default {
         version: "2.0.9",
         provider: "wxc6b86e382a1e3294"
       }
-    }
+    },
+    navigateToMiniProgramAppIdList: [
+      "wx010ca9734f850748"
+    ]
   },
 }

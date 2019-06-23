@@ -92,6 +92,13 @@
     <div style="position: fixed; top: 9999999999999px; overflow: hidden">
       <canvas :style="{width: canvasWidth+'px', height: canvasHeight+'px', 'margin-left': '30rpx'}" canvas-id="deck-pic"></canvas>
     </div>
+    <floatBtnGroup @onCompare="openCompareDeckModal" :badgeCount="badgeCount"></floatBtnGroup>
+    <compareDeckModal ref="cDeckModal"
+                      @confirm="handleDeckCompare"
+                      @clear="handleClearDeckModal"
+                      @addCompareDeck1="handleAddDeck1"
+                      @addCompareDeck2="handleAddDeck2"
+    ></compareDeckModal>
   </div>
 </template>
 <script>
@@ -107,6 +114,8 @@ import ZanToast from '@/components/toast'
 import NavBar from '@/components/NavBar'
 import WinRateBoard from '@/components/WinRateBoard'
 import AddBubble from '@/components/AddBubble'
+import floatBtnGroup from '@/components/floatBtnGroup'
+import compareDeckModal from '@/components/compareDeckModal'
 
 const defaultDetail = {
   background_img: '',
@@ -134,11 +143,13 @@ export default {
     FooterMenu,
     WinRateBoard,
     AddBubble,
+    floatBtnGroup,
+    compareDeckModal,
     _toast: ZanToast
   },
   data() {
     return {
-      recordID : '5c7ee1b5421bd1177dc0657a',
+      recordID : '5cfecc421859dd7639acb241',
       deckID: '',
       trending: false,
       collected: false,
@@ -169,8 +180,16 @@ export default {
       'decksName',
       'navHeight',
       'userInfo',
-      'showBubble'
+      'showBubble',
+      'compareDeck1',
+      'compareDeck2',
     ]),
+    badgeCount() {
+      let count = 0
+      count += this.compareDeck1?1:0
+      count += this.compareDeck2?1:0
+      return count
+    },
     genFactionIcon() {
       if (this.deckDetail.faction) {
         return utils.faction[this.deckDetail.faction].image
@@ -630,6 +649,26 @@ export default {
         }
       })
     },
+    openCompareDeckModal() {
+      this.$refs.cDeckModal.showModal()
+    },
+    handleClearDeckModal() {
+
+      this.$store.commit('clearDecks')
+    },
+    handleDeckCompare() {
+      console.log('开始对比卡组')
+      console.log(this.compareDeck1, this.compareDeck2)
+      wx.navigateTo({
+        url: `/pages/decks/compareDeck/main`
+      })
+    },
+    handleAddDeck1() {
+      this.$store.commit('setFirstDeck', this.deckDetail)
+    },
+    handleAddDeck2() {
+      this.$store.commit('setSecondDeck', this.deckDetail)
+    }
   },
   async mounted() {
     setTimeout(() => {
@@ -640,9 +679,9 @@ export default {
     this.deckID = this.$root.$mp.query.deckID
     this.deckMode = this.$root.$mp.query.mode?this.$root.$mp.query.mode:'Standard'
     // this.decksName = this.$store.state.cards.decksName
-    // if (this.decksName.length === 0) {
-    //   this.decksName = await this.$store.dispatch('getDecksName')
-    // }
+    if (this.decksName.length === 0) {
+      this.decksName = await this.$store.dispatch('getDecksName')
+    }
     this.trending = !!this.$root.$mp.query.trending
     this.collected = !!this.$root.$mp.query.collected
     await this.genDeckData()
@@ -659,16 +698,9 @@ export default {
     } else if (this.deckID) {
       sharePath: `/pages/decks/deckDetail/main?deckID=${this.deckID}`
     }
-    if (res.from === 'button') {
-      return {
-        title: this.genDeckName,
-        path: sharePath
-      }
-    } else {
-      return {
-        title: '炉石传说情报站',
-        path: '/pages/index/main'
-      }
+    return {
+      title: this.genDeckName,
+      path: sharePath
     }
   },
 }

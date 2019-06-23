@@ -3,8 +3,3 @@ import App from './index'
 
 Page(pageFactory(App))
 
-export default {
-  config: {
-    enablePullDownRefresh: true,
-  }
-}

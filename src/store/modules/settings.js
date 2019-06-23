@@ -3,6 +3,7 @@ import { getSetting, getArenaConfig } from "../../api/dbapi";
 const settings = {
   state: {
     navHeight: null,
+    tabHeight: null,
     isIphoneX: false,
     winWidth: null,
     winHeight: null,
@@ -23,6 +24,9 @@ const settings = {
     },
     SET_NAV_HEIGHT: (state, navHeight) => {
       state.navHeight = navHeight
+    },
+    SET_TAB_HEIGHT: (state, val) => {
+      state.tabHeight = val
     },
     IS_IPHONE_X: (state) => {
       state.isIphoneX = true
@@ -75,6 +79,7 @@ const settings = {
           success: res => {
             commit('SET_WIN_WIDTH', res.windowWidth)
             commit('SET_WIN_HEIGHT', res.windowHeight)
+            commit('SET_TAB_HEIGHT', res.screenHeight-res.windowHeight)
             resolve()
           }, fail(err) {
             console.log(err)

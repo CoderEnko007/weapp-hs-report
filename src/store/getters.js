@@ -8,6 +8,7 @@ const getters = {
   noticeContent: state => state.cards.noticeContent,
   deckTabFilter: state => state.cards.deckTabFilter,
   navHeight: state => state.settings.navHeight,
+  tabHeight: state => state.settings.tabHeight,
   isIphoneX: state => state.settings.isIphoneX,
   winWidth: state => state.settings.winWidth,
   winHeight: state => state.settings.winHeight,
@@ -17,7 +18,9 @@ const getters = {
   fbiKey: state => state.settings.fbiKey,
   fbiFlag: state => state.settings.fbiFlag,
   card_resource: state => state.settings.card_resource,
-  arenaTableID: state => state.settings.arenaTableID
+  arenaTableID: state => state.settings.arenaTableID,
+  compareDeck1: state => state.compare.compareDeck1,
+  compareDeck2: state => state.compare.compareDeck2
 }
 
 export default getters

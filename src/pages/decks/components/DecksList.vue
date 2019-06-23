@@ -151,10 +151,13 @@ export default {
       this.deckList = []
       this.tabList.selectedItem = e.mp.detail.value
       this.decksFilter.last_30_days = this.tabList.list[this.tabList.selectedItem].last_30_days
+      this.decksFilter.archetype = 'all'
       this.genDeckList(true)
+      this.genPickerList()
     },
     modeBtnClick(item) {
       this.decksFilter.mode = item.mode
+      this.decksFilter.archetype = 'all'
       this.genPickerList()
       this.genDeckList(true)
     },
@@ -198,25 +201,33 @@ export default {
     },
     genPickerList() {
       this.selectedDeckIndex = 0
-      this.deckPickerList = [{id: 'all', name: '全部类型'}]
-      let filterDecksName = this.decksName.filter(item => {
-        if ((item.mode === this.decksFilter.mode)
-          || item.mode==='All') {
-          return true
+      console.log(this.decksFilter.mode, this.decksFilter.last_30_days, this.selectedFaction)
+      let filterDecksName = this.decksName.filter(v => {
+        if (this.selectedFaction!=='' && v.faction !== this.selectedFaction) {
+          return false
+        }
+        if (v.ename === v.faction) {
+          return false
+        }
+        if (this.decksFilter.mode === 'Standard' && this.decksFilter.last_30_days === false) {
+          return v.std_ld
+        } else if (this.decksFilter.mode === 'Standard' && this.decksFilter.last_30_days === true) {
+          return v.std_l30
+        } else if (this.decksFilter.mode === 'Wild' && this.decksFilter.last_30_days === false) {
+          return v.wild_ld
+        } else if (this.decksFilter.mode === 'Wild' && this.decksFilter.last_30_days === true) {
+          return v.wild_l30
         }
       })
-      for (let item of filterDecksName) {
-        if (this.selectedFaction) {
-          if (item.faction === this.selectedFaction && item.ename !== item.faction) {
-            this.deckPickerList.push({id: item.ename, name: item.cname})
-          }
-        } else {
-          if (item.ename !== item.faction) {
-            this.deckPickerList.push({id: item.ename, name: item.cname})
-          }
+      this.deckPickerList = filterDecksName.map(v => {
+        return {
+          id: v.ename,
+          name: v.cname
         }
-      }
+      })
+      this.deckPickerList.unshift({id: 'all', name: '全部类型'})
       this.deckPickerList.push({id: this.selectedFaction, name: '其他'})
+      console.log(this.deckPickerList)
     },
     genDeckList(init) {
       if (init) {

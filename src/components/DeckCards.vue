@@ -1,10 +1,11 @@
 <template>
-  <div class="cards-list" :style="{width: colNum===1?300+'rpx':'100%', display: colNum===1?'block':'flex'}">
+  <div class="cards-list" :style="{display: colNum===1?'block':'flex'}">
     <div :class="['card-tile', {'menu-item-empty': !card.name}]"
          v-for="(card, index) in formatData"
          :key="index"
          @click="cardClick(card)"
-         :style="{width: colNum===1?'100%':'47.8%', 'margin-top': colNum===1?20+'rpx':5+'rpx'}">
+         :style="{width: colNum?'100%':'47.8%', 'margin-top': smallSpacing?20+'rpx':5+'rpx'}">
+      <div class="frame" :class="{'display-none': !card.name || !card.diffFlag}"></div>
       <div :class="['card-gem', {
         'rarity-common': card.rarity==='FREE'||card.rarity==='COMMON',
         'rarity-rare': card.rarity==='RARE',
@@ -23,8 +24,11 @@
           <span class="card-fade-countbox" :style="{background: 'linear-gradient(65deg,#313109,#313131 calc(100% - 96px),rgba(49,49,49,0) calc(100% - 26px),rgba(49,49,49,0));'}"></span>
         </div>
         <span class="card-name">{{card.cname}}</span>
-        <div class="card-countbox" v-show="card.count && card.count!==1" style="width: 22px;">
+        <div class="card-countbox" v-if="card.count && card.count!==1" style="width: 22px;">
           <span class="card-count">{{card.count}}</span>
+        </div>
+        <div class="card-countbox" v-else-if="card.count && card.count===1 && card.rarity === 'LEGENDARY'" style="width: 22px;">
+          <span class="card-count">★</span>
         </div>
       </div>
     </div>
@@ -35,7 +39,7 @@ import {genTileImageURL, iFanrTileImageURL} from "@/utils";
 
 export default {
   name: 'DeckCards',
-  props: ['cards', 'colNum', 'ifanrTile'],
+  props: ['cards', 'colNum', 'ifanrTile', 'smallSpacing'],
   data() {
     return {
       formatData: null
@@ -53,15 +57,13 @@ export default {
     },
     cardClick(item) {
       this.$emit('cardClick', item)
-    }
-  },
-  watch: {
-    cards: function(val) {
+    },
+    formatCardList() {
       if(this.cards) {
-        if (typeof val === 'string') {
-          this.formatData = JSON.parse(val)
+        if (typeof this.cards === 'string') {
+          this.formatData = JSON.parse(this.cards)
         } else {
-          this.formatData = val
+          this.formatData = this.cards
         }
         for (let card of this.formatData) {
           // 太费流量啦！！CDN HTTPS REQUEST又双叕超量了！！
@@ -76,14 +78,22 @@ export default {
             card['img'] = this.genTileImage(card.card_hsid)
           }
 
-          if (card.rarity === 'LEGENDARY') {
-            card['count'] = '★'
-          }
+          // if (card.rarity === 'LEGENDARY') {
+          //   card['count'] = '★'
+          // }
         }
         if (this.formatData.length % 2 && this.colNum !== 1) {
           this.formatData.push({})
         }
       }
+    }
+  },
+  mounted() {
+    this.formatCardList()
+  },
+  watch: {
+    cards: function(val1, val2) {
+      this.formatCardList()
     }
   }
 }
@@ -99,6 +109,7 @@ export default {
   color: white;
   box-sizing: border-box;
   .card-tile {
+    position: relative;
     width: 47.8%;
     height: 58rpx;
     line-height: 58rpx;
@@ -108,6 +119,14 @@ export default {
     /*border: 1px solid transparent;*/
     border-radius: 8rpx;
     box-sizing: border-box;
+    .frame {
+      position:absolute;
+      width:100%;
+      height:100%;
+      border:7rpx solid red;
+      box-sizing:border-box;
+      z-index:1;
+    }
     .card-gem {
       float: left;
       width: 55rpx;

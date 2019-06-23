@@ -2,7 +2,7 @@
   <scroll-view scroll-y='true'
                @scrolltolower='scrollToBottom'
                @scrolltoupper="scrollToTop"
-               :style="{height: winHeight-177+'px'}">
+               :style="{height: winHeight-navHeight-166+'px'}">
     <div class="card-list">
       <div class="card" v-for="(item, index) in list" :key="index" @click="handleClick(item)">
         <img :src="item.image" mode="aspectFit">
@@ -28,7 +28,8 @@ export default {
   computed: {
     ...mapGetters([
       'winWidth',
-      'winHeight'
+      'winHeight',
+      'navHeight'
     ]),
   },
   methods: {

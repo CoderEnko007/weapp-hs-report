@@ -74,7 +74,11 @@ const cards = {
               'faction': item.faction,
               'ename': item.ename,
               'cname': item.cname,
-              'mode': item.mode
+              'mode': item.mode,
+              'std_ld':item.std_ld,
+              'std_l30':item.std_l30,
+              'wild_ld':item.wild_ld,
+              'wild_l30':item.wild_l30,
             })
           }
           commit('SET_DECKSNAME', decksName)

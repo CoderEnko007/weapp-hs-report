@@ -64,6 +64,10 @@ export function getCardsList(params, limit=20, page=0, orderBy='-set_id') {
     let tableObj = new wx.BaaS.TableObject(tableID.cardsTableID)
     let removeHeroQuery = new wx.BaaS.Query()
     removeHeroQuery.isNotNull('artist')
+    let validQuery = new wx.BaaS.Query()
+    validQuery.compare('invalid', '=', 0)
+    let collectibleQuery = new wx.BaaS.Query()
+    collectibleQuery.compare('collectible', '=', 1)
     let costQuery = new wx.BaaS.Query()
     if (params && params.cost!==null) {
       if (params.cost<7) {
@@ -129,7 +133,7 @@ export function getCardsList(params, limit=20, page=0, orderBy='-set_id') {
       otherQuery.contains('text', params.search)
       searchQuery = wx.BaaS.Query.or(nameQuery, otherQuery)
     }
-    let query = wx.BaaS.Query.and(removeHeroQuery, costQuery, factionQuery, modeQuery, typeQuery, rarityQuery, seriesQuery, searchQuery)
+    let query = wx.BaaS.Query.and(collectibleQuery, validQuery, costQuery, factionQuery, modeQuery, typeQuery, rarityQuery, seriesQuery, searchQuery)
     tableObj.setQuery(query).orderBy(['-set_id', 'cost']).limit(limit).offset(page*limit).find().then(res => {
       resolve(res.data)
     }, err => {
@@ -181,11 +185,18 @@ export function getArenaCards(params, tableid=tableID.arenaCardsTableID, limit=2
   })
 }
 
-export function getCardDetail(id) {
+export function getCardDetail(params) {
   return new Promise((resolve, reject) => {
     let tableObj = new wx.BaaS.TableObject(tableID.cardsTableID)
     let query = new wx.BaaS.Query()
-    query.compare('dbfId', '=', id)
+    console.log(params)
+    if (params.dbfId) {
+      query.compare('dbfId', '=', params.dbfId)
+    } else if (params.hsId) {
+      query.compare('hsId', '=', params.hsId)
+    } else {
+      resolve()
+    }
     tableObj.setQuery(query).find().then(res => {
       resolve(res.data.objects)
     }, err => {
