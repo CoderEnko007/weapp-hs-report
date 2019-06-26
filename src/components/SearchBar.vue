@@ -3,7 +3,7 @@
   <div class="search-bar-form">
     <div class="serach-bar-box">
       <div class="zan-icon zan-icon-search"></div>
-      <input type="text" :placeholder="placeholder" v-model.lazy="str">
+      <input type="text" :placeholder="placeholder" @input="handleInput" @confirm="handleConfirm">
     </div>
   </div>
 </div>
@@ -11,18 +11,15 @@
 <script>
 export default {
   name: 'SearchBar',
-  props: ["placeholder", "search"],
-  data() {
-    return {
-      str: this.search
+  props: ["placeholder"],
+  methods: {
+    handleConfirm(e) {
+      this.$emit('handleConfirm', e.mp.detail.value)
+    },
+    handleInput(e) {
+      this.$emit('update:search', e.mp.detail.value.trim())
     }
   },
-  watch: {
-    str(newVal, oldVal) {
-      this.$emit('update:search', newVal.trim())
-      this.$emit('handleConfirm')
-    }
-  }
 }
 </script>
 <style lang="scss" scoped>

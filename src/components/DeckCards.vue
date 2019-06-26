@@ -82,7 +82,7 @@ export default {
           //   card['count'] = '★'
           // }
         }
-        if (this.formatData.length % 2 && this.colNum !== 1) {
+        if (this.formatData.length % 2 && this.colNum != 1) {
           this.formatData.push({})
         }
       }

@@ -9,7 +9,7 @@
       </block>
     </div>
     <div class="tab-container">
-      <swiper class="content" :duration="50" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">
+      <swiper class="content" :easing-function="easeInOutCubic" :duration="100" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab" @animationfinish="onAnimationfinish">
         <swiper-item>
           <ArchetypeList></ArchetypeList>
         </swiper-item>

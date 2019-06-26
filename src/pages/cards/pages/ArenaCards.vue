@@ -2,7 +2,7 @@
   <div class="arnea-cards-container">
     <div class="filter">
       <div class="search-bar">
-        <SearchBar @handleConfirm="handleSearch" placeholder="请输入卡牌名称"></SearchBar>
+        <SearchBar :search.sync="filter.search" @handleConfirm="handleSearch" placeholder="请输入卡牌名称"></SearchBar>
       </div>
       <div class="panel-faction">
         <HeroesPanel :dataList="factionIcons" :selected="selectedFaction.id" @itemClick="handleIconsClick"></HeroesPanel>
@@ -128,7 +128,7 @@ export default {
       'winWidth',
       'winHeight',
       'arenaTableID'
-    ])
+    ]),
   },
   methods: {
     genFactionIcons() {
@@ -192,8 +192,7 @@ export default {
         url: `/pages/cards/cardDetail/main?id=${item.dbfId}`
       })
     },
-    handleSearch(value) {
-      this.filter.search = value.trim()
+    handleSearch() {
       this.genCardsList(true)
     },
     scrollToBottom() {
