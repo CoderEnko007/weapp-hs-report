@@ -1,5 +1,5 @@
 <template>
-  <div class="nav-container" :style="{'min-height': isIphoneX?90+'px':66+'px'}">
+  <div class="nav-container" :style="{'min-height': isIphoneX?90+'px':66+'px', 'background': background}">
     <div class="nav-bar" :style="{height: navHeight+'px'}">
       <div class="nav-title" >
         <span class="title" v-if="navTitle">{{navTitle}}</span>
@@ -24,7 +24,7 @@
 import { mapGetters } from 'vuex'
 export default {
   name: 'NavBar',
-  props: ['showCapsule', 'navTitle'],
+  props: ['showCapsule', 'navTitle', 'background'],
   data() {
     return {
       defaultTitle: '炉石传说情报站',

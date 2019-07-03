@@ -330,7 +330,7 @@ export function getArchetypeList(params, limit=1000, page=0, orderBy='-win_rate'
     }
     let query = wx.BaaS.Query.and(factionQuery, tierQuery, rankRange)
     tableObj.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
-      resolve(res.data.objects)
+      resolve(res.data)
     }, err => {
       reject(err)
     })
@@ -525,6 +525,41 @@ export function updateCustomerSetting(params, recordID) {
       }
     }
     record.update().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getArticleList(params, limit=10, page=0, orderBy='-created_at') {
+  return new Promise((resolve, reject) => {
+    let MyContentGroup = new wx.BaaS.ContentGroup(params.contentGroupID)
+    let query = new wx.BaaS.Query()
+    query.compare('show', '=', true)
+    if (params && params.categoryID) {
+      query.arrayContains('categories', [params.categoryID])
+    }
+    if (params && params.mainArticle) {
+      query.isNull('main_article')
+    }
+    if (params && params.mainArticleId) {
+      query.compare('main_article', '=', params.mainArticleId)
+    }
+    console.log('orderBy', orderBy)
+    MyContentGroup.setQuery(query).orderBy(orderBy).limit(limit).offset(page*limit).find().then(res => {
+      resolve(res.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+export function getArticleDetail(params) {
+  console.log(params)
+  return new Promise((resolve, reject) => {
+    let MyContentGroup = new wx.BaaS.ContentGroup(params.groupID)
+    MyContentGroup.getContent(params.contentID).then(res => {
       resolve(res.data)
     }, err => {
       reject(err)

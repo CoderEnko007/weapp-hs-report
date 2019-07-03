@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App'
 import store from '@/store'
 import md5 from 'js-md5';
+import '@/components/mpvue-wxparse/src/wxParse.css'
 
 Vue.prototype.$md5 = md5;
 Vue.prototype.$store = store
@@ -56,7 +57,7 @@ export default {
       sdkPlugin: {
         version: "2.0.9",
         provider: "wxc6b86e382a1e3294"
-      }
+      },
     },
     navigateToMiniProgramAppIdList: [
       "wx010ca9734f850748"

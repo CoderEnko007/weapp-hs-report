@@ -30,10 +30,6 @@ export default {
   methods: {
     handleClick(item) {
       this.$emit('swiperClick', item)
-      if (this.date) {
-        let test = new Date(this.date)
-        console.log(test.getMonth(), test.getDate())
-      }
     }
   }
 }

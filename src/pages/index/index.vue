@@ -1,59 +1,75 @@
 <template>
   <div class="container">
-    <NavBar></NavBar>
+    <NavBar :background="'#eff3f4'"></NavBar>
     <div class="swiper">
       <div class="notice-bar" v-show="noticeContent.display">
         <NoticeBar v-on:ref="setRef" v-bind="noticeText" @close="handleCloseNoticeBar" @barClick="handleNoticeClick" :componentId="'noticeText'"/>
       </div>
-      <Swiper :banners="banners" :date="report_date" @swiperClick="swiperClick" v-if="banners"></Swiper>
+      <SwiperBanner :banners="banners" :date="report_date" @swiperClick="handleBannerClick" v-if="banners"></SwiperBanner>
     </div>
-    <div class="rank-panel">
-      <div class="headline">
-        <span class="title">职业排名</span>
-        <div class="mode-filter">
-          <picker mode="selector" :value="modeFilter.selectedItem" :range="modePickerList" @change="handleModeChange">
-            <span class='selector-item'>{{modeFilter.list[modeFilter.selectedItem].text}}</span>
-            <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
-          </picker>
+    <div class="panel-tab">
+      <block v-for="(item,index) in tabbar" :key="index">
+        <div :id="index" :class="{'tab-item': true, 'tab-item-active': activeIndex==index}" @click="tabBarClick">
+          {{item.text}}
         </div>
-        <div class="btn-group">
-          <div class="btn-block"
-               v-for="(item, index) in rankMode"
-               :key="index"
-               @click="modeBtnClick(item)">
-            <img class="btn-img" :src="selectedGameType===item.mode?item.active_icon:item.icon" mode="aspectFit">
-            <button class="c-button" :class="selectedGameType===item.mode?'btn-active':''">{{item.text}}</button>
-            <div class="separator" v-if="index !== 2">|</div>
-          </div>
-        </div>
-      </div>
-      <div class="content">
-        <RankBoard :list="rankData[selectedGameType]" :mode="modeFilter.list[modeFilter.selectedItem].value"></RankBoard>
-      </div>
+      </block>
     </div>
-    <div class="tier-panel">
-      <div class="headline">
-        <span class="title">标准模式强度排行</span>
-        <!--<span class="headline-meta">标准模式</span>-->
-        <div class="head-picker">
-          <picker mode="selector" :value="rangePicker.selectedItem" :range="rangePickerList" @change="handleRankRangeChange">
-            <span class='selector-item'>{{rangePicker.list[rangePicker.selectedItem].text}}</span>
-            <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
-          </picker>
-        </div>
-        <div class="head-btn" @click="handleExport">
-          <span class="icon iconfont">&#xe69c;&nbsp</span>
-          <span>导出日报</span>
-        </div>
-      </div>
-      <div class="tier-content">
-        <div class="tier-block" v-for="(tier, index) in tierList" :key="index">
-          <TierList :tierData="tier" @itemClick="handleTierClick"></TierList>
-          <div class="ads" v-if="index===0 && adsOpenFlag">
-            <ad unit-id="adunit-900bbac5f4c50939"></ad>
+    <div class="tab-container">
+      <swiper class="content" :easing-function="easeInOutCubic" :duration="100" :style="'height:'+contentHeight" @change="swiperChange" :current="currentTab">
+        <swiper-item>
+          <div class="rank-panel">
+            <div class="headline">
+              <span class="title">职业排名</span>
+              <div class="mode-filter">
+                <picker mode="selector" :value="modeFilter.selectedItem" :range="modePickerList" @change="handleModeChange">
+                  <span class='selector-item'>{{modeFilter.list[modeFilter.selectedItem].text}}</span>
+                  <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
+                </picker>
+              </div>
+              <div class="btn-group">
+                <div class="btn-block"
+                     v-for="(item, index) in rankMode"
+                     :key="index"
+                     @click="modeBtnClick(item)">
+                  <img class="btn-img" :src="selectedGameType===item.mode?item.active_icon:item.icon" mode="aspectFit">
+                  <button class="c-button" :class="selectedGameType===item.mode?'btn-active':''">{{item.text}}</button>
+                  <div class="separator" v-if="index !== 2">|</div>
+                </div>
+              </div>
+            </div>
+            <div class="content">
+              <RankBoard :list="rankData[selectedGameType]" :mode="modeFilter.list[modeFilter.selectedItem].value"></RankBoard>
+            </div>
           </div>
-        </div>
-      </div>
+          <div class="tier-panel">
+            <div class="headline">
+              <span class="title">强度排行</span>
+              <!--<span class="headline-meta">标准模式</span>-->
+              <div class="head-picker">
+                <picker mode="selector" :value="rangePicker.selectedItem" :range="rangePickerList" @change="handleRankRangeChange">
+                  <span class='selector-item'>标准模式 {{rangePicker.list[rangePicker.selectedItem].text}}</span>
+                  <span class="iconfont" :style="{'vertical-align': 'middle'}">&#xe668;</span>
+                </picker>
+              </div>
+              <div class="head-btn" @click="handleExport">
+                <span class="icon iconfont">&#xe69c;&nbsp</span>
+                <span>导出日报</span>
+              </div>
+            </div>
+            <div class="tier-content">
+              <div class="tier-block" v-for="(tier, index) in tierList" :key="index">
+                <TierList :tierData="tier" @itemClick="handleTierClick"></TierList>
+                <div class="ads" v-if="index===0 && adsOpenFlag">
+                  <ad unit-id="adunit-900bbac5f4c50939"></ad>
+                </div>
+              </div>
+            </div>
+          </div>
+        </swiper-item>
+        <swiper-item>
+          <articlePage ref="articlePage"></articlePage>
+        </swiper-item>
+      </swiper>
     </div>
     <div style="position: fixed; top: 9999999999999px; overflow: hidden">
       <canvas :style="{width: canvasWidth+'px', height: canvasHeight+'px'}" canvas-id="dailyReport"></canvas>
@@ -67,21 +83,29 @@ import { mapGetters } from 'vuex'
 import {getRankData, getArchetypeList, getBanners, getNotice} from "@/api/dbapi";
 import {formatNowTime, ShadeColor} from "@/utils";
 import TierList from '@/components/TierList'
-import Swiper from '@/components/Swiper'
+import SwiperBanner from '@/components/SwiperBanner'
 import NavBar from '@/components/NavBar'
 import RankBoard from '@/components/RankBoard'
 import NoticeBar from '@/components/noticebar'
+import articlePage from './components/articlePage'
 
 export default {
   components: {
-    Swiper,
+    SwiperBanner,
     TierList,
     NavBar,
     RankBoard,
-    NoticeBar
+    NoticeBar,
+    articlePage,
   },
   data () {
     return {
+      tabbar: [
+        {id: 'report', text: '日报'},
+        {id: 'article', text: '周报'}
+      ],
+      activeIndex: 0,
+      currentTab: 0,
       banners: [],
       origRankList: [],
       rankData: {
@@ -115,6 +139,7 @@ export default {
         {name: 'Tier 3', cname: '第3梯队', icon: '/static/icons-v2/tierlist-t3.png', list: []},
         {name: 'Tier 4', cname: '第4梯队', icon: '/static/icons-v2/tierlist-t4.png', list: []},
       ],
+      tierListNum: 0,
       refreshFlag: 0,
       noticeText: {
         text: '',
@@ -143,6 +168,13 @@ export default {
       return this.rangePicker.list.map(item => {
         return item.text
       })
+    },
+    contentHeight() {
+      if (this.activeIndex == 0) {
+        return 578+60*this.tierListNum+10+'px'
+      } else {
+        return this.winHeight-this.navHeight-41 + "px"
+      }
     }
     // 通知栏数据不能用computed属性，因为animationData每次都会被清空，可以在mounted时获取text
     // noticeText() {
@@ -208,6 +240,12 @@ export default {
       this.rangePicker.selectedItem = e.mp.detail.value
       this.genArchetypeList()
     },
+    handleBannerClick(item) {
+      console.log(item)
+      wx.navigateTo({
+        url: `/pages/index/articleDetail/main?group_id=${item.articleGroupID}&id=${item.articleID}`
+      })
+    },
     genRankData() {
       let date = formatNowTime(new Date())
       getRankData(date, null, 27).then(res => {
@@ -222,11 +260,13 @@ export default {
       })
     },
     genArchetypeList() {
+      this.tierListNum = 0
       let params = {rankRange: this.rangePicker.list[this.rangePicker.selectedItem].rank_range}
       getArchetypeList(params).then(res => {
+        this.tierListNum = res.meta.total_count
         for (let index in this.tierList) {
           if (this.tierList.hasOwnProperty(index)) {
-            this.tierList[index].list = res.filter(item => {
+            this.tierList[index].list = res.objects.filter(item => {
               return item.tier === this.tierList[index].name
             })
           }
@@ -522,6 +562,14 @@ export default {
         }
       })
     },
+    tabBarClick(e) {
+      this.activeIndex = e.currentTarget.id;
+      this.currentTab =this.activeIndex;
+    },
+    swiperChange(e) {
+      this.currentTab = e.mp.detail.current;
+      this.activeIndex = this.currentTab;
+    },
   },
   mounted() {
     this.genBanners()
@@ -533,6 +581,7 @@ export default {
     // this.genBanners()
     this.genRankData()
     this.genArchetypeList()
+    this.$refs.articlePage.genDataList(true)
   },
   onShareAppMessage(res) {
     return {
@@ -545,8 +594,50 @@ export default {
 <style scoped lang="scss">
 @import '../../style/color';
 .container {
+  .panel-tab {
+    width: 100%;
+    height: 80rpx;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    background-color: #fff;
+    border-bottom: 1rpx solid #eee;
+    z-index: 2;
+    .tab-item {
+      position: relative;
+      height: 100%;
+      width: 232rpx;
+      line-height: 80rpx;
+      font-size: 15px;
+      color: #666;
+      text-align: center;
+      &:after {
+        display: none;
+        content: '';
+        position: absolute;
+        width: 53rpx;
+        height: 4rpx;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: $palette-blue;
+      }
+    }
+    .tab-item-active {
+      color: $palette-blue;
+      font-weight: bold;
+      &:after {
+        display: block;
+        animation: tabBottomIn .4s;
+      }
+    }
+  }
+  .tab-container {
+    width: 100%;
+    z-index: 1;
+  }
   .rank-panel {
-    padding: 0 15px;
+    padding: 0 30rpx;
     .headline {
       height: 96rpx;
       .mode-filter {
@@ -631,5 +722,9 @@ export default {
   line-height:30px;
   font-size: 12px;
   color: $palette-blue;
+}
+@keyframes tabBottomIn {
+  from {width: 100%; opacity: 0}
+  to {width: 53rpx; opacity: 1}
 }
 </style>

@@ -1,4 +1,3 @@
-import md5 from 'js-md5';
 const adsOpenFlag = true
 
 function formatNumber (n) {
@@ -6,7 +5,7 @@ function formatNumber (n) {
   return str[1] ? str : `0${str}`
 }
 
-export function formatTime (date) {
+export function formatTime (date, full=false) {
   const year = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
@@ -16,10 +15,13 @@ export function formatTime (date) {
   const second = date.getSeconds()
 
   const t1 = [year, month, day].map(formatNumber).join('/')
-  const t2 = [hour, minute, second].map(formatNumber).join(':')
+  const t2 = [hour, minute].map(formatNumber).join(':')
 
-  // return `${t1} ${t2}`
-  return year+'年'+formatNumber(month)+'月'+formatNumber(day)+'日'
+  if (full) {
+    return `${t1} ${t2}`
+  } else {
+    return year+'年'+formatNumber(month)+'月'+formatNumber(day)+'日'
+  }
 }
 
 export function formatNowTime(date) {

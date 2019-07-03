@@ -15,6 +15,7 @@
     "mpvue": "^1.0.11",
     "mpvue-echarts": "^0.2.7",
     "mpvue-page-factory": "^1.0.1",
+    "mpvue-wxparse": "^0.6.5",
     "mpvue-zanui": "^1.0.3",
     "npm": "^6.9.0",
     "vuex": "^3.0.1"

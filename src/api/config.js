@@ -33,6 +33,6 @@ const tableID = {
   noticeTableID,
   aboutTableID,
   settingTableID,
-  customerSettingTableID
+  customerSettingTableID,
 }
 export default tableID

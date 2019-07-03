@@ -115,6 +115,12 @@ export default {
     clear: both;
   }
 }
+/*.ads {*/
+  /*ad {*/
+    /*transform:scale(1.11111) !important;*/
+    /*margin: 0 auto;*/
+  /*}*/
+/*}*/
 .ads {
   ad {
     transform: scale(0.9) !important;
@@ -199,7 +205,7 @@ export default {
   color: #ddd;
 }
 .notice-bar {
-  position:fixed;
+  position: absolute;
   width:100%;
   margin-top: 0;
   z-index:2;
@@ -207,5 +213,10 @@ export default {
   &:after {
     border: none;
   }
+}
+::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+  color: transparent;
 }
 </style>
